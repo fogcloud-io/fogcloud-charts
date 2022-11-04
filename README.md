@@ -21,7 +21,7 @@ helm pull fogcloud-charts/fogcloud-charts --untar
 
 ## 安装chart
 1. 拷贝fogcloud-charts目录的values.yaml文件，并命名为myvalues.yaml
-2. 编辑myvalues.yaml文件，参考配置项说明：
+2. 编辑myvalues.yaml文件，参考配置说明
 3. 安装fogcloud-charts
 ```console
 kubectl create namespace {NAMESPACE_NAME}
@@ -33,6 +33,7 @@ helm upgrade -f myvalues.yaml {RELEASE_NAME} ./fogcloud-charts
 ```
 
 配置说明：
+
 | 配置项 | 类型 | 说明 |
 | --- | --- | --- |
 | k8sApiServer | string | k8s server api地址，用来创建k8s StatefulSet资源；可以通过```kubectl config view```获取 |

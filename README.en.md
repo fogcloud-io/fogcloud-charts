@@ -21,7 +21,7 @@ helm pull fogcloud-charts/fogcloud-charts --untar
 ## Install Chart
 
 1. cp fogcloud-charts/values.yaml ./myvalues.yaml
-2. edit myvalues.yaml：
+2. edit myvalues.yaml
 3. install fogcloud-charts
 ```console
 kubectl create namespace fogcloud

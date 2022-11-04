@@ -1,0 +1,36 @@
+{{ if .Values.redis.enabled }}
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: redis-pv
+# spec:
+#   capacity:
+#     storage: 1Gi
+#   hostPath:
+#     path: /var/lib/rancher/k3s/storage/fogcloud-dev/redis-pv
+#   volumeMode: Filesystem
+#   accessModes:
+#     - ReadWriteOnce
+#   persistentVolumeReclaimPolicy: Retain
+#   storageClassName: ""
+#   claimRef:
+#     name: redis-pvc
+#     namespace: {{ .Values.namespace }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    pvc: redis-data
+  name: redis-pvc
+  namespace: {{ .Values.namespace }}
+spec:
+  storageClassName: {{ .Values.storageClassName }}
+  # volumeName: redis-pv
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+status: {}
+{{ end }}

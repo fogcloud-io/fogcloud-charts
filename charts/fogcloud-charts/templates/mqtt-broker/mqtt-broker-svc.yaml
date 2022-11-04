@@ -1,0 +1,31 @@
+{{ if .Values.mqttBroker.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    srv: mqtt-broker
+  name: mqtt-broker
+  namespace: {{ .Values.namespace }}
+spec:
+  type: {{ .Values.mqttBroker.service.type }}
+  {{ if or (eq .Values.mqttBroker.service.type "NodePort") (eq .Values.mqttBroker.service.type "LoadBalancer") }}
+  externalTrafficPolicy: {{ .Values.mqttBroker.service.externalTrafficPolicy }}
+    {{ if and (eq .Values.mqttBroker.service.externalTrafficPolicy "Local") (eq .Values.mqttBroker.service.type "LoadBalancer") }}
+  healthCheckNodePort: {{ .Values.mqttBroker.service.healthCheckNodePort }}
+    {{ end }}
+  {{ end }}
+  ports:
+    {{ $svcType := .Values.mqttBroker.service.type }}
+    {{ range $port := .Values.mqttBroker.service.ports }}
+    - name: {{ $port.name }}
+      port: {{ $port.port }}
+      targetPort: {{ $port.targetPort }}
+      {{ if eq $svcType "NodePort" }}
+      nodePort: {{ $port.nodePort }}
+      {{ end }}
+    {{ end }}
+  selector:
+    app: mqtt-broker
+status:
+  loadBalancer: {}
+{{ end }}

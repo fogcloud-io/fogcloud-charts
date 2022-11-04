@@ -1,0 +1,88 @@
+# faasproxy-service
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    srv: faasbuilder
+  name: faasbuilder
+  namespace: {{ .Values.namespace }}
+spec:
+  ports:
+    - name: "api"
+      port: 8090
+      targetPort: 8090
+  selector:
+    app: faasbuilder
+status:
+  loadBalancer: {}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+  labels:
+    dep: faasbuilder
+  name: faasbuilder
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.faasbuilder.replicas }}
+  selector:
+    matchLabels:
+      app: faasbuilder
+  strategy:
+    type: {{ .Values.faasbuilder.strategy.type }}
+    {{ if eq .Values.faasbuilder.strategy.type "RollingUpdate" }}
+    rollingUpdate:
+      maxSurge: {{ .Values.faasbuilder.strategy.rollingUpdate.maxSurge | default "50%" }}
+      maxUnavailable: {{ .Values.faasbuilder.strategy.rollingUpdate.maxUnavailable | default 0 }}
+    {{ end }}
+  template:
+    metadata:
+      annotations:
+      labels:
+        app: faasbuilder
+    spec:
+      containers:
+        - image: {{ .Values.faasbuilder.image }}:{{ .Values.faasbuilder.imageTag }}
+          args:
+            - -c
+            - /etc/faasbuilder/faasbuilder.yaml
+            - -e
+            - {{ .Values.environment }}
+          env:
+            - name: KUBECONFIG
+              value: /etc/faasbuilder/kubeconfig
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          name: faasbuilder
+          securityContext:
+            privileged: true
+          ports:
+            - containerPort: 8090
+          resources: {}
+          volumeMounts:
+            - mountPath: /etc/faasbuilder/faasbuilder.yaml
+              subPath: faasbuilder.yaml
+              name: fogcloud-claim
+            {{ if .Values.faasbuilder.createDockerconfigWithFile }}  
+            - mountPath: /etc/faasbuilder/kubeconfig
+              subPath: kubeconfig
+              name: fogcloud-claim
+            {{ end }}  
+      restartPolicy: Always
+      imagePullSecrets:
+        {{ range $_, $secret := .Values.secret.imageCredentials }}
+        - name: {{ $secret.name }}
+        {{ end }}
+      volumes:
+        - name: fogcloud-claim
+          configMap:
+            name: fog-config
+            items:
+              - key: faasbuilder.yaml
+                path: faasbuilder.yaml
+              {{ if .Values.faasbuilder.createDockerconfigWithFile }}  
+              - key: kubeconfig
+                path: kubeconfig
+              {{ end }}           
+status: {}

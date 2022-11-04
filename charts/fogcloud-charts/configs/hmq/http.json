@@ -1,0 +1,5 @@
+{
+  "auth": "http://fogcloud:4000/mqtt/auth/hmq",
+  "acl": "http://fogcloud:4000/mqtt/acl/hmq",
+  "super": "http://fogcloud:4000/mqtt/superuser/hmq"
+}

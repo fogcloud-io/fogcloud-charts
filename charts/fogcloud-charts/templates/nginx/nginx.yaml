@@ -1,0 +1,84 @@
+# nginx-service
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    srv: nginx
+  name: nginx
+  namespace: {{ .Values.namespace }}
+spec:
+  type: {{ .Values.nginx.service.type }}
+  {{ if or (eq .Values.nginx.service.type "NodePort") (eq .Values.nginx.service.type "LoadBalancer") }}
+  externalTrafficPolicy: {{ .Values.nginx.service.externalTrafficPolicy }}
+    {{ if and (eq .Values.nginx.service.externalTrafficPolicy "Local") (eq .Values.nginx.service.type "LoadBalancer") }}
+  healthCheckNodePort: {{ .Values.nginx.service.healthCheckNodePort }}
+    {{ end }}
+  {{ end }}
+  ports:
+    {{ $svcType := .Values.nginx.service.type }}
+    {{ range $port := .Values.nginx.service.ports }}
+    - name: {{ $port.name }}
+      port: {{ $port.port }}
+      targetPort: {{ $port.targetPort }}
+      {{ if eq $svcType "NodePort" }}
+      nodePort: {{ $port.nodePort }}
+      {{ end }}
+    {{ end }}
+  selector:
+    app: nginx
+status:
+  loadBalancer: {}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: nginx
+  name: nginx
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.nginx.replicas }}
+  selector:
+    matchLabels:
+      app: nginx
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - image: {{ .Values.nginx.image }}:{{ .Values.nginx.imageTag }}
+          name: nginx
+          ports:
+            - containerPort: 80
+            - containerPort: 443
+          resources: {}
+          volumeMounts:
+            - mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+              name: nginx-claim
+            - mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              name: nginx-claim
+      restartPolicy: Always
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app: nginx
+              topologyKey: "kubernetes.io/hostname"    
+      volumes:
+        - name: nginx-claim
+          configMap:
+            name: fog-config
+            defaultMode: 0755
+            items:
+              - key: default.conf
+                path: default.conf
+              - key: nginx.conf
+                path: nginx.conf  
+status: {}

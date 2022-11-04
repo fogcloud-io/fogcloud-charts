@@ -1,0 +1,49 @@
+{{ if .Values.redis.enabled }}
+# redis-service
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    srv: redis
+  name: redis
+  namespace: {{ .Values.namespace }}
+spec:
+  ports:
+    - name: "6379"
+      port: 6379
+      targetPort: 6379
+  selector:
+    app: redis
+status:
+  loadBalancer: {}
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: redis
+  name: redis
+  namespace: {{ .Values.namespace }}
+spec:
+  containers:
+    - image: {{ .Values.redis.image }}:{{ .Values.redis.imageTag }}
+      name: redis
+      env:
+        {{ range $fields := .Values.redis.envVars }}
+        - name: {{ $fields.name }}
+          value: "{{ $fields.value }}"
+        {{ end }}        
+      ports:
+        - containerPort: 6379
+      resources: {}
+      volumeMounts:
+        - mountPath: /data
+          name: redis-data
+  restartPolicy: Always
+  volumes:
+    - name: redis-data
+      persistentVolumeClaim:
+        claimName: redis-pvc
+status: {}
+{{ end }}

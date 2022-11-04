@@ -1,0 +1,49 @@
+{{ if .Values.postgres.enabled }}
+# postgres-service
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    srv: postgres
+  name: postgres
+  namespace: {{ .Values.namespace }}
+spec:
+  ports:
+    - name: "5432"
+      port: 5432
+      targetPort: 5432
+  selector:
+    app: postgres
+status:
+  loadBalancer: {}
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: postgres
+  name: postgres
+  namespace: {{ .Values.namespace }}
+spec:
+  containers:
+    - env:
+        {{ range $fields := .Values.postgres.envVars }}
+        - name: {{ $fields.name }}
+          value: "{{ $fields.value }}"
+        {{ end }}  
+      image: {{ .Values.postgres.image }}:{{ .Values.postgres.imageTag }}
+      name: postgres
+      ports:
+        - containerPort: 5432
+      resources: {}
+      volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: postgres-data
+  restartPolicy: Always
+  volumes:
+    - name: postgres-data
+      persistentVolumeClaim:
+        claimName: postgres-pvc
+status: {}
+{{ end }}

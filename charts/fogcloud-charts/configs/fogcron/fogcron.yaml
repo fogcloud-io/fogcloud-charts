@@ -1,0 +1,26 @@
+defaults: &defaults
+  ETCD_ENDPOINTS: 127.0.0.1:2379
+  MACHINE_ID: 1
+  DEFAULT_QUEUE: fogcron
+  BROKER_ENDPOINTS: redis://localhost:6379/1
+  RESULT_BACKEND_ENDPOINT: redis://localhost:6379/2
+  RESULT_EXPIRE: 60
+  CONCURRENCY: 100
+
+development: &development
+  <<: *defaults
+  ETCD_ENDPOINTS: etcd1:2379
+  BROKER_ENDPOINTS: redis://redis:6379/1
+  RESULT_BACKEND_ENDPOINT: redis://redis:6379/2
+
+dev:
+  <<: *defaults
+  ETCD_ENDPOINTS: 192.168.10.223:2379
+  BROKER_ENDPOINTS: redis://192.168.10.223:6379/1
+  RESULT_BACKEND_ENDPOINT: redis://192.168.10.223:6379/2
+
+test:
+  <<: *development  
+
+production:
+  <<: *development

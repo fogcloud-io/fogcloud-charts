@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fog-config
+  namespace: {{ .Values.namespace }}
+data:
+  {{- (.Files.Glob "configs/*").AsConfig | nindent 2 }}
+  {{- (.Files.Glob "configs/faasbuilder/*.yaml").AsConfig | nindent 2 }}
+  {{- (.Files.Glob "configs/fogcron/*.yaml").AsConfig | nindent 2 }}
+  {{ range $path, $bytes := .Files.Glob "configs/kubeconfig/*" }}
+  kubeconfig: |-
+    {{ $bytes | toString | nindent 4 }}
+  {{ end }} 
+
+  {{ range $path, $bytes := .Files.Glob "configs/emq/*" }}
+  {{ $path | base }}: |-
+    {{ $bytes | toString | nindent 4 }}
+  {{ end }}
+
+  {{ range $path, $bytes := .Files.Glob "configs/hmq/*" }}
+  {{ $path | base }}: |-
+    {{ $bytes | toString | nindent 4 }}
+  {{ end }}
+
+  {{ range $path, $bytes := .Files.Glob "configs/i18n/*" }}
+  {{ $path | base }}: |-
+    {{ $bytes | toString | nindent 4 }}
+  {{ end }}
+
+  {{ range $path, $bytes := .Files.Glob "configs/nginx/*" }}
+  {{ $path | base }}: |-
+    {{ $bytes | toString | nindent 4 }}
+  {{ end }}
+  
+  {{ range $path, $bytes := .Files.Glob "configs/rabbitmq/*" }}
+  {{ $path | base }}: |-
+    {{ $bytes | toString | nindent 4 }}
+  {{ end }}
+

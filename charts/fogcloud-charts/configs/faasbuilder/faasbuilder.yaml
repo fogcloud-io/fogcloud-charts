@@ -1,0 +1,40 @@
+defaults: &defaults
+  PORT: 8090
+  REPO_URL: docker.io
+  REPO_API_URL: https://registry-1.docker.io
+  REPO_PROJECT: eternalzhw
+  FISSION_API_URL: http://localhost:8081
+  ACCESS_KEY:
+  ACCESS_SECRET:
+  TEMPLATE_PATH:
+
+  REDIS_HOST: 127.0.0.1
+  REDIS_PORT: 6379
+  REDIS_PASSWORD:
+  REDIS_DB: 3
+
+  POSTGRES_HOST: 127.0.0.1
+  POSTGRES_PORT: 5432
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: fogcloud
+  POSTGRES_DBNAME: fogcloud
+  POSTGRES_SSLMODE: disable
+
+development: &development
+  <<: *defaults
+  REPO_URL: 192.168.10.73:30002
+  REPO_API_URL: http://192.168.10.73:30002
+  FISSION_API_URL: http://controller.fission.svc.cluster.local
+  REPO_PROJECT: library
+  ACCESS_KEY: admin
+  ACCESS_SECRET: Harbor12345
+  TEMPLATE_PATH: /etc/faasbuilder/
+
+  REDIS_HOST: redis
+  POSTGRES_HOST: postgres
+
+test:
+  <<: *development
+
+production:
+  <<: *development

@@ -1,0 +1,54 @@
+# fogcron-scheduler
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    dep: fogcron-scheduler
+  name: fogcron-scheduler
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.fogcronScheduler.replicas }}
+  selector:
+    matchLabels:
+      app: fogcron-scheduler
+  strategy:
+    type: {{ .Values.fogcronScheduler.strategy.type }}
+    {{ if eq .Values.fogcronScheduler.strategy.type "RollingUpdate" }}
+    rollingUpdate:
+      maxSurge: {{ .Values.fogcronScheduler.strategy.rollingUpdate.maxSurge | default "50%" }}
+      maxUnavailable: {{ .Values.fogcronScheduler.strategy.rollingUpdate.maxUnavailable | default 0 }}
+    {{ end }}
+  template:
+    metadata:
+      labels:
+        app: fogcron-scheduler
+    spec:
+      containers:
+        - args:
+            - fogcron
+            - schedule
+            - -c
+            - /etc/fogcron/fogcron.yaml
+            - -e
+            - {{ .Values.environment }}
+          image: {{ .Values.fogcronScheduler.image }}:{{ .Values.fogcronScheduler.imageTag }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          name: fogcron-scheduler
+          resources: {}
+          volumeMounts:
+            - mountPath: /etc/fogcron/fogcron.yaml
+              subPath: fogcron.yaml
+              name: fogcron-scheduler-claim
+      restartPolicy: Always
+      imagePullSecrets:
+        {{ range $_, $secret := .Values.secret.imageCredentials }}
+        - name: {{ $secret.name }}
+        {{ end }}
+      volumes:
+        - name: fogcron-scheduler-claim
+          configMap:
+            name: fog-config
+            items:
+              - key: fogcron.yaml
+                path: fogcron.yaml
+status: {}

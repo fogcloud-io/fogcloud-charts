@@ -1,0 +1,58 @@
+{{ if .Values.minio.enabled }}
+# minio-service
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    srv: minio
+  name: minio
+  namespace: {{ .Values.namespace }}
+spec:
+  ports:
+    - name: "9000"
+      port: 9000
+      targetPort: 9000
+    - name: "9001"
+      port: 9001
+      targetPort: 9001
+  selector:
+    app: minio
+status:
+  loadBalancer: {}
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: minio
+  name: minio
+  namespace: {{ .Values.namespace }}
+spec:
+  containers:
+    - name: minio
+      env:
+        {{ range $fields := .Values.minio.envVars }}
+        - name: {{ $fields.name }}
+          value: "{{ $fields.value }}"
+        {{ end }}
+      args:
+        - server
+        - --console-address
+        - :9001
+        - /data
+      image: {{ .Values.minio.image }}:{{ .Values.minio.imageTag }}
+      ports:
+        - containerPort: 9000
+        - containerPort: 9001
+      resources: {}
+      volumeMounts:
+        - mountPath: /data
+          name: minio-data
+  restartPolicy: Always
+  volumes:
+    - name: minio-data
+      persistentVolumeClaim:
+        claimName: minio-pvc
+status: {}
+{{ end }}

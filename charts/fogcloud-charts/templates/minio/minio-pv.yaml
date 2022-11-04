@@ -1,0 +1,36 @@
+{{ if .Values.minio.enabled }}
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: minio-pv
+# spec:
+#   capacity:
+#     storage: 10Gi
+#   hostPath:
+#     path: /var/lib/rancher/k3s/storage/fogcloud-dev/minio-pv
+#   volumeMode: Filesystem
+#   accessModes:
+#     - ReadWriteOnce
+#   persistentVolumeReclaimPolicy: Retain
+#   storageClassName: ""
+#   claimRef:
+#     name: minio-pvc
+#     namespace: {{ .Values.namespace }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    pvc: minio-data
+  name: minio-pvc
+  namespace: {{ .Values.namespace }}
+spec:
+  storageClassName: {{ .Values.storageClassName }}
+  # volumeName: minio-pv
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+status: {}
+{{ end }}

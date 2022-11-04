@@ -1,0 +1,33 @@
+{{ if .Values.etcd.enabled }}
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: etcd-pv
+# spec:
+#   capacity:
+#     storage: 1Gi
+#   volumeMode: Filesystem
+#   accessModes:
+#     - ReadWriteOnce
+#   persistentVolumeReclaimPolicy: Retain
+#   storageClassName: ""
+#   claimRef:
+#     name: etcd-pvc
+# ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    pvc: etcd-data
+  name: etcd-pvc
+  namespace: {{ .Values.namespace }}
+spec:
+  storageClassName: {{ .Values.storageClassName }}
+  # volumeName: etcd-pv
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+status: {}
+{{ end }}

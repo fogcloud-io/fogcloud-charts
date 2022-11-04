@@ -1,0 +1,240 @@
+# Default values for fogcloud-charts.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+namespace: fogcloud-dev
+environment: test # enum: development,test,production
+
+imagePullPolicy: Always
+
+k8sApiServer: "https://localhost:6443"
+
+secret:
+  # 配置私有镜像仓库    
+  imageCredentials:
+    # - registry:
+    #   name:
+    #   username:
+    #   password:
+    #   email:
+
+storageClassName: "local-path"
+
+# 用于发布fogcloud api/web服务
+ingress:
+  enabled: false
+  hosts:
+    webAdmin: eu-dev.fogcloud.io #web管理后台域名
+    api: eu-dev.fogcloud.io  #后端服务域名
+  tls: 
+    enabled: false
+    # 前端服务的证书
+    webAdmin:
+      createWithCertFile: false
+      secretName: fogcloud-cert
+    # 后端http接口证书  
+    api:
+      createWithCertFile: false
+      secretName: fogcloud-cert
+  className: traefik
+  controller: traefik.io/ingress-controller
+
+fogcloud:
+  restartPolicy: Always
+  targetPort: 34000
+  image: ghcr.io/fogcloud-io/fogcloud
+  imageTag: v4.11.0
+  replicas: 1
+  strategy: 
+    type: RollingUpdate # enum: Recreate, RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 0
+  service:
+    type: ClusterIP # enum: NodePort,ClusterIP,LoadBalance
+    externalTrafficPolicy: Cluster
+    ports:
+      httpPort:
+        port: 4000
+        nodePort: 4000
+      httpDebugPort:
+        port: 4001
+        nodePort: 15000
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+fogcloudWeb:
+  image: ghcr.io/fogcloud-io/fogcloud-web
+  imageTag: v4.11.0
+  replicas: 1
+  strategy: 
+    type: RollingUpdate # enum: Recreate, RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 0  
+  service:
+    type: ClusterIP
+    externalTrafficPolicy: Cluster
+    ports:
+      httpPort:
+        port: 4002
+        nodePort: 8888
+
+faasbuilder:
+  image: ghcr.io/fogcloud-io/faas-builder
+  imageTag: latest
+  createDockerconfigWithFile: false
+  replicas: 1
+  strategy: 
+    type: RollingUpdate # enum: Recreate, RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 0    
+
+fogcronScheduler:
+  image: ghcr.io/fogcloud-io/fogcron-scheduler
+  imageTag: latest
+  replicas: 1
+  strategy: 
+    type: RollingUpdate # enum: Recreate, RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 0    
+
+mqttBroker:
+  enabled: true
+  type: emqx
+  image: emqx/emqx
+  imageTag: 4.2.8
+  nodeSelector:
+    enabled: false
+    key: kubernetes.io/hostname
+    value: fogcloud-prod1
+  replicas: 1
+  tls:
+    enabled: false
+    secretName: fogcloud-cert
+    createWithCertFile: false
+  service:
+    type: ClusterIP
+    externalTrafficPolicy: Local
+    healthCheckNodePort: 30000
+    ports:
+      - name: "mqtt-tcp"
+        port: 1883
+        targetPort: 1883
+        nodePort: 1883
+      - name: "mqtt-tcp-tls"
+        port: 8883
+        targetPort: 8883
+        nodePort: 8883
+      - name: "http-api"
+        port: 8081
+        targetPort: 8081
+        nodePort: 8081
+      - name: "mqtt-ws"
+        port: 8083
+        targetPort: 8083
+        nodePort: 8083
+      - name: "mqtt-wss"
+        port: 8084
+        targetPort: 8084
+        nodePort: 8084
+      - name: "admin"
+        port: 18083
+        targetPort: 18083
+        nodePort: 18083
+
+nginx:
+  image: nginx
+  imageTag: 1.21
+  replicas: 1
+  service:
+    type: ClusterIP
+    externalTrafficPolicy: Local
+    healthCheckNodePort: 30010
+    ports:
+      - name: "http"
+        port: 80
+        targetPort: 80
+        nodePort: 8000
+
+rabbitmq:
+  enabled: true
+  image: rabbitmq
+  imageTag: 3.8.0-management
+  tls:
+    enabled: false
+    secretName: fogcloud-cert
+    createWithCertFile: false  
+  service:
+    externalTrafficPolicy: Local
+    healthCheckNodePort: 30001
+    type: ClusterIP
+    ports:
+      - name: "amqp"
+        port: 5672
+        targetPort: 5672
+        nodePort: 5672
+      - name: "amqp-tls"
+        port: 5671
+        targetPort: 5671
+        nodePort: 5671
+      - name: "dasboard"
+        port: 15672
+        targetPort: 15672
+
+postgres:
+  enabled: true
+  image: postgres
+  imageTag: 13
+  envVars:
+    - name: POSTGRES_DB
+      value: fogcloud
+    - name: POSTGRES_PASSWORD
+      value: fogcloud
+    - name: POSTGRES_USER
+      value: postgres
+
+mongodb:
+  enabled: true
+  image: mongo
+  imageTag: 4.4-rc-focal
+  envVars:
+
+redis:
+  enabled: true
+  image: redis
+  imageTag: 6.2
+  envVars:
+
+etcd:
+  enabled: true
+  image: bitnami/etcd
+  imageTag: 3.5.1
+  replicas: 1
+  envVars:
+    - name: ALLOW_NONE_AUTHENTICATION
+      value: "yes"
+    - name: ETCD_ADVERTISE_CLIENT_URLS
+      value: "http://etcd1:2379"
+    - name: ETCD_LISTEN_CLIENT_URLS
+      value: "http://0.0.0.0:2379"
+
+minio:
+  enabled: true
+  image: minio/minio
+  imageTag: latest
+  envVars:
+    - name: MINIO_ACCESS_KEY
+      value: "1234567890"
+    - name: MINIO_REGION_NAME
+      value: "cn-south-1"
+    - name: MINIO_ROOT_PASSWORD
+      value: "fogcloud"
+    - name: MINIO_ROOT_USER
+      value: "minio"
+    - name: MINIO_SECRET_KEY
+      value: "abcdefghi"

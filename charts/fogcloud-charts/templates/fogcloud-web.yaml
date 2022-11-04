@@ -1,0 +1,73 @@
+# fogcloud-web-service
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    srv: fogcloud-web
+  name: fogcloud-web
+  namespace: {{ .Values.namespace }}
+spec:
+  type: {{ .Values.fogcloudWeb.service.type }}
+  {{ if eq .Values.fogcloudWeb.service.type "NodePort" }}  
+  externalTrafficPolicy: {{ .Values.fogcloudWeb.service.externalTrafficPolicy }}
+  {{ end }}
+  ports:
+    - name: "http"
+      port: {{ .Values.fogcloudWeb.service.ports.httpPort.port }}
+      targetPort: 8000
+      {{ if eq .Values.fogcloudWeb.service.type "NodePort" }}
+      nodePort: {{ .Values.fogcloudWeb.service.ports.httpPort.nodePort }}
+      {{ end }}      
+  selector:
+    app: fogcloud-web
+status:
+  loadBalancer: {}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    dep: fogcloud-web
+  name: fogcloud-web
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.fogcloudWeb.replicas }}
+  selector:
+    matchLabels:
+      app: fogcloud-web
+  strategy:
+    type: {{ .Values.fogcloudWeb.strategy.type }}
+    {{ if eq .Values.fogcloudWeb.strategy.type "RollingUpdate" }}
+    rollingUpdate:
+      maxSurge: {{ .Values.fogcloudWeb.strategy.rollingUpdate.maxSurge | default "50%" }}
+      maxUnavailable: {{ .Values.fogcloudWeb.strategy.rollingUpdate.maxUnavailable | default 0 }}
+    {{ end }}
+  template:
+    metadata:
+      labels:
+        app: fogcloud-web
+    spec:
+      containers:
+        - image: {{ .Values.fogcloudWeb.image }}:{{ .Values.fogcloudWeb.imageTag }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          name: fogcloud-web
+          ports:
+            - containerPort: 80
+            - containerPort: 443
+          volumeMounts:
+            - mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+              name: nginx-claim
+      imagePullSecrets:
+        {{ range $_, $secret := .Values.secret.imageCredentials }}
+        - name: {{ $secret.name }}
+        {{ end }}
+      volumes:
+        - name: nginx-claim
+          configMap:
+            name: fog-config
+            items:
+              - key: default_web.conf
+                path: default.conf
+status: {}

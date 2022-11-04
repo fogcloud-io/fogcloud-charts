@@ -1,0 +1,46 @@
+{{ if .Values.etcd.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    srv: etcd1
+  name: etcd1
+  namespace: {{ .Values.namespace }}
+spec:
+  ports:
+    - name: "2379"
+      port: 2379
+      targetPort: 2379
+  selector:
+    app: etcd1
+status:
+  loadBalancer: {}
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: etcd1
+  name: etcd1
+  namespace: {{ .Values.namespace }}
+spec:
+  containers:
+    - image: {{ .Values.etcd.image }}:{{ .Values.etcd.imageTag }}
+      name: etcd1
+      ports:
+        - containerPort: 2379
+      volumeMounts:
+        - mountPath: /bitnami/etcd/data
+          name: etcd1-data
+      env:
+        {{ range $fields := .Values.etcd.envVars }}
+        - name: {{ $fields.name }}
+          value:  "{{ $fields.value }}"
+        {{ end }}            
+  restartPolicy: Always
+  volumes:
+    - name: etcd1-data
+      persistentVolumeClaim:
+        claimName: etcd-pvc
+status: {}
+{{ end }}

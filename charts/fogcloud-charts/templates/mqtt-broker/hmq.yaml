@@ -1,0 +1,77 @@
+{{ if .Values.mqttBroker.enabled }}
+{{ if eq .Values.mqttBroker.type "hmq" }}
+# hmq
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mqtt-broker
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: mqtt-broker
+  replicas: {{ .Values.mqttBroker.replicas }}
+  template:
+    metadata:
+      labels:
+        app: mqtt-broker
+    spec:
+      imagePullSecrets:
+        {{ range $_, $secret := .Values.imagePullSecrets }}
+        - name: {{ $secret }}
+        {{ end }}
+      containers:
+        - name: mqtt-broker
+          args:
+            - hmq
+            - -c
+            - /etc/hmq/hmq.config
+          image: {{ .Values.mqttBroker.image }}:{{ .Values.mqttBroker.imageTag }}
+          ports:
+            - name: mqtt
+              containerPort: 1883
+            - name: mqtt-tls
+              containerPort: 8883
+            - name: http-api
+              containerPort: 8081
+            - name: wss
+              containerPort: 8084
+            - name: dashboard
+              containerPort: 18083
+          volumeMounts:
+            - name: mqtt-broker
+              mountPath: /etc/hmq/hmq.config
+              subPath: hmq.config
+            - name: mqtt-broker
+              mountPath: /etc/hmq/plugins/rabbitmq.json
+              subPath: rabbitmq.json
+            - name: mqtt-broker
+              mountPath: /etc/hmq/plugins/http.json
+              subPath: http.json
+            - name: mqtt-secret
+              mountPath: /etc/hmq/cert/fogcloud.crt
+              subPath: fogcloud.crt
+            - name: mqtt-secret
+              mountPath: /etc/hmq/cert/fogcloud.key
+              subPath: fogcloud.key
+      volumes:
+        - name: mqtt-broker
+          configMap:
+            name: fog-config
+            items:
+              - key: hmq.config
+                path: hmq.config
+              - key: http.json
+                path: http.json
+              - key: rabbitmq.json
+                path: rabbitmq.json
+        - name: mqtt-secret
+          secret:
+            secretName: {{ .Values.mqttBroker.tls.secretName }}
+            items:
+              - key: tls.crt
+                path: fogcloud.crt
+              - key: tls.key
+                path: fogcloud.key
+{{ end }}                
+{{ end }}

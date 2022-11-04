@@ -1,0 +1,35 @@
+{{ if .Values.mqttBroker.enabled }}
+# emqx-pv
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: emqx-headless-pv
+#   labels:
+#     type: local
+# spec:
+#   storageClassName: manual
+#   capacity:
+#     storage: 2Gi
+#   accessModes:
+#     - ReadWriteOnce
+#   hostPath:
+#     path: "/var/lib/rancher/k3s/storage/fogcloud-dev/emqx-pv"
+---
+# emqx-pvc
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    pvc: emqx-headless
+  name: emqx-headless-pvc
+  namespace: {{ .Values.namespace }}
+spec:
+  storageClassName: {{ .Values.storageClassName }}
+  # volumeName: emqx-headless-pv
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+status: {}
+{{ end }}

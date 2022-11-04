@@ -1,0 +1,72 @@
+{{ if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    # {{ if .Values.ingress.redirectToHttps }}
+    # {{ if eq .Values.ingress.controller "traefik.io/ingress-controller" }}
+    # traefik.ingress.kubernetes.io/router.middlewares: default-redirect-https@kubernetescrd
+    # {{ end }}
+    # {{ end }}
+    # must be tls
+    {{ if .Values.ingress.tls.enabled }}
+    {{ if eq .Values.ingress.controller "traefik.io/ingress-controller" }}
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    {{ end }}
+    {{ end }}
+  labels:
+    ing: fogcloud-ingress
+  name: fogcloud-ingress
+  namespace: {{ .Values.namespace }}
+spec:
+  {{ if .Values.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - "{{ .Values.ingress.hosts.webAdmin }}"
+        - "{{ .Values.ingress.hosts.api }}"
+      secretName: {{ .Values.ingress.tls.webAdmin.secretName }}
+  {{ end }}    
+  ingressClassName: {{ .Values.ingress.className }} #import !!!
+  rules:
+    - host: {{ .Values.ingress.hosts.webAdmin }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: fogcloud-web
+                port:
+                  number: 4002
+          - path: /api/v1/oss/
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx
+                port:
+                  number: 80 
+          - path: /faas/functions/
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx
+                port:
+                  number: 80                
+    - host: {{ .Values.ingress.hosts.api }}
+      http:
+        paths:
+          - path: /api/
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx
+                port:
+                  number: 80     
+          - path: /openapi/
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx
+                port:
+                  number: 80                                  
+{{ end }}                  

@@ -1,0 +1,169 @@
+{{ if .Values.mqttBroker.enabled }}
+{{ if eq .Values.mqttBroker.type "emqx" }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: {{ .Values.namespace }}
+  name: emqx
+
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: {{ .Values.namespace }}
+  name: emqx
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - endpoints
+    verbs:
+      - get
+      - watch
+      - list
+
+---
+kind: RoleBinding 
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: {{ .Values.namespace }}
+  name: emqx
+subjects:
+  - kind: ServiceAccount
+    name: emqx
+    namespace: {{ .Values.namespace }}
+roleRef:
+  kind: Role
+  name: emqx
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mqtt-broker
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: mqtt-broker
+spec:
+  serviceName: mqtt-broker
+  updateStrategy:
+    type: RollingUpdate
+  replicas: {{ .Values.mqttBroker.replicas }}
+  selector:
+    matchLabels:
+      app: mqtt-broker    
+  template:
+    metadata:
+      labels:
+        app: mqtt-broker
+    spec:
+      serviceAccountName: emqx
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app: mqtt-broker
+              topologyKey: "kubernetes.io/hostname"    
+      {{ if .Values.mqttBroker.nodeSelector.enabled }}
+      nodeSelector:
+        {{ .Values.mqttBroker.nodeSelector.key }}: {{ .Values.mqttBroker.nodeSelector.value }}
+      {{ end }}
+      containers:
+        - name: mqtt-broker
+          image: {{ .Values.mqttBroker.image }}:{{ .Values.mqttBroker.imageTag }}
+          ports:
+            - name: mqtt
+              containerPort: 1883
+            - name: mqttssl
+              containerPort: 8883
+            - name: mgmt
+              containerPort: 8081
+            - name: ws
+              containerPort: 8083
+            - name: wss
+              containerPort: 8084
+            - name: dashboard
+              containerPort: 18083
+          volumeMounts:
+            # - name: emqx-headless-data
+            #   mountPath: /emq
+            - name: emq-claim
+              mountPath: /opt/emqx/etc/plugins/emqx_web_hook.conf
+              subPath: emqx_web_hook.conf
+            - name: emq-claim
+              mountPath: /opt/emqx/etc/plugins/emqx_auth_http.conf
+              subPath: emqx_auth_http.conf
+            - name: emq-claim
+              mountPath: /opt/emqx/data/loaded_plugins
+              subPath: loaded_plugins
+            {{ if .Values.mqttBroker.tls.enabled }}  
+            - name: mqtt-secret
+              mountPath: /opt/emqx/etc/certs/fogcloud.key
+              subPath: fogcloud.key
+            - name: mqtt-secret
+              mountPath: /opt/emqx/etc/certs/fogcloud.crt
+              subPath: fogcloud.crt
+            {{ end }}  
+          env:
+            {{ if .Values.mqttBroker.tls.enabled }}  
+            - name: EMQX_LISTENER__SSL__EXTERNAL__KEYFILE
+              value: etc/certs/fogcloud.key
+            - name: EMQX_LISTENER__SSL__EXTERNAL__CERTFILE
+              value: etc/certs/fogcloud.crt
+            - name: EMQX_LISTENER__SSL__EXTERNAL__CACERTFILE
+              value: etc/certs/fogcloud.crt
+            - name: EMQX_LISTENER__WSS__EXTERNAL__KEYFILE
+              value: etc/certs/fogcloud.key
+            - name: EMQX_LISTENER__WSS__EXTERNAL__CERTFILE
+              value: etc/certs/fogcloud.crt
+            - name: EMQX_LISTENER__WSS__EXTERNAL__CACERTFILE
+              value: etc/certs/fogcloud.crt
+            {{ end }}  
+            - name: EMQX_LISTENER__TCP__EXTERNAL__ACCEPTORS
+              value: "64"
+            - name: EMQX_LISTENER__TCP__EXTERNAL__MAX_CONNECTIONS
+              value: "1024000"
+            - name: EMQX_NAME
+              value: mqtt-broker
+            - name: EMQX_CLUSTER__K8S__ADDRESS__TYPE
+              value: hostname
+            - name: EMQX_CLUSTER__K8S__SUFFIX
+              value: svc.cluster.local
+            - name: EMQX_CLUSTER__K8S__SERVICE_NAME # 和service.name一致
+              value: mqtt-broker
+            - name: EMQX_CLUSTER__DISCOVERY
+              value: k8s
+            - name: EMQX_CLUSTER__K8S__APP_NAME # 和EMQX_NAME一致
+              value: mqtt-broker
+            - name: EMQX_CLUSTER__K8S__NAMESPACE
+              value: {{ .Values.namespace }}
+            - name: EMQX_CLUSTER__K8S__APISERVER
+              value: {{ .Values.k8sApiServer }}
+      volumes:
+        # - name: emqx-headless-data
+        #   persistentVolumeClaim:
+        #     claimName: emqx-headless-pvc
+        - name: emq-claim
+          configMap:
+            name: fog-config
+            items:
+              - key: emqx_web_hook.conf
+                path: emqx_web_hook.conf
+              - key: emqx_auth_http.conf
+                path: emqx_auth_http.conf
+              - key: loaded_plugins
+                path: loaded_plugins
+        {{ if .Values.mqttBroker.tls.enabled }}          
+        - name: mqtt-secret
+          secret:
+            secretName: {{ .Values.mqttBroker.tls.secretName }}
+            items:
+              - key: tls.crt
+                path: fogcloud.crt
+              - key: tls.key
+                path: fogcloud.key
+        {{ end }}        
+{{ end }}                
+{{ end }}

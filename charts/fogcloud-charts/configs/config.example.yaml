@@ -1,0 +1,285 @@
+defaults: &defaults
+  NAME: fogcloud
+  HOST: 0.0.0.0
+  PORT: 4000
+  LOG_LEVEL: debug
+  ENABLE_TLS: false
+  AUTH_JWT_KEY: IoW36FHl3PeAsXDZdcJNQHW8r0U6hKcq
+  AUTH_KEY: 1234567890
+  AUTH_SECRET: abcdefghi
+  GEO_DATABASE_FILEPATH: ./configs/geo/IP2LOCATION-LITE-DB3.BIN
+  IP_WHITE_TABLE: [192.168.10.74, 192.168.10.72, 192.168.10.73]
+
+  I18N_FILEPATH:
+    ZH: ./configs/i18n/active.zh.json
+    EN: ./configs/i18n/active.en.json
+
+  # fogcloud admin dashboard initial account password
+  APP_ID: root
+  APP_SECRET: fogcloud
+
+  REDIS_HOST: 127.0.0.1
+  REDIS_PORT: 6379
+  REDIS_PASSWORD:
+
+  CRON_WORKER_MACHINE_ID: 1
+  CRON_WORKER_ETCD_ENDPOINTS: 127.0.0.1:2379
+  CRON_WORKER_DEFAULT_QUEUE: fogcron
+  CRON_WORKER_BROKER_ENDPOINTS: redis://localhost:6379/1
+  CRON_WORKER_RESULT_BACKEND_ENDPOINT: redis://localhost:6379/2
+  CRON_WORKER_CONCURRENCY: 10
+  CRON_WORKER_RESULT_EXPIRE: 10
+
+  POSTGRES_HOST: 127.0.0.1
+  POSTGRES_PORT: 5432
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: fogcloud
+  POSTGRES_DBNAME: fogcloud
+  POSTGRES_SSLMODE: disable
+
+  MONGO_ENDPOINT: 127.0.0.1:27017
+  MONGO_PORT: 27017
+  MONGO_DBNAME: fogcloud
+  MONGO_USER:
+  MONGO_PASSWORD:
+
+  MQTT:
+    BROKER_TYPE: emqx
+    BROKER_ADAPTOR:
+      emqx:
+        HTTP_AUTH_PATH: /api/v1/emqx/mqtt/auth
+        HTTP_ACL_PATH: /api/v1/emqx/mqtt/acl
+        HTTP_WEBHOOK_PATH: /api/v1/emqx/mqtt/webhook
+      verne:
+        HTTP_WEBHOOK_PATH: /mqtt/webhook/verne
+      hmq:
+        AMQP_QUEUE_NAME: fogcloud
+        AMQP_EXCHANGE: mqtt.bridge
+        HTTP_AUTH_PATH: 192.168.180.250:4000/api/v1/mqtt/auth/hmq
+        HTTP_ACL_PATH: 192.168.180.250:4000/api/v1/mqtt/acl/hmq
+
+    BROKER_HOST: 127.0.0.1
+    BROKER_ID: admin
+    BROKER_SECRET: public
+
+    BROKER_API_PORT: 8081
+    BROKER_TCP_PORT: 1883
+    BROKER_TLS_PORT: 8883
+    BROKER_WS_PORT: 8083
+    BROKER_WSS_PORT: 8084
+
+    CLIENT_POOL_SIZE: 5
+
+  RABBITMQ_HOST: 127.0.0.1
+  RABBITMQ_PORT: 5672
+  RABBITMQ_USER: rabbitmq
+  RABBITMQ_PASSWORD: fogcloud
+  RABBITMQ_EVENTS_EX: fogcloud.event_notify
+  RABBITMQ_QUEUE_MAX_LENGTH: 100
+
+  MINIO_HOST: 127.0.0.1
+  MINIO_API_PORT: 9000
+  MINIO_ROOT_USER: minio
+  MINIO_ROOT_PASSWORD: fogcloud
+  MINIO_ACCESS_KEY: 1234567890
+  MINIO_SECRET_KEY: abcdefghi
+  MINIO_REGION_NAME: cn-south-1
+  MINIO_BUCKET_FIRMWARE: fogcloud-firmware
+
+  FAAS_ENDPOINT: http://127.0.0.1:8080
+  FAAS_USER: admin
+  FAAS_PASSWORD: PRhg3ID9iBeG
+  FAAS_STORE_ENDPOINT: http://192.168.2.135:3000
+  FAAS_BUILDER_ENDPOINT: http://127.0.0.1:8090
+  OAUTH2:
+    GITHUB_CLIENT_KEY: 93af8fb72b8cc6be2d5a
+    GITHUB_CLIENT_SECRET: e821aa266bb89757e57560fe97179cef8c65cbc9
+    GITHUB_AUTH_CALLBACK: /#/oauth2/github
+    DINGTALK_CLIENT_KEY: ding7powmhygzhgc83cs
+    DINGTALK_CLIENT_SECRET: ZdgV_KE-3HPS6kQNEbjWr5fonJdHze3l3AWIlGlK6ft23t4La1QspGW7l4N_uNgh
+    DINGTALK_AGENTID: 1635081269
+    DINGTALK_AUTH_CALLBACK: /#/oauth2/dingtalk
+
+  GINMODE: debug
+
+  TOPIC:
+    DEVICE_ALL_TOPIC: fogcloud/+/+/thing/#
+
+    DEVICE_SUB_TOPIC:
+      thing_property_post_reply: fogcloud/+/+/thing/down/property/post_reply
+      thing_property_set: fogcloud/+/+/thing/down/property/set
+      thing_event_post_reply: fogcloud/+/+/thing/down/event/+/post_reply
+      thing_service: fogcloud/+/+/thing/down/service/+
+      thing_sub_downlink: fogcloud/+/+/thing/down/sub
+
+      thing_through_down_raw: fogcloud/+/+/thing/down/through
+      thing_sub_through_down_raw: fogcloud/+/+/thing/down/sub/through
+
+      thing_topo_downlink: fogcloud/+/+/thing/down/topo
+
+      thing_shadow_downlink: fogcloud/+/+/thing/down/shadow
+
+      thing_ntp_downlink: fogcloud/+/+/thing/down/ntp
+
+      thing_auth_register: fogcloud/+/+/thing/down/ext/register
+
+      thing_ota_downlink: fogcloud/+/+/thing/down/ota
+
+      thing_sys_downlink: fogcloud/+/+/thing/down/sys
+
+      thing_mesh_downlink: fogcloud/+/+/thing/down/mesh
+
+    DEVICE_PUB_TOPIC:
+      thing_property_post: fogcloud/+/+/thing/up/property/post
+      thing_event_post: fogcloud/+/+/thing/up/event/+/post
+      thing_service_reply: fogcloud/+/+/thing/up/service/+/reply
+      thing_sub_uplink: fogcloud/+/+/thing/up/sub
+
+      thing_through_up_raw: fogcloud/+/+/thing/up/through
+      thing_sub_through_up_raw: fogcloud/+/+/thing/up/sub/through
+
+      thing_topo_uplink: fogcloud/+/+/thing/up/topo
+
+      thing_shadow_uplink: fogcloud/+/+/thing/up/shadow
+
+      thing_ntp_uplink: fogcloud/+/+/thing/up/ntp
+
+      thing_ota_uplink: fogcloud/+/+/thing/up/ota
+
+      thing_sys_uplink: fogcloud/+/+/thing/up/sys
+
+      thing_file_uplink: fogcloud/+/+/thing/up/file
+      thing_mesh_uplink: fogcloud/+/+/thing/up/mesh
+
+    FOG_PROJECT_ALL_EVENT_TOPIC: fogcloud/project/+/event/#
+    FOG_SYSTEM_ALL_EVENT_TOPIC: fogcloud/system/#
+
+    FOG_PROJECT_SUB_EVENT_TOPIC:
+      event_device_status: fogcloud/project/+/event/device/status
+      event_device_limit: fogcloud/project/+/event/device/limit
+    FOG_SYSTEM_SUB_EVENT_TOPIC:
+      EVENT_LICENCE: fogcloud/system/event/licence
+      EVENT_LICENCE_LIMIT: fogcloud/system/event/licence/limit
+
+ci:
+  <<: *defaults
+  REDIS_HOST: redis
+  REDIS_PORT: 6379
+  REDIS_PASSWORD:
+
+  CRON_WORKER_ETCD_ENDPOINTS: etcd1:2379
+  CRON_WORKER_BROKER_ENDPOINTS: redis://redis:6379/1
+  CRON_WORKER_RESULT_BACKEND_ENDPOINT: redis://redis:6379/2
+
+  POSTGRES_HOST: postgres
+  POSTGRES_PORT: 5432
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: fogcloud
+  POSTGRES_DBNAME: fogcloud
+  POSTGRES_SSLMODE: disable
+
+  MQTT:
+    BROKER_TYPE: emqx
+    BROKER_ADAPTOR:
+      emqx:
+        HTTP_AUTH_PATH: /mqtt/auth/emqx
+        HTTP_ACL_PATH: /mqtt/acl/emqx
+        HTTP_WEBHOOK_PATH: /mqtt/webhook/emqx
+      verne:
+        HTTP_WEBHOOK_PATH: /mqtt/webhook/verne
+      hmq:
+        AMQP_QUEUE_NAME: fogcloud
+        AMQP_EXCHANGE: mqtt.bridge
+        HTTP_AUTH_PATH: /mqtt/auth/hmq
+        HTTP_ACL_PATH: /mqtt/acl/hmq
+
+    BROKER_HOST: emq
+    BROKER_ID: admin
+    BROKER_SECRET: public
+
+    BROKER_API_PORT: 8081
+    BROKER_TCP_PORT: 1883
+    BROKER_TLS_PORT: 8883
+    BROKER_WS_PORT: 8083
+    BROKER_WSS_PORT: 8084
+    CLIENT_POOL_SIZE: 5
+
+  MONGO_ENDPOINT: mongo:27017
+
+  EMQ_HOST: emq
+  EMQ_API_PORT: 8081
+  EMQ_APP_ID: admin
+  EMQ_APP_SECRET: public
+
+  RABBITMQ_HOST: rabbitmq
+  RABBITMQ_USER: guest
+  RABBITMQ_PASSWORD: guest
+
+  MINIO_HOST: minio
+
+development: &development
+  <<: *defaults
+  NAME: fogcloud_development
+  IP_WHITE_TABLE: [47.101.56.19, 139.196.239.27, 139.196.147.39]
+  LICENCE_SERVER_URL: https://licence.fogcloud.io
+
+  CRON_WORKER_ETCD_ENDPOINTS: etcd1:2379
+  CRON_WORKER_BROKER_ENDPOINTS: redis://redis:6379/1
+  CRON_WORKER_RESULT_BACKEND_ENDPOINT: redis://redis:6379/2
+
+  MQTT:
+    BROKER_TYPE: emqx
+    BROKER_ADAPTOR:
+      emqx:
+        HTTP_AUTH_PATH: /mqtt/auth/emqx
+        HTTP_ACL_PATH: /mqtt/acl/emqx
+        HTTP_WEBHOOK_PATH: /mqtt/webhook/emqx
+      verne:
+        HTTP_WEBHOOK_PATH: /mqtt/webhook/verne
+      hmq:
+        AMQP_QUEUE_NAME: fogcloud
+        AMQP_EXCHANGE: mqtt.bridge
+        HTTP_AUTH_PATH: /mqtt/auth/hmq
+        HTTP_ACL_PATH: /mqtt/acl/hmq
+
+    BROKER_HOST: mqtt-broker
+    BROKER_ID: admin
+    BROKER_SECRET: public
+
+    BROKER_API_PORT: 8081
+    BROKER_TCP_PORT: 1883
+    BROKER_TLS_PORT: 8883
+    BROKER_WS_PORT: 8083
+    BROKER_WSS_PORT: 8084
+
+    CLIENT_POOL_SIZE: 5
+
+  REDIS_HOST: redis
+  POSTGRES_HOST: postgres
+  MONGO_ENDPOINT: mongo:27017
+  EMQ_HOST: mqtt-broker
+  HOST: fogapi.mxchip.com.cn
+  MINIO_HOST: minio
+  RABBITMQ_HOST: rabbitmq
+  FAAS_STORE_ENDPOINT: http://fogcloud-website.fogcloud-dev.svc.cluster.local:3000
+  FAAS_BUILDER_ENDPOINT: http://faasbuilder:8090
+  GEO_DATABASE_FILEPATH: /etc/fogcloud/IP2LOCATION-LITE-DB3.BIN
+  FAAS_ENDPOINT: http://gateway.openfaas.svc.cluster.local:8080
+
+  I18N_FILEPATH:
+    ZH: /etc/fogcloud/active.zh.json
+    EN: /etc/fogcloud/active.en.json
+
+  LOG_LEVEL: warning
+  GINMODE: release
+  ENABLE_TLS: true
+
+test:
+  <<: *development
+  NAME: fogcloud_test
+  HOST: eu-dev.fogcloud.io
+  LICENCE_SERVER_URL: https://beta.licence.fogcloud.io
+  FAAS_STORE_ENDPOINT: https://fogcloud.io
+
+production:
+  <<: *development

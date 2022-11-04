@@ -43,7 +43,7 @@ fogcloud:
   restartPolicy: Always
   targetPort: 34000
   image: ghcr.io/fogcloud-io/fogcloud
-  imageTag: v4.11.0
+  imageTag: v4.11.1
   replicas: 1
   strategy: 
     type: RollingUpdate # enum: Recreate, RollingUpdate
@@ -67,7 +67,7 @@ fogcloud:
 
 fogcloudWeb:
   image: ghcr.io/fogcloud-io/fogcloud-web
-  imageTag: v4.11.0
+  imageTag: v4.11.1
   replicas: 1
   strategy: 
     type: RollingUpdate # enum: Recreate, RollingUpdate

@@ -37,8 +37,9 @@ helm upgrade -f myvalues.yaml {RELEASE_NAME} ./fogcloud-charts
 | 配置项 | 类型 | 说明 |
 | --- | --- | --- |
 | k8sApiServer | string | k8s server api地址，用来创建k8s StatefulSet资源；可以通过```kubectl config view```获取 |
-| ingress.hosts.webAdmin | string | 使用ingress方式发布对外服务时，用于设置管理后台域名 |
-| ingress.hosts.api | string | 使用ingress方式发布对外服务时，用于设置后端api服务域名 |
+| hosts.webAdmin | string | 设置管理后台域名，使用ingress发布前端服务时会用到 |
+| hosts.api | string | 设置后端api服务域名，使用ingress发布后端服务时会用到 |
+| hosts.mqtt | string | 设置mqtt服务域名 |
 | ingress.tls.enabled | bool | 是否启用ingress tls |
 | ingress.tls.webAdmin.createWithCertFile | bool | 是否使用证书文件创建管理后台web服务的sercret对象；若为true，可将*.crt（证书）, *.key（密钥）文件放到fogcloud-charts/configs/cert/webAdmin目录下 |
 | mqttBroker.enabled | bool | 是否使用k8s创建mqtt broker |

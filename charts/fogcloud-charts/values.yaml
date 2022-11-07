@@ -18,14 +18,16 @@ secret:
     #   password:
     #   email:
 
+hosts:
+  webAdmin: app.fogcloud.io #web管理后台域名
+  api: api.fogcloud.io  #后端服务域名
+  mqtt: mqtt.fogcloud.io  #mqtt服务域名
+
 storageClassName: "local-path"
 
 # 用于发布fogcloud api/web服务
 ingress:
   enabled: false
-  hosts:
-    webAdmin: eu-dev.fogcloud.io #web管理后台域名
-    api: eu-dev.fogcloud.io  #后端服务域名
   tls: 
     enabled: false
     # 前端服务的证书
@@ -43,7 +45,7 @@ fogcloud:
   restartPolicy: Always
   targetPort: 34000
   image: ghcr.io/fogcloud-io/fogcloud
-  imageTag: v4.11.0
+  imageTag: v4.11.1
   replicas: 1
   strategy: 
     type: RollingUpdate # enum: Recreate, RollingUpdate
@@ -67,7 +69,7 @@ fogcloud:
 
 fogcloudWeb:
   image: ghcr.io/fogcloud-io/fogcloud-web
-  imageTag: v4.11.0
+  imageTag: v4.11.1
   replicas: 1
   strategy: 
     type: RollingUpdate # enum: Recreate, RollingUpdate

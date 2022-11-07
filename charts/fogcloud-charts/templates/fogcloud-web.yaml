@@ -54,9 +54,9 @@ spec:
           name: fogcloud-web
           env:
             - name: API_BASE_URL
-            - value: "{{ .Values.hosts.api }}"
+              value: "{{ .Values.fogcloudWeb.apiURL }}"
             - name: MQTT_BASE_URL
-            - value: "{{ .Values.hosts.mqtt }}"
+              value: "{{ .Values.fogcloudWeb.mqttURL }}"
           ports:
             - containerPort: 80
             - containerPort: 443

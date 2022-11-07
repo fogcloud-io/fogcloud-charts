@@ -52,6 +52,11 @@ spec:
         - image: {{ .Values.fogcloudWeb.image }}:{{ .Values.fogcloudWeb.imageTag }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           name: fogcloud-web
+          env:
+            - name: API_BASE_URL
+            - value: "{{ .Values.hosts.api }}"
+            - name: MQTT_BASE_URL
+            - value: "{{ .Values.hosts.mqtt }}"
           ports:
             - containerPort: 80
             - containerPort: 443

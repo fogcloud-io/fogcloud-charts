@@ -22,13 +22,13 @@ spec:
   {{ if .Values.ingress.tls.enabled }}
   tls:
     - hosts:
-        - "{{ .Values.ingress.hosts.webAdmin }}"
-        - "{{ .Values.ingress.hosts.api }}"
+        - "{{ .Values.hosts.webAdmin }}"
+        - "{{ .Values.hosts.api }}"
       secretName: {{ .Values.ingress.tls.webAdmin.secretName }}
   {{ end }}    
   ingressClassName: {{ .Values.ingress.className }} #import !!!
   rules:
-    - host: {{ .Values.ingress.hosts.webAdmin }}
+    - host: {{ .Values.hosts.webAdmin }}
       http:
         paths:
           - path: /
@@ -52,7 +52,7 @@ spec:
                 name: nginx
                 port:
                   number: 80                
-    - host: {{ .Values.ingress.hosts.api }}
+    - host: {{ .Values.hosts.api }}
       http:
         paths:
           - path: /api/

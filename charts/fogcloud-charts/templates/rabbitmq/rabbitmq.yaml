@@ -45,11 +45,11 @@ spec:
           value: /etc/rabbitmq/rabbitmq.conf
         {{ if .Values.rabbitmq.tls.enabled }}  
         - name: RABBITMQ_LISTENERS_SSL_1
-          value: 5671       
+          value: "5671"       
         - name: RABBITMQ_SSL__OPTIONS_VERIFY
           value: "verify_peer"    
         - name: RABBITMQ_SSL__OPTIONS_FAIL__IF__NO__PEER__CERT
-          value: false                 
+          value: "false"                 
         - name: RABBITMQ_SSL__OPTIONS_CACERTFILE
           value: "/etc/rabbimq/tls.crt"
         - name: RABBITMQ_SSL__OPTIONS_CERTFILE

@@ -2,8 +2,8 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-namespace: fogcloud-dev
-environment: test # enum: development,test,production
+namespace: fogcloud
+environment: production # enum: development,test,production
 
 imagePullPolicy: Always
 
@@ -46,7 +46,6 @@ ingress:
 
 fogcloud:
   restartPolicy: Always
-  targetPort: 34000
   image: ghcr.io/fogcloud-io/fogcloud
   imageTag: v4.11.1
   replicas: 1
@@ -55,16 +54,6 @@ fogcloud:
     rollingUpdate:
       maxSurge: 50%
       maxUnavailable: 0
-  service:
-    type: ClusterIP # enum: NodePort,ClusterIP,LoadBalance
-    externalTrafficPolicy: Cluster
-    ports:
-      httpPort:
-        port: 4000
-        nodePort: 4000
-      httpDebugPort:
-        port: 4001
-        nodePort: 15000
   resources:
     limits:
       cpu: 100m

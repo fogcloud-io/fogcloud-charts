@@ -17,6 +17,8 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
   labels:
     pvc: etcd-data
   name: etcd-pvc

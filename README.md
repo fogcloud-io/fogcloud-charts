@@ -37,8 +37,8 @@ helm upgrade -f myvalues.yaml {RELEASE_NAME} ./fogcloud-charts
 | 配置项 | 类型 | 说明 |
 | --- | --- | --- |
 | k8sApiServer | string | k8s server api地址，用来创建k8s StatefulSet资源；可以通过```kubectl config view```获取 |
-| fogcloudWeb.apiURL | string | 设置前端服务访问的后端api域名 |
-| fogcloudWeb.mqttURL | string | 设置前端服务访问的后端mqtt服务域名 |
+| fogcloudWeb.apiURL | string | 设置前端服务访问的后端api地址，格式为```[schema]://[host]:[port]/api/v1```，host为后端服务的域名 |
+| fogcloudWeb.mqttURL | string | 设置前端服务访问的后端mqtt服务地址，格式为```[schema]://[host]:[port]/mqtt```，host为mqtt服务的域名 |
 | ingress.hosts.webAdmin | string | 设置管理后台域名，使用ingress发布前端服务时会用到 |
 | ingress.hosts.api | string | 设置后端api服务域名，使用ingress发布后端服务时会用到 |
 | ingress.tls.enabled | bool | 是否启用ingress tls |
@@ -61,6 +61,8 @@ helm upgrade -f myvalues.yaml {RELEASE_NAME} ./fogcloud-charts
 ```console
 helm uninstall {RELEASE_NAME}
 ```
+
+注意：默认启用了helm的资源保留，卸载时不会释放persistent volume资源；
 
 ## 使用许可
 

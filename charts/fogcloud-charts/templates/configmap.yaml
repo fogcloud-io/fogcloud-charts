@@ -22,11 +22,6 @@ data:
     {{ $bytes | toString | nindent 4 }}
   {{ end }}
 
-  {{ range $path, $bytes := .Files.Glob "configs/i18n/*" }}
-  {{ $path | base }}: |-
-    {{ $bytes | toString | nindent 4 }}
-  {{ end }}
-
   {{ range $path, $bytes := .Files.Glob "configs/nginx/*" }}
   {{ $path | base }}: |-
     {{ $bytes | toString | nindent 4 }}

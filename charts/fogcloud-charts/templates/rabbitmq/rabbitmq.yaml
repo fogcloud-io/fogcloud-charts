@@ -41,23 +41,12 @@ metadata:
 spec:
   containers:
     - env:
+        {{ if .Values.rabbitmq.tls.enabled }}
         - name: RABBITMQ_CONFIG_FILE
-          value: /etc/rabbitmq/rabbitmq.conf
-        {{ if .Values.rabbitmq.tls.enabled }}  
-        - name: RABBITMQ_LISTENERS_SSL_1
-          value: "5671"       
-        - name: RABBITMQ_SSL__OPTIONS_VERIFY
-          value: "verify_peer"    
-        - name: RABBITMQ_SSL__OPTIONS_FAIL__IF__NO__PEER__CERT
-          value: "false"                 
-        - name: RABBITMQ_SSL__OPTIONS_CACERTFILE
-          value: "/etc/rabbimq/tls.crt"
-        - name: RABBITMQ_SSL__OPTIONS_CERTFILE
-          value: "/etc/rabbimq/tls.crt"
-        - name: RABBITMQ_SSL__OPTIONS_KEYFILE
-          value: "/etc/rabbimtq/tls.key"
-        - name: RABBITMQ_SSL__OPTIONS_VERSION_2
-          value: "tlsv1.2"          
+          value: /etc/rabbitmq/rabbitmq.tls.conf
+        {{ else }}
+        - name: RABBITMQ_CONFIG_FILE
+          value: /etc/rabbitmq/rabbitmq.conf       
         {{ end }}  
       image: {{ .Values.rabbitmq.image }}:{{ .Values.rabbitmq.imageTag }}
       name: rabbitmq
@@ -69,6 +58,9 @@ spec:
         - mountPath: /etc/rabbitmq/rabbitmq.conf
           subPath: rabbitmq.conf
           name: rabbitmq-claim
+        - mountPath: /etc/rabbitmq/rabbitmq.tls.conf
+          subPath: rabbitmq.tls.conf
+          name: rabbitmq-claim          
         - mountPath: /etc/rabbitmq/enabled_plugins
           subPath: enabled_plugins
           name: rabbitmq-claim
@@ -89,6 +81,8 @@ spec:
         items:
           - key: rabbitmq.conf
             path: rabbitmq.conf
+          - key: rabbitmq.tls.conf
+            path: rabbitmq.tls.conf  
           - key: enabled_plugins
             path: enabled_plugins
     {{ if .Values.rabbitmq.tls.enabled }}        

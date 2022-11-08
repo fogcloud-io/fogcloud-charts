@@ -47,7 +47,7 @@ ingress:
 fogcloud:
   restartPolicy: Always
   image: ghcr.io/fogcloud-io/fogcloud
-  imageTag: v4.11.1
+  imageTag: v4.12.0
   replicas: 1
   strategy: 
     type: RollingUpdate # enum: Recreate, RollingUpdate
@@ -61,7 +61,7 @@ fogcloud:
 
 fogcloudWeb:
   image: ghcr.io/fogcloud-io/fogcloud-web
-  imageTag: v4.11.1
+  imageTag: v4.12.0
   replicas: 1
   apiURL: http://localhost:4000/api/v1
   mqttURL:  http://localhost:8083/mqtt
@@ -80,7 +80,7 @@ fogcloudWeb:
 
 faasbuilder:
   image: ghcr.io/fogcloud-io/faas-builder
-  imageTag: latest
+  imageTag: v4.0.0
   createDockerconfigWithFile: false
   replicas: 1
   strategy: 
@@ -91,7 +91,7 @@ faasbuilder:
 
 fogcronScheduler:
   image: ghcr.io/fogcloud-io/fogcron-scheduler
-  imageTag: latest
+  imageTag: v4.0.0
   replicas: 1
   strategy: 
     type: RollingUpdate # enum: Recreate, RollingUpdate

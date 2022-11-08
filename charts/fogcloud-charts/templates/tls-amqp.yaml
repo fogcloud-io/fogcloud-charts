@@ -1,5 +1,5 @@
 {{ if .Values.rabbitmq.enabled }}
-{{ if .Values.rabbitmq.tls.enable }}
+{{ if .Values.rabbitmq.tls.enabled }}
 {{ if .Values.rabbitmq.tls.createWithCertFile }}
 apiVersion: v1
 kind: Secret

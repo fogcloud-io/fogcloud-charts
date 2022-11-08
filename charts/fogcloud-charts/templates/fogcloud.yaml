@@ -8,23 +8,14 @@ metadata:
   name: fogcloud
   namespace: {{ .Values.namespace }}
 spec:
-  type: {{ .Values.fogcloud.service.type }}
-  {{ if eq .Values.fogcloud.service.type "NodePort" }}
-  externalTrafficPolicy: {{ .Values.fogcloud.service.externalTrafficPolicy }}
-  {{ end }}
+  type: ClusterIP
   ports:
     - name: "http"
-      port: {{ .Values.fogcloud.service.ports.httpPort.port }}
+      port: 4000
       targetPort: 4000
-      {{ if eq .Values.fogcloud.service.type "NodePort" }}
-      nodePort: {{ .Values.fogcloud.service.ports.httpPort.nodePort }}
-      {{ end }}
     - name: "http-debug"
-      port: {{ .Values.fogcloud.service.ports.httpDebugPort.port }}
-      targetPort: 15000
-      {{ if eq .Values.fogcloud.service.type "NodePort" }}
-      nodePort: {{ .Values.fogcloud.service.ports.httpDebugPort.nodePort }}
-      {{ end }}      
+      port: 4001
+      targetPort: 15000  
   selector:
     app: fogcloud
 status:

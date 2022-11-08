@@ -21,6 +21,8 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  annotations:
+    "helm.sh/resource-policy": keep
   labels:
     pvc: mongo-data
   name: mongo-pvc

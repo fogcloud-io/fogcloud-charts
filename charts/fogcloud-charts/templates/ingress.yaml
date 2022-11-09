@@ -9,11 +9,11 @@ metadata:
     # {{ end }}
     # {{ end }}
     # must be tls
-    {{ if .Values.ingress.tls.enabled }}
-    {{ if eq .Values.ingress.controller "traefik.io/ingress-controller" }}
-    traefik.ingress.kubernetes.io/router.tls: "true"
-    {{ end }}
-    {{ end }}
+    # {{ if .Values.ingress.tls.mustBeSecure }}
+    # {{ if eq .Values.ingress.controller "traefik.io/ingress-controller" }}
+    # traefik.ingress.kubernetes.io/router.tls: "true"
+    # {{ end }}
+    # {{ end }}
   labels:
     ing: fogcloud-ingress
   name: fogcloud-ingress

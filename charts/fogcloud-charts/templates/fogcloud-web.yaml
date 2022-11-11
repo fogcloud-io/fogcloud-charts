@@ -7,17 +7,34 @@ metadata:
   name: fogcloud-web
   namespace: {{ .Values.namespace }}
 spec:
-  type: {{ .Values.fogcloudWeb.service.type }}
-  {{ if eq .Values.fogcloudWeb.service.type "NodePort" }}  
-  externalTrafficPolicy: {{ .Values.fogcloudWeb.service.externalTrafficPolicy }}
+  {{ if eq .Values.expose.type "Ingress" }}
+  type: ClusterIP
+  {{ else }}
+  type: {{ .Values.expose.type }}
   {{ end }}
+  {{ if eq .Values.expose.type "LoadBalancer" }}
+  externalTrafficPolicy: {{ .Values.expose.LoadBalancer.externalTrafficPolicy }}
+  healthCheckNodePort: {{ .Values.expose.LoadBalancer.ports.webAdmin.healthCheckNodePort }}
   ports:
-    - name: "http"
-      port: {{ .Values.fogcloudWeb.service.ports.httpPort.port }}
+    - name: http
+      port: 80
+      targetPort: 80
+      nodePort: {{ .Values.expose.LoadBalancer.ports.webAdmin.httpPort }}
+  {{ end }} 
+  {{ if eq .Values.expose.type "NodePort" }}
+  externalTrafficPolicy: {{ .Values.expose.NodePort.externalTrafficPolicy }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      nodePort: {{ .Values.expose.NodePort.ports.webAdmin.httpPort }}
+  {{ end }}   
+  {{ if or (eq .Values.expose.type "Ingress") (eq .Values.expose.type "ClusterIP") }}
+  ports:
+    - name: http
+      port: 80
       targetPort: 8000
-      {{ if eq .Values.fogcloudWeb.service.type "NodePort" }}
-      nodePort: {{ .Values.fogcloudWeb.service.ports.httpPort.nodePort }}
-      {{ end }}      
+  {{ end }}   
   selector:
     app: fogcloud-web
 status:
@@ -53,10 +70,25 @@ spec:
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           name: fogcloud-web
           env:
+            {{ if .Values.expose.tls.enabled }}
             - name: API_BASE_URL
-              value: "{{ .Values.fogcloudWeb.apiURL }}"
+              value: "https://{{ .Values.expose.hosts.api }}/api/v1"
             - name: MQTT_BASE_URL
-              value: "{{ .Values.fogcloudWeb.mqttURL }}"
+              {{ if .Values.mqttBroker.enabled }}
+              value: "wss://{{ .Values.expose.hosts.api }}:{{ .Values.mqttBroker.service.ports.mqttWss.nodePort }}/mqtt"
+              {{ else }}
+              value: "wss://{{ .Values.expose.hosts.api }}:8084/mqtt"
+              {{ end }}
+            {{ else }}
+            - name: API_BASE_URL
+              value: "http://{{ .Values.expose.hosts.api }}/api/v1"
+            - name: MQTT_BASE_URL
+              {{ if .Values.mqttBroker.enabled }}
+              value: "wss://{{ .Values.expose.hosts.api }}:{{ .Values.mqttBroker.service.ports.mqttWs.nodePort }}/mqtt"
+              {{ else }}
+              value: "wss://{{ .Values.expose.hosts.api }}:8083/mqtt"
+              {{ end }}        
+            {{ end }}
           ports:
             - containerPort: 80
             - containerPort: 443

@@ -7,23 +7,34 @@ metadata:
   name: nginx
   namespace: {{ .Values.namespace }}
 spec:
-  type: {{ .Values.nginx.service.type }}
-  {{ if or (eq .Values.nginx.service.type "NodePort") (eq .Values.nginx.service.type "LoadBalancer") }}
-  externalTrafficPolicy: {{ .Values.nginx.service.externalTrafficPolicy }}
-    {{ if and (eq .Values.nginx.service.externalTrafficPolicy "Local") (eq .Values.nginx.service.type "LoadBalancer") }}
-  healthCheckNodePort: {{ .Values.nginx.service.healthCheckNodePort }}
-    {{ end }}
+  {{ if eq .Values.expose.type "Ingress" }}
+  type: ClusterIP
+  {{ else }}
+  type: {{ .Values.expose.type }}
   {{ end }}
+  {{ if eq .Values.expose.type "LoadBalancer" }}
+  externalTrafficPolicy: {{ .Values.expose.LoadBalancer.externalTrafficPolicy }}
+  healthCheckNodePort: {{ .Values.expose.LoadBalancer.ports.api.healthCheckNodePort }}
   ports:
-    {{ $svcType := .Values.nginx.service.type }}
-    {{ range $port := .Values.nginx.service.ports }}
-    - name: {{ $port.name }}
-      port: {{ $port.port }}
-      targetPort: {{ $port.targetPort }}
-      {{ if eq $svcType "NodePort" }}
-      nodePort: {{ $port.nodePort }}
-      {{ end }}
-    {{ end }}
+    - name: http
+      port: 80
+      targetPort: 80
+      nodePort: {{ .Values.expose.LoadBalancer.ports.api.httpPort }}
+  {{ end }} 
+  {{ if eq .Values.expose.type "NodePort" }}
+  externalTrafficPolicy: {{ .Values.expose.NodePort.externalTrafficPolicy }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      nodePort: {{ .Values.expose.NodePort.ports.api.httpPort }}
+  {{ end }}   
+  {{ if or (eq .Values.expose.type "Ingress") (eq .Values.expose.type "ClusterIP") }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+  {{ end }}
   selector:
     app: nginx
 status:
@@ -59,7 +70,7 @@ spec:
           volumeMounts:
             - mountPath: /etc/nginx/conf.d/default.conf
               subPath: default.conf
-              name: nginx-claim
+              name: default-claim
             - mountPath: /etc/nginx/nginx.conf
               subPath: nginx.conf
               name: nginx-claim
@@ -75,10 +86,13 @@ spec:
         - name: nginx-claim
           configMap:
             name: fog-config
-            defaultMode: 0755
             items:
-              - key: default.conf
-                path: default.conf
               - key: nginx.conf
                 path: nginx.conf  
+        - name: default-claim
+          configMap:
+            name: nginx-config
+            items:
+              - key: default.conf
+                path: default.conf              
 status: {}

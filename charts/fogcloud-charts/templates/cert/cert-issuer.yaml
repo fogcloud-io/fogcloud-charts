@@ -1,0 +1,16 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: issuer-fog
+  namespace: {{ .Values.namespace }}
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email:
+    privateKeySecretRef:
+      name: letsencrypt-fog
+    solvers:
+      - selector: {}
+        http01:
+          ingress:
+            class: {{ .Values.expose.Ingress.className }}

@@ -1,4 +1,6 @@
 {{ if .Values.mqttBroker.enabled }}
+{{ $mqttPorts := .Values.mqttBroker.service.ports }}
+--- 
 apiVersion: v1
 kind: Service
 metadata:
@@ -15,15 +17,42 @@ spec:
     {{ end }}
   {{ end }}
   ports:
-    {{ $svcType := .Values.mqttBroker.service.type }}
-    {{ range $port := .Values.mqttBroker.service.ports }}
-    - name: {{ $port.name }}
-      port: {{ $port.port }}
-      targetPort: {{ $port.targetPort }}
-      {{ if eq $svcType "NodePort" }}
-      nodePort: {{ $port.nodePort }}
+    - name: mqtt-tcp
+      port: {{ $mqttPorts.mqttTcp.port }}
+      targetPort: 1883
+      {{ if eq .Values.mqttBroker.service.type "NodePort" }}
+      nodePort: {{ $mqttPorts.mqttTcp.nodePort }}
       {{ end }}
-    {{ end }}
+    - name: mqtt-tcp-tls
+      port: {{ $mqttPorts.mqttTcpTls.port }}
+      targetPort: 8883
+      {{ if eq .Values.mqttBroker.service.type "NodePort" }}
+      nodePort: {{ $mqttPorts.mqttTcpTls.nodePort }}
+      {{ end }}      
+    - name: http-api
+      port: {{ $mqttPorts.httpApi.port }}
+      targetPort: 8081
+      {{ if eq .Values.mqttBroker.service.type "NodePort" }}
+      nodePort: {{ $mqttPorts.httpApi.nodePort }}
+      {{ end }}    
+    - name: mqtt-ws
+      port: {{ $mqttPorts.mqttWs.port }}
+      targetPort: 8083
+      {{ if eq .Values.mqttBroker.service.type "NodePort" }}
+      nodePort: {{ $mqttPorts.mqttWs.nodePort }}
+      {{ end }}    
+    - name: mqtt-wss
+      port: {{ $mqttPorts.mqttWss.port }}
+      targetPort: 8084
+      {{ if eq .Values.mqttBroker.service.type "NodePort" }}
+      nodePort: {{ $mqttPorts.mqttWss.nodePort }}
+      {{ end }}    
+    - name: admin
+      port: {{ $mqttPorts.admin.port }}
+      targetPort: 18083
+      {{ if eq .Values.mqttBroker.service.type "NodePort" }}
+      nodePort: {{ $mqttPorts.admin.nodePort }}
+      {{ end }}  
   selector:
     app: mqtt-broker
 status:

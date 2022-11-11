@@ -1,0 +1,28 @@
+{{- $item := .Values.expose.tls.cert.webAdmin -}}
+{{- if eq $item.certSource "auto" -}}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ $item.secretName }}
+  namespace: {{ .Values.namespace }}
+spec:
+  dnsNames:
+    - {{ .Values.expose.hosts.webAdmin }}
+  secretName: {{ $item.secretName }}
+  issuerRef:
+    name: issuer-fog
+{{- else if eq $item.certSource "file" -}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ $item.secretName }}
+  namespace: {{ .Values.namespace }}
+type: kubernetes.io/tls
+data:
+  {{ range $_, $bytes := .Files.Glob "configs/cert/webAdmin/*.crt"  }}
+  tls.crt: {{ $bytes | toString | b64enc }}
+  {{ end }}
+  {{ range $_, $bytes := .Files.Glob "configs/cert/webAdmin/*.key"  }}
+  tls.key: {{ $bytes | toString | b64enc }}
+  {{ end }}
+{{- end -}}

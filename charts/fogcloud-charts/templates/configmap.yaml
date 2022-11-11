@@ -4,17 +4,31 @@ metadata:
   name: fog-config
   namespace: {{ .Values.namespace }}
 data:
-  {{- (.Files.Glob "configs/*").AsConfig | nindent 2 }}
-  {{- (.Files.Glob "configs/faasbuilder/*.yaml").AsConfig | nindent 2 }}
-  {{- (.Files.Glob "configs/fogcron/*.yaml").AsConfig | nindent 2 }}
+  {{ range $path, $bytes := .Files.Glob "configs/fogcloud-core/*" }}
+  fogcloud.yaml: |-
+    {{ $bytes | toString | nindent 4 }}
+  {{ end }}
+
+  {{ range $path, $bytes := .Files.Glob "configs/fogcron/*" }}
+  fogcron.yaml: |-
+    {{ $bytes | toString | nindent 4 }}
+  {{ end }}
+
+  {{ range $path, $bytes := .Files.Glob "configs/faasbuilder/*" }}
+  faasbuilder.yaml: |-
+    {{ $bytes | toString | nindent 4 }}
+  {{ end }}
+
   {{ range $path, $bytes := .Files.Glob "configs/kubeconfig/*" }}
   kubeconfig: |-
     {{ $bytes | toString | nindent 4 }}
-  {{ end }} 
+  {{ end }}
 
+  {{ if .Values.mqttBroker.enabled }}
   {{ range $path, $bytes := .Files.Glob "configs/emq/*" }}
   {{ $path | base }}: |-
     {{ $bytes | toString | nindent 4 }}
+  {{ end }}
   {{ end }}
 
   {{ range $path, $bytes := .Files.Glob "configs/hmq/*" }}
@@ -27,8 +41,10 @@ data:
     {{ $bytes | toString | nindent 4 }}
   {{ end }}
   
+  {{ if .Values.rabbitmq.enabled }}
   {{ range $path, $bytes := .Files.Glob "configs/rabbitmq/*" }}
   {{ $path | base }}: |-
     {{ $bytes | toString | nindent 4 }}
+  {{ end }}
   {{ end }}
 

@@ -1,34 +1,26 @@
-{{ if .Values.ingress.enabled }}
+{{ if eq .Values.expose.type "Ingress" }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
-    # {{ if .Values.ingress.redirectToHttps }}
-    # {{ if eq .Values.ingress.controller "traefik.io/ingress-controller" }}
-    # traefik.ingress.kubernetes.io/router.middlewares: default-redirect-https@kubernetescrd
-    # {{ end }}
-    # {{ end }}
-    # must be tls
-    # {{ if .Values.ingress.tls.mustBeSecure }}
-    # {{ if eq .Values.ingress.controller "traefik.io/ingress-controller" }}
-    # traefik.ingress.kubernetes.io/router.tls: "true"
-    # {{ end }}
-    # {{ end }}
+{{ toYaml .Values.expose.Ingress.annotations | indent 4 }}
   labels:
     ing: fogcloud-ingress
   name: fogcloud-ingress
   namespace: {{ .Values.namespace }}
 spec:
-  {{ if .Values.ingress.tls.enabled }}
+  {{ if .Values.expose.tls.enabled }}
   tls:
     - hosts:
-        - "{{ .Values.ingress.hosts.webAdmin }}"
-        - "{{ .Values.ingress.hosts.api }}"
-      secretName: {{ .Values.ingress.tls.webAdmin.secretName }}
+        - "{{ .Values.expose.hosts.webAdmin }}"
+      secretName: {{ .Values.expose.tls.cert.webAdmin.secretName }}
+    - hosts:
+        - "{{ .Values.expose.hosts.api }}"
+      secretName: {{ .Values.expose.tls.cert.api.secretName }}
   {{ end }}    
-  ingressClassName: {{ .Values.ingress.className }} #import !!!
+  ingressClassName: {{ .Values.expose.Ingress.className }} #import !!!
   rules:
-    - host: {{ .Values.ingress.hosts.webAdmin }}
+    - host: {{ .Values.expose.hosts.webAdmin }}
       http:
         paths:
           - path: /
@@ -52,7 +44,7 @@ spec:
                 name: nginx
                 port:
                   number: 80                
-    - host: {{ .Values.ingress.hosts.api }}
+    - host: {{ .Values.expose.hosts.api }}
       http:
         paths:
           - path: /api/

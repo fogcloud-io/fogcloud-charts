@@ -2,13 +2,67 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-namespace: fogcloud
-environment: production # enum: development,test,production
+namespace: fogcloud-dev
+# 配置文件环境：development,test,production
+environment: production
 
 imagePullPolicy: Always
 
 k8sApiServer: "https://localhost:6443"
+# 是否启用云函数功能，若安装了fission可以设置为true
+fissionEnabled: false
 
+# 暴露web管理后台和api服务，有：Ingress, ClusterIP, NodePort, LoadBalancer这几种类型；
+# 若要公开服务，请使用LoadBalancer,Ingress,NodePort三种类型
+expose:
+  type: Ingress
+  # 各个服务的域名，若启用对应服务的tls，请保证域名是外网可以访问的；
+  hosts:
+    # web管理后台域名
+    webAdmin: localhost
+    # 后端api服务域名
+    api: localhost
+    # mqtt服务域名
+    mqtt: localhost
+    # amqp服务域名
+    amqp: localhost
+  
+  tls:
+    enabled: false
+    cert:
+      webAdmin:
+        # x509证书创建方式，支持file, auto, none这三种方式
+        # file: 通过文件创建，可将对应证书文件：*.key，*.crt，放到fogcloud-charts/configs/cert/webAdmin目录下
+        # none: 不创建
+        # auto: 使用cert-manager自动生成
+        certSource: none
+        secretName: web-cert    
+      api:
+        certSource: none
+        secretName: api-cert
+
+  Ingress:
+    className: traefik
+    controller: traefik.io/ingress-controller
+    annotations: {}
+
+  NodePort:
+    externalTrafficPolicy: Local
+    ports:
+      webAdmin:
+        httpPort: 8888
+      api:
+        httpPort: 8000
+
+  LoadBalancer:
+    externalTrafficPolicy: Local
+    healthCheckNodePort: 4000
+    ports:
+      webAdmin:
+        httpPort: 8888
+      api:
+        httpPort: 8000  
+        
 secret:
   # 配置私有镜像仓库    
   imageCredentials:
@@ -18,36 +72,12 @@ secret:
     #   password:
     #   email:
 
-hosts:
-  webAdmin: app.fogcloud.io #web管理后台域名
-  api: api.fogcloud.io  #后端服务域名
-  mqtt: mqtt.fogcloud.io  #mqtt服务域名
-
 storageClassName: "local-path"
-
-# 用于发布fogcloud api/web服务
-ingress:
-  enabled: false
-  hosts:
-    webAdmin: app.fogcloud.io #web管理后台域名
-    api: api.fogcloud.io  #后端服务域名
-  tls: 
-    enabled: false
-    # 前端服务的证书
-    webAdmin:
-      createWithCertFile: false
-      secretName: fogcloud-cert
-    # 后端http接口证书  
-    api:
-      createWithCertFile: false
-      secretName: fogcloud-cert
-  className: traefik
-  controller: traefik.io/ingress-controller
 
 fogcloud:
   restartPolicy: Always
   image: ghcr.io/fogcloud-io/fogcloud
-  imageTag: v4.12.0
+  imageTag: latest
   replicas: 1
   strategy: 
     type: RollingUpdate # enum: Recreate, RollingUpdate
@@ -61,43 +91,39 @@ fogcloud:
 
 fogcloudWeb:
   image: ghcr.io/fogcloud-io/fogcloud-web
-  imageTag: v4.12.0
+  imageTag: latest
   replicas: 1
-  apiURL: http://localhost:4000/api/v1
-  mqttURL:  http://localhost:8083/mqtt
   strategy: 
     type: RollingUpdate # enum: Recreate, RollingUpdate
     rollingUpdate:
       maxSurge: 50%
-      maxUnavailable: 0  
-  service:
-    type: ClusterIP
-    externalTrafficPolicy: Cluster
-    ports:
-      httpPort:
-        port: 4002
-        nodePort: 8888
+      maxUnavailable: 0
 
 faasbuilder:
   image: ghcr.io/fogcloud-io/faas-builder
-  imageTag: v4.0.0
+  imageTag: latest
   createDockerconfigWithFile: false
   replicas: 1
   strategy: 
     type: RollingUpdate # enum: Recreate, RollingUpdate
     rollingUpdate:
       maxSurge: 50%
-      maxUnavailable: 0    
+      maxUnavailable: 0
 
 fogcronScheduler:
   image: ghcr.io/fogcloud-io/fogcron-scheduler
-  imageTag: v4.0.0
+  imageTag: latest
   replicas: 1
   strategy: 
     type: RollingUpdate # enum: Recreate, RollingUpdate
     rollingUpdate:
       maxSurge: 50%
       maxUnavailable: 0    
+
+nginx:
+  image: nginx
+  imageTag: 1.21
+  replicas: 1
 
 mqttBroker:
   enabled: true
@@ -111,51 +137,37 @@ mqttBroker:
   replicas: 1
   tls:
     enabled: false
-    secretName: fogcloud-cert
-    createWithCertFile: false
+    certSource: none # file, auto, none
+    secretName: mqtt-cert
   service:
     type: ClusterIP
     externalTrafficPolicy: Local
     healthCheckNodePort: 30000
     ports:
-      - name: "mqtt-tcp"
+      mqttTcp:
         port: 1883
         targetPort: 1883
         nodePort: 1883
-      - name: "mqtt-tcp-tls"
+      mqttTcpTls:
         port: 8883
         targetPort: 8883
         nodePort: 8883
-      - name: "http-api"
+      httpApi:
         port: 8081
         targetPort: 8081
         nodePort: 8081
-      - name: "mqtt-ws"
+      mqttWs:
         port: 8083
         targetPort: 8083
         nodePort: 8083
-      - name: "mqtt-wss"
+      mqttWss:
         port: 8084
         targetPort: 8084
         nodePort: 8084
-      - name: "admin"
+      admin:
         port: 18083
         targetPort: 18083
-        nodePort: 18083
-
-nginx:
-  image: nginx
-  imageTag: 1.21
-  replicas: 1
-  service:
-    type: ClusterIP
-    externalTrafficPolicy: Local
-    healthCheckNodePort: 30010
-    ports:
-      - name: "http"
-        port: 80
-        targetPort: 80
-        nodePort: 8000
+        nodePort: 18083        
 
 rabbitmq:
   enabled: true
@@ -163,8 +175,8 @@ rabbitmq:
   imageTag: 3.8.0-management
   tls:
     enabled: false
-    secretName: fogcloud-cert
-    createWithCertFile: false  
+    certSource: none # file, auto, none 
+    secretName: amqp-cert
   service:
     externalTrafficPolicy: Local
     healthCheckNodePort: 30001

@@ -85,9 +85,9 @@ fogcloud:
       maxSurge: 50%
       maxUnavailable: 0
   resources:
-    limits:
-      cpu: 100m
-      memory: 128Mi
+    # limits:
+    #   cpu: "2"
+    #   memory: "128Mi"
 
 fogcloudWeb:
   image: ghcr.io/fogcloud-io/fogcloud-web
@@ -98,12 +98,20 @@ fogcloudWeb:
     rollingUpdate:
       maxSurge: 50%
       maxUnavailable: 0
+  resources:
+    # limits:
+    #   cpu: "1"
+    #   memory: "128Mi"
 
 faasbuilder:
   image: ghcr.io/fogcloud-io/faas-builder
   imageTag: latest
   createDockerconfigWithFile: false
   replicas: 1
+  resources:
+    # limits:
+    #   cpu: "0.1"
+    #   memory: "128Mi"  
   strategy: 
     type: RollingUpdate # enum: Recreate, RollingUpdate
     rollingUpdate:
@@ -114,6 +122,10 @@ fogcronScheduler:
   image: ghcr.io/fogcloud-io/fogcron-scheduler
   imageTag: latest
   replicas: 1
+  resources:
+    # limits:
+    #   cpu: "1"
+    #   memory: "128Mi"  
   strategy: 
     type: RollingUpdate # enum: Recreate, RollingUpdate
     rollingUpdate:
@@ -124,12 +136,20 @@ nginx:
   image: nginx
   imageTag: 1.21
   replicas: 1
+  resources:
+    # limits:
+    #   cpu: "1"
+    #   memory: "128Mi"  
 
 mqttBroker:
   enabled: true
   type: emqx
   image: emqx/emqx
   imageTag: 4.2.8
+  resources:
+    # limits:
+    #   cpu: "4"
+    #   memory: "2048Mi"  
   nodeSelector:
     enabled: false
     key: kubernetes.io/hostname
@@ -173,6 +193,10 @@ rabbitmq:
   enabled: true
   image: rabbitmq
   imageTag: 3.8.0-management
+  resources:
+    # limits:
+    #   cpu: "2"
+    #   memory: "1024Mi"  
   tls:
     enabled: false
     certSource: none # file, auto, none 
@@ -198,6 +222,10 @@ postgres:
   enabled: true
   image: postgres
   imageTag: 13
+  resources:
+    # limits:
+    #   cpu: "4"
+    #   memory: "2048Mi"  
   envVars:
     - name: POSTGRES_DB
       value: fogcloud
@@ -208,20 +236,32 @@ postgres:
 
 mongodb:
   enabled: true
-  image: mongo
+  image: mongo  
   imageTag: 4.4-rc-focal
+  resources:
+    # limits:
+    #   cpu: "2"
+    #   memory: "2048Mi"  
   envVars:
 
 redis:
   enabled: true
   image: redis
   imageTag: 6.2
+  resources:
+    # limits:
+    #   cpu: "2"
+    #   memory: "2048Mi"  
   envVars:
 
 etcd:
   enabled: true
   image: bitnami/etcd
   imageTag: 3.5.1
+  resources:
+    # limits:
+    #   cpu: "1"
+    #   memory: "128Mi"  
   replicas: 1
   envVars:
     - name: ALLOW_NONE_AUTHENTICATION
@@ -235,6 +275,10 @@ minio:
   enabled: true
   image: minio/minio
   imageTag: latest
+  resources:
+    # limits:
+    #   cpu: "1"
+    #   memory: "128Mi"  
   envVars:
     - name: MINIO_ACCESS_KEY
       value: "1234567890"

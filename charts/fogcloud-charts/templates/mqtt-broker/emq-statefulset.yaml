@@ -73,6 +73,10 @@ spec:
       containers:
         - name: mqtt-broker
           image: {{ .Values.mqttBroker.image }}:{{ .Values.mqttBroker.imageTag }}
+          {{- if .Values.mqttBroker.resources }}
+          resources:
+{{ toYaml .Values.mqttBroker.resources | indent 12 }}
+          {{- end }}          
           ports:
             - name: mqtt
               containerPort: 1883

@@ -89,6 +89,10 @@ spec:
               value: "wss://{{ .Values.expose.hosts.api }}:8083/mqtt"
               {{ end }}        
             {{ end }}
+          {{- if .Values.fogcloudWeb.resources }}
+          resources:
+{{ toYaml .Values.fogcloudWeb.resources | indent 12 }}
+          {{- end }}            
           ports:
             - containerPort: 80
             - containerPort: 443

@@ -34,7 +34,10 @@ spec:
           image: {{ .Values.fogcronScheduler.image }}:{{ .Values.fogcronScheduler.imageTag }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           name: fogcron-scheduler
-          resources: {}
+          {{- if .Values.fogcronScheduler.resources }}
+          resources:
+{{ toYaml .Values.fogcronScheduler.resources | indent 12 }}
+          {{- end }}
           volumeMounts:
             - mountPath: /etc/fogcron/fogcron.yaml
               subPath: fogcron.yaml

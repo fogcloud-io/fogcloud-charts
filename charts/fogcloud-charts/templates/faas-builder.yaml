@@ -59,7 +59,10 @@ spec:
             privileged: true
           ports:
             - containerPort: 8090
-          resources: {}
+          {{- if .Values.faasbuilder.resources }}
+          resources:
+{{ toYaml .Values.fogcloud.resources | indent 12 }}
+          {{- end }}
           volumeMounts:
             - mountPath: /etc/faasbuilder/faasbuilder.yaml
               subPath: faasbuilder.yaml

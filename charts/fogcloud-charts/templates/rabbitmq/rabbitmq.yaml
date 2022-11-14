@@ -53,7 +53,10 @@ spec:
       ports:
         - containerPort: 15672
         - containerPort: 5672
-      resources: {}
+      {{- if .Values.rabbitmq.resources }}
+      resources:
+{{ toYaml .Values.rabbitmq.resources | indent 8 }}
+      {{- end }}
       volumeMounts:
         - mountPath: /etc/rabbitmq/rabbitmq.conf
           subPath: rabbitmq.conf

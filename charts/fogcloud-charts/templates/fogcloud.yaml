@@ -58,6 +58,10 @@ spec:
           image: {{ .Values.fogcloud.image }}:{{ .Values.fogcloud.imageTag }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           name: fogcloud
+          {{- if .Values.fogcloud.resources }}
+          resources:
+{{ toYaml .Values.fogcloud.resources | indent 12 }}
+          {{- end }}
           ports:
             - containerPort: 4000
             - containerPort: 15000

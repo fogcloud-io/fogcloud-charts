@@ -74,6 +74,22 @@ secret:
 
 storageClassName: "local-path"
 
+resourceRangeLimit:
+  limits:
+  - default:
+      memory: "512Mi"
+      cpu: "0.5"
+    defaultRequest:
+      memory: "256Mi"
+      cpu: "0.1"
+    min:
+      memory: "128Mi"
+      cpu: "0.1"
+    max:  
+      memory: "4Gi"
+      cpu: "2"
+    type: Container    
+
 fogcloud:
   restartPolicy: Always
   image: ghcr.io/fogcloud-io/fogcloud

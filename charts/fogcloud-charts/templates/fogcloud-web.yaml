@@ -20,7 +20,7 @@ spec:
   ports:
     - name: http
       port: 80
-      targetPort: 80
+      targetPort: 8000
       nodePort: {{ .Values.expose.LoadBalancer.ports.webAdmin.httpPort }}
   {{ end }} 
   {{ if eq .Values.expose.type "NodePort" }}
@@ -28,7 +28,7 @@ spec:
   ports:
     - name: http
       port: 80
-      targetPort: 80
+      targetPort: 8000
       nodePort: {{ .Values.expose.NodePort.ports.webAdmin.httpPort }}
   {{ end }}   
   {{ if or (eq .Values.expose.type "Ingress") (eq .Values.expose.type "ClusterIP") }}

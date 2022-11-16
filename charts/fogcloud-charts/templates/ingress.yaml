@@ -5,6 +5,7 @@ metadata:
   annotations:
 {{ toYaml .Values.expose.Ingress.annotations | indent 4 }}
   labels:
+{{ include "fogcloud.labels" . | indent 4 }}  
     ing: fogcloud-ingress
   name: fogcloud-ingress
   namespace: {{ .Values.namespace }}

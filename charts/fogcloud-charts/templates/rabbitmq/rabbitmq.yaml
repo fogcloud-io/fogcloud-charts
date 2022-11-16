@@ -1,9 +1,12 @@
 {{ if .Values.rabbitmq.enabled }}
+{{ $svcType := .Values.rabbitmq.service.type }}
+{{ $ports := .Values.rabbitmq.service.ports }}
 # rabbitmq-service
 apiVersion: v1
 kind: Service
 metadata:
   labels:
+{{ include "fogcloud.labels" . | indent 4 }}   
     srv: rabbitmq
   name: rabbitmq
   namespace: {{ .Values.namespace }}
@@ -16,15 +19,21 @@ spec:
     {{ end }}
   {{ end }}
   ports:
-    {{ $svcType := .Values.rabbitmq.service.type }}
-    {{ range $port := .Values.rabbitmq.service.ports }}
-    - name: {{ $port.name }}
-      port: {{ $port.port }}
-      targetPort: {{ $port.targetPort }}
-      {{ if eq $svcType "NodePort" }}
-      nodePort: {{ $port.nodePort }}
+    - name: amqp
+      port: {{ $ports.amqp.port }}
+      targetPort: 5672
+      {{ if or (eq $svcType "NodePort") (eq $svcType "LoadBalancer") }}
+      nodePort: {{ $ports.amqp.nodePort }}
       {{ end }}
-    {{ end }}
+    - name: amqps
+      port: {{ $ports.amqps.port }}
+      targetPort: 5672
+      {{ if or (eq $svcType "NodePort") (eq $svcType "LoadBalancer") }}
+      nodePort: {{ $ports.amqps.nodePort }}
+      {{ end }}
+    - name: dashboard
+      port: 15672
+      targetPort: 15672
   selector:
     app: rabbitmq
 status:
@@ -35,6 +44,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   labels:
+{{ include "fogcloud.labels" . | indent 4 }}   
     app: rabbitmq
   name: rabbitmq
   namespace: {{ .Values.namespace }}

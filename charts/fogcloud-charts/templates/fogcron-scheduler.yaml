@@ -3,7 +3,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    dep: fogcron-scheduler
+{{ include "fogcloud.labels" . | indent 4 }}  
+    component: fogcron-scheduler
   name: fogcron-scheduler
   namespace: {{ .Values.namespace }}
 spec:

@@ -5,6 +5,7 @@ metadata:
   annotations:
   labels:
     srv: fogcloud
+{{ include "fogcloud.labels" . | indent 4 }}
   name: fogcloud
   namespace: {{ .Values.namespace }}
 spec:
@@ -26,8 +27,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    dep: fogcloud
-  name: fogcloud
+    component: core
+{{ include "fogcloud.labels" . | indent 4 }}
+  name: fogcloud-core
   namespace: {{ .Values.namespace }}
 spec:
   replicas: {{ .Values.fogcloud.replicas }}
@@ -57,7 +59,7 @@ spec:
             - {{ .Values.environment }}
           image: {{ .Values.fogcloud.image }}:{{ .Values.fogcloud.imageTag }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
-          name: fogcloud
+          name: fogcloud-core
           {{- if .Values.fogcloud.resources }}
           resources:
 {{ toYaml .Values.fogcloud.resources | indent 12 }}

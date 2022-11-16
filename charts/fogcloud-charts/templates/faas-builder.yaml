@@ -4,6 +4,7 @@ kind: Service
 metadata:
   labels:
     srv: faasbuilder
+{{ include "fogcloud.labels" . | indent 4 }}    
   name: faasbuilder
   namespace: {{ .Values.namespace }}
 spec:
@@ -22,7 +23,8 @@ kind: Deployment
 metadata:
   annotations:
   labels:
-    dep: faasbuilder
+    component: faasbuilder
+{{ include "fogcloud.labels" . | indent 4 }}    
   name: faasbuilder
   namespace: {{ .Values.namespace }}
 spec:

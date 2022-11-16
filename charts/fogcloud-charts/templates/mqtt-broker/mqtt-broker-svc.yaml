@@ -1,18 +1,20 @@
 {{ if .Values.mqttBroker.enabled }}
+{{ $svcType := .Values.mqttBroker.service.type }}
 {{ $mqttPorts := .Values.mqttBroker.service.ports }}
 --- 
 apiVersion: v1
 kind: Service
 metadata:
   labels:
+{{ include "fogcloud.labels" . | indent 4 }}   
     srv: mqtt-broker
   name: mqtt-broker
   namespace: {{ .Values.namespace }}
 spec:
-  type: {{ .Values.mqttBroker.service.type }}
-  {{ if or (eq .Values.mqttBroker.service.type "NodePort") (eq .Values.mqttBroker.service.type "LoadBalancer") }}
+  type: {{ $svcType }}
+  {{ if or (eq $svcType "NodePort") (eq $svcType "LoadBalancer") }}
   externalTrafficPolicy: {{ .Values.mqttBroker.service.externalTrafficPolicy }}
-    {{ if and (eq .Values.mqttBroker.service.externalTrafficPolicy "Local") (eq .Values.mqttBroker.service.type "LoadBalancer") }}
+    {{ if and (eq .Values.mqttBroker.service.externalTrafficPolicy "Local") (eq $svcType "LoadBalancer") }}
   healthCheckNodePort: {{ .Values.mqttBroker.service.healthCheckNodePort }}
     {{ end }}
   {{ end }}
@@ -20,37 +22,37 @@ spec:
     - name: mqtt-tcp
       port: {{ $mqttPorts.mqttTcp.port }}
       targetPort: 1883
-      {{ if eq .Values.mqttBroker.service.type "NodePort" }}
+      {{ if or (eq $svcType "NodePort") (eq $svcType "LoadBalancer") }}
       nodePort: {{ $mqttPorts.mqttTcp.nodePort }}
       {{ end }}
     - name: mqtt-tcp-tls
       port: {{ $mqttPorts.mqttTcpTls.port }}
       targetPort: 8883
-      {{ if eq .Values.mqttBroker.service.type "NodePort" }}
+      {{ if or (eq $svcType "NodePort") (eq $svcType "LoadBalancer") }}
       nodePort: {{ $mqttPorts.mqttTcpTls.nodePort }}
       {{ end }}      
     - name: http-api
       port: {{ $mqttPorts.httpApi.port }}
       targetPort: 8081
-      {{ if eq .Values.mqttBroker.service.type "NodePort" }}
+      {{ if or (eq $svcType "NodePort") (eq $svcType "LoadBalancer") }}
       nodePort: {{ $mqttPorts.httpApi.nodePort }}
       {{ end }}    
     - name: mqtt-ws
       port: {{ $mqttPorts.mqttWs.port }}
       targetPort: 8083
-      {{ if eq .Values.mqttBroker.service.type "NodePort" }}
+      {{ if or (eq $svcType "NodePort") (eq $svcType "LoadBalancer") }}
       nodePort: {{ $mqttPorts.mqttWs.nodePort }}
       {{ end }}    
     - name: mqtt-wss
       port: {{ $mqttPorts.mqttWss.port }}
       targetPort: 8084
-      {{ if eq .Values.mqttBroker.service.type "NodePort" }}
+      {{ if or (eq $svcType "NodePort") (eq $svcType "LoadBalancer") }}
       nodePort: {{ $mqttPorts.mqttWss.nodePort }}
       {{ end }}    
     - name: admin
       port: {{ $mqttPorts.admin.port }}
       targetPort: 18083
-      {{ if eq .Values.mqttBroker.service.type "NodePort" }}
+      {{ if or (eq $svcType "NodePort") (eq $svcType "LoadBalancer") }}
       nodePort: {{ $mqttPorts.admin.nodePort }}
       {{ end }}  
   selector:

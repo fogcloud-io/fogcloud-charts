@@ -44,6 +44,7 @@ metadata:
   name: mqtt-broker
   namespace: {{ .Values.namespace }}
   labels:
+{{ include "fogcloud.labels" . | indent 4 }}   
     app: mqtt-broker
 spec:
   serviceName: mqtt-broker

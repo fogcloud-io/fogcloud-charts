@@ -50,18 +50,18 @@ expose:
     externalTrafficPolicy: Local
     ports:
       webAdmin:
-        httpPort: 8888
-      api:
         httpPort: 8000
+      api:
+        httpPort: 8001
 
   LoadBalancer:
     externalTrafficPolicy: Local
     healthCheckNodePort: 4000
     ports:
       webAdmin:
-        httpPort: 8888
+        httpPort: 8000
       api:
-        httpPort: 8000  
+        httpPort: 8001  
         
 secret:
   # 配置私有镜像仓库    
@@ -222,17 +222,12 @@ rabbitmq:
     healthCheckNodePort: 30001
     type: ClusterIP
     ports:
-      - name: "amqp"
+      amqp:
         port: 5672
-        targetPort: 5672
         nodePort: 5672
-      - name: "amqp-tls"
+      amqps:
         port: 5671
-        targetPort: 5671
         nodePort: 5671
-      - name: "dasboard"
-        port: 15672
-        targetPort: 15672
 
 postgres:
   enabled: true

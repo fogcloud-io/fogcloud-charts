@@ -70,19 +70,22 @@ helm uninstall [RELEASE_NAME]
 | `fissionEnabled` | 是否启用了云函数功能 | `false` |
 | **expose** | | | 
 | `expose.type` | 如何暴露服务：`Ingress`、`ClusterIP`、`NodePort`或`LoadBalancer`，其他值将被忽略，服务的创建将被跳过。| `ClusterIP` |
-| `expose.hosts.webAdmin` | web服务域名，使用ingress暴露服务时会用到 | `localhost` |
-| `expose.hosts.api` | api服务域名，使用ingress暴露服务时会用到 | `localhost` | 
-| `expose.hosts.mqtt` | mqtt服务域名 | `localhost` | 
-| `expose.hosts.amqp` | amqp服务域名 | `localhost` | 
+| `expose.insecureOSS` | 不安全的oss下载 | `true` | 
+| `expose.hosts.api` | api服务域名，用于前端服务访问后端api | `localhost` | 
+| `expose.hosts.mqtt` | mqtt服务域名，用于前端服务访问mqtt-websocket服务 | `localhost` | 
 | `expose.tls.enabled` | 是否启用ingress tls | `false` |
 | `expose.tls.cert.api.certSource` | api服务证书的来源：`file`, `auto`或`none`；1）`file`：使用证书文件，直接将*.key和*.crt文件放入fogcloud-charts/config/cert/api目录下；2）`auto`：使用cert-manager生成免费证书，需要保证设置的域名可用；3）`none`：不为服务入口配置证书 | `none` |
 | `expose.tls.cert.api.secretName` | api服务所用证书对应的k8s secret资源名 | `fogcloud-api` |
+| `expose.tls.cert.api.dnsName` | 当`expose.tls.cert.api.certSource`=`auto`时，用于cert-manage生成x509证书 | `fogcloud-api` |
 | `expose.tls.cert.webAdmin.certSource` | web服务证书的来源：`file`, `auto`或`none`；1）`file`：使用证书文件，直接将*.key和*.crt文件放入fogcloud-charts/config/cert/api目录下；2）`auto`：使用cert-manager生成免费证书，需要保证设置的域名可用；3）`none`：不为服务入口配置证书 | `none` |
 | `expose.tls.cert.webAdmin.secretName` | web服务所用证书对应的k8s secret资源名 | `fogcloud-web` |
+| `expose.tls.cert.webAdmin.dnsName` | 当`expose.tls.cert.webAdmin.certSource`=`auto`时，用于cert-manage生成x509证书 | `fogcloud-api` |
 | `expose.Ingress` | `expose.type`设置为Ingress时才需要设置 | |
 | `expose.Ingress.className` | ingress class资源名| `traefik` |
 | `expose.Ingress.controller` | ingress controller类型 | `traefik.io/ingress-controller` |
 | `expose.Ingress.annotations` | ingress注释，可以用来设置ingress部分参数 | `{}` |
+| `expose.Ingress.hosts.webAdmin` | web服务域名，用于ingress路由 | `localhost` |
+| `expose.Ingress.hosts.api` | api服务域名，用于ingress路由 | `localhost` |
 | `expose.NodePort` |  |  |
 | `expose.NodePort.externalTrafficPolicy` | 流量策略：`Cluster`或`Local`；1）`Cluster`：流量可以转发到其他k8s节点的pod，2）`Local`：流量只转发给本机的pod| `Local` | 
 | `expose.NodePort.ports.webAdmin.httpPort` | web服务的NodePort端口，可用于外网暴露web服务 | `8888` |

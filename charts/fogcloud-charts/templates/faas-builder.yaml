@@ -69,7 +69,7 @@ spec:
             - mountPath: /etc/faasbuilder/faasbuilder.yaml
               subPath: faasbuilder.yaml
               name: fogcloud-claim
-            {{ if .Values.faasbuilder.createDockerconfigWithFile }}  
+            {{ if .Values.faasbuilder.createKubeconfigWithFile }}  
             - mountPath: /etc/faasbuilder/kubeconfig
               subPath: kubeconfig
               name: fogcloud-claim
@@ -86,7 +86,7 @@ spec:
             items:
               - key: faasbuilder.yaml
                 path: faasbuilder.yaml
-              {{ if .Values.faasbuilder.createDockerconfigWithFile }}  
+              {{ if .Values.faasbuilder.createKubeconfigWithFile }}  
               - key: kubeconfig
                 path: kubeconfig
               {{ end }}           

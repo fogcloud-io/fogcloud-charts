@@ -2,7 +2,7 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-namespace: fogcloud-dev
+namespace: fogcloud
 # 配置文件环境：development,test,production
 environment: production
 
@@ -16,16 +16,13 @@ fissionEnabled: false
 # 若要公开服务，请使用LoadBalancer,Ingress,NodePort三种类型
 expose:
   type: Ingress
+  insecureOSS: true  
   # 各个服务的域名，若启用对应服务的tls，请保证域名是外网可以访问的；
   hosts:
-    # web管理后台域名
-    webAdmin: localhost
     # 后端api服务域名
     api: localhost
     # mqtt服务域名
     mqtt: localhost
-    # amqp服务域名
-    amqp: localhost
   
   tls:
     enabled: false
@@ -36,15 +33,22 @@ expose:
         # none: 不创建
         # auto: 使用cert-manager自动生成
         certSource: none
-        secretName: web-cert    
+        secretName: web-cert
+        dnsName:
       api:
         certSource: none
         secretName: api-cert
+        dnsName: 
 
   Ingress:
     className: traefik
     controller: traefik.io/ingress-controller
     annotations: {}
+    hosts:
+      # web管理后台域名
+      webAdmin: localhost
+      # 后端api服务域名
+      api: localhost    
 
   NodePort:
     externalTrafficPolicy: Local
@@ -122,7 +126,7 @@ fogcloudWeb:
 faasbuilder:
   image: ghcr.io/fogcloud-io/faas-builder
   imageTag: latest
-  createDockerconfigWithFile: false
+  createKubeconfigWithFile: false
   replicas: 1
   resources:
     # limits:

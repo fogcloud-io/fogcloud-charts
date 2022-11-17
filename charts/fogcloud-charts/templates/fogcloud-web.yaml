@@ -110,8 +110,8 @@ spec:
       volumes:
         - name: nginx-claim
           configMap:
-            name: fog-config
+            name: nginx-web-config
             items:
-              - key: default_web.conf
+              - key: default.conf
                 path: default.conf
 status: {}

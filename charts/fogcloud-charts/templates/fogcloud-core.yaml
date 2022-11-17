@@ -67,6 +67,13 @@ spec:
           ports:
             - containerPort: 4000
             - containerPort: 15000
+          env:
+            - name: FOG_ENABLE__TLS
+              value: "{{ .Values.expose.tls.enabled }}"
+            {{ range $fields := .Values.fogcloud.envVars }}
+            - name: {{ $fields.name }}
+              value: "{{ $fields.value }}"
+            {{ end }}    
           volumeMounts:
             - mountPath: /etc/fogcloud/fogcloud.yaml
               subPath: fogcloud.yaml

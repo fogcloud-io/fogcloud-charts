@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-web-config
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: fogcloud
+data:
+  default.conf: |+
+    server {
+        listen 8000;
+        server_name localhost;
+
+        location / {
+            root   /app/www/fogcloud_web;
+            index  index.html index.htm;
+            try_files $uri $uri/index.html $uri.html=404;
+        }
+
+        {{ if .Values.expose.tls.enabled }}
+        location /api/ {
+          proxy_pass https://{{ .Values.expose.hosts.api }}/api/;
+        }
+        {{ else }}
+        location /api/ {
+          proxy_pass http://{{ .Values.expose.hosts.api }}/api/;
+        }         
+        {{ end }}
+    }

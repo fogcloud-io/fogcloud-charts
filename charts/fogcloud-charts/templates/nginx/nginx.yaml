@@ -97,7 +97,7 @@ spec:
                 path: nginx.conf  
         - name: default-claim
           configMap:
-            name: nginx-config
+            name: nginx-api-config
             items:
               - key: default.conf
                 path: default.conf              

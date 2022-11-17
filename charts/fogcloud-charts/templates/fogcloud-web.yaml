@@ -78,18 +78,18 @@ spec:
               value: "https://{{ .Values.expose.hosts.api }}/api/v1"
             - name: MQTT_BASE_URL
               {{ if .Values.mqttBroker.enabled }}
-              value: "wss://{{ .Values.expose.hosts.api }}:{{ .Values.mqttBroker.service.ports.mqttWss.nodePort }}/mqtt"
+              value: "wss://{{ .Values.expose.hosts.mqtt }}:{{ .Values.mqttBroker.service.ports.mqttWss.nodePort }}/mqtt"
               {{ else }}
-              value: "wss://{{ .Values.expose.hosts.api }}:8084/mqtt"
+              value: "wss://{{ .Values.expose.hosts.mqtt }}:8084/mqtt"
               {{ end }}
             {{ else }}
             - name: API_BASE_URL
               value: "http://{{ .Values.expose.hosts.api }}/api/v1"
             - name: MQTT_BASE_URL
               {{ if .Values.mqttBroker.enabled }}
-              value: "wss://{{ .Values.expose.hosts.api }}:{{ .Values.mqttBroker.service.ports.mqttWs.nodePort }}/mqtt"
+              value: "ws://{{ .Values.expose.hosts.mqtt }}:{{ .Values.mqttBroker.service.ports.mqttWs.nodePort }}/mqtt"
               {{ else }}
-              value: "wss://{{ .Values.expose.hosts.api }}:8083/mqtt"
+              value: "ws://{{ .Values.expose.hosts.mqtt }}:8083/mqtt"
               {{ end }}        
             {{ end }}
           {{- if .Values.fogcloudWeb.resources }}

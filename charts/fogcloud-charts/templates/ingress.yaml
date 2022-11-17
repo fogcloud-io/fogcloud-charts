@@ -13,15 +13,15 @@ spec:
   {{ if .Values.expose.tls.enabled }}
   tls:
     - hosts:
-        - "{{ .Values.expose.hosts.webAdmin }}"
+        - "{{ .Values.expose.Ingress.hosts.webAdmin }}"
       secretName: {{ .Values.expose.tls.cert.webAdmin.secretName }}
     - hosts:
-        - "{{ .Values.expose.hosts.api }}"
+        - "{{ .Values.expose.Ingress.hosts.api }}"
       secretName: {{ .Values.expose.tls.cert.api.secretName }}
   {{ end }}    
   ingressClassName: {{ .Values.expose.Ingress.className }} #import !!!
   rules:
-    - host: {{ .Values.expose.hosts.webAdmin }}
+    - host: {{ .Values.expose.Ingress.hosts.webAdmin }}
       http:
         paths:
           - path: /
@@ -30,36 +30,15 @@ spec:
               service:
                 name: fogcloud-web
                 port:
-                  number: 4002
-          - path: /api/v1/oss/
-            pathType: Prefix
-            backend:
-              service:
-                name: nginx
-                port:
-                  number: 80 
-          - path: /faas/functions/
-            pathType: Prefix
-            backend:
-              service:
-                name: nginx
-                port:
-                  number: 80                
-    - host: {{ .Values.expose.hosts.api }}
+                  number: 4002              
+    - host: {{ .Values.expose.Ingress.hosts.api }}
       http:
         paths:
-          - path: /api/
+          - path: /
             pathType: Prefix
             backend:
               service:
                 name: nginx
                 port:
-                  number: 80     
-          - path: /openapi/
-            pathType: Prefix
-            backend:
-              service:
-                name: nginx
-                port:
-                  number: 80                                  
+                  number: 80                                   
 {{ end }}                  

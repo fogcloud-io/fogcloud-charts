@@ -73,24 +73,16 @@ spec:
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           name: fogcloud-web
           env:
-            {{ if .Values.expose.tls.enabled }}
+            {{ if .Values.expose.tls.enabled }} 
             - name: API_BASE_URL
               value: "https://{{ .Values.expose.hosts.api }}/api/v1"
             - name: MQTT_BASE_URL
-              {{ if .Values.mqttBroker.enabled }}
-              value: "wss://{{ .Values.expose.hosts.mqtt }}:{{ .Values.mqttBroker.service.ports.mqttWss.nodePort }}/mqtt"
-              {{ else }}
-              value: "wss://{{ .Values.expose.hosts.mqtt }}:8084/mqtt"
-              {{ end }}
+              value: "wss://{{ .Values.expose.hosts.mqtt }}/mqtt"                
             {{ else }}
             - name: API_BASE_URL
               value: "http://{{ .Values.expose.hosts.api }}/api/v1"
             - name: MQTT_BASE_URL
-              {{ if .Values.mqttBroker.enabled }}
-              value: "ws://{{ .Values.expose.hosts.mqtt }}:{{ .Values.mqttBroker.service.ports.mqttWs.nodePort }}/mqtt"
-              {{ else }}
-              value: "ws://{{ .Values.expose.hosts.mqtt }}:8083/mqtt"
-              {{ end }}        
+              value: "ws://{{ .Values.expose.hosts.mqtt }}/mqtt"          
             {{ end }}
           {{- if .Values.fogcloudWeb.resources }}
           resources:

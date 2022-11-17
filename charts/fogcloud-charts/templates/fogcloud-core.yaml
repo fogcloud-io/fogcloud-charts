@@ -68,7 +68,7 @@ spec:
             - containerPort: 4000
             - containerPort: 15000
           env:
-            - name: FOG_ENABLE__TLS
+            - name: FOG_ENABLE_TLS
               value: "{{ .Values.expose.tls.enabled }}"
             {{ range $fields := .Values.fogcloud.envVars }}
             - name: {{ $fields.name }}

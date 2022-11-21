@@ -3,7 +3,7 @@ apiVersion: networking.k8s.io/v1
 kind: IngressClass
 metadata:
   name: {{ .Values.expose.Ingress.className }}
-  namespace: {{ .Values.namespace }}
+  
 spec:
   controller: {{ .Values.expose.Ingress.controller }}
 {{ end }}

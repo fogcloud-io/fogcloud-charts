@@ -6,7 +6,7 @@ metadata:
     srv: faasbuilder
 {{ include "fogcloud.labels" . | indent 4 }}    
   name: faasbuilder
-  namespace: {{ .Values.namespace }}
+  
 spec:
   ports:
     - name: "api"
@@ -26,7 +26,7 @@ metadata:
     component: faasbuilder
 {{ include "fogcloud.labels" . | indent 4 }}    
   name: faasbuilder
-  namespace: {{ .Values.namespace }}
+  
 spec:
   replicas: {{ .Values.faasbuilder.replicas }}
   selector:

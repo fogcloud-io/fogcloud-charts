@@ -1,6 +1,6 @@
-{{ if .Values.rabbitmq.enabled }}
-{{ $svcType := .Values.rabbitmq.service.type }}
-{{ $ports := .Values.rabbitmq.service.ports }}
+{{ if eq .Values.rabbitmq.type "internal" }}
+{{ $svcType := .Values.rabbitmq.internal.service.type }}
+{{ $ports := .Values.rabbitmq.internal.service.ports }}
 # rabbitmq-service
 apiVersion: v1
 kind: Service
@@ -9,13 +9,13 @@ metadata:
 {{ include "fogcloud.labels" . | indent 4 }}   
     srv: rabbitmq
   name: rabbitmq
-  namespace: {{ .Values.namespace }}
+  
 spec:
-  type: {{ .Values.rabbitmq.service.type }}
-  {{ if or (eq .Values.rabbitmq.service.type "NodePort") (eq .Values.rabbitmq.service.type "LoadBalancer") }}
-  externalTrafficPolicy: {{ .Values.rabbitmq.service.externalTrafficPolicy }}
-    {{ if and (eq .Values.rabbitmq.service.externalTrafficPolicy "Local") (eq .Values.rabbitmq.service.type "LoadBalancer") }}
-  healthCheckNodePort: {{ .Values.rabbitmq.service.healthCheckNodePort }}
+  type: {{ .Values.rabbitmq.internal.service.type }}
+  {{ if or (eq .Values.rabbitmq.internal.service.type "NodePort") (eq .Values.rabbitmq.internal.service.type "LoadBalancer") }}
+  externalTrafficPolicy: {{ .Values.rabbitmq.internal.service.externalTrafficPolicy }}
+    {{ if and (eq .Values.rabbitmq.internal.service.externalTrafficPolicy "Local") (eq .Values.rabbitmq.internal.service.type "LoadBalancer") }}
+  healthCheckNodePort: {{ .Values.rabbitmq.internal.service.healthCheckNodePort }}
     {{ end }}
   {{ end }}
   ports:
@@ -47,27 +47,29 @@ metadata:
 {{ include "fogcloud.labels" . | indent 4 }}   
     app: rabbitmq
   name: rabbitmq
-  namespace: {{ .Values.namespace }}
+  
 spec:
   containers:
     - env:
-        {{ if .Values.rabbitmq.tls.enabled }}
+        {{ if .Values.rabbitmq.internal.tls.enabled }}
         - name: RABBITMQ_CONFIG_FILE
           value: /etc/rabbitmq/rabbitmq.tls.conf
         {{ else }}
         - name: RABBITMQ_CONFIG_FILE
           value: /etc/rabbitmq/rabbitmq.conf       
         {{ end }}  
-      image: {{ .Values.rabbitmq.image }}:{{ .Values.rabbitmq.imageTag }}
+      image: {{ .Values.rabbitmq.internal.image }}:{{ .Values.rabbitmq.internal.imageTag }}
       name: rabbitmq
       ports:
         - containerPort: 15672
         - containerPort: 5672
-      {{- if .Values.rabbitmq.resources }}
+      {{- if .Values.rabbitmq.internal.resources }}
       resources:
-{{ toYaml .Values.rabbitmq.resources | indent 8 }}
+{{ toYaml .Values.rabbitmq.internal.resources | indent 8 }}
       {{- end }}
       volumeMounts:
+        - mountPath: /var/lib/rabbitmq
+          name: rabbitmq-data
         - mountPath: /etc/rabbitmq/rabbitmq.conf
           subPath: rabbitmq.conf
           name: rabbitmq-claim
@@ -77,7 +79,7 @@ spec:
         - mountPath: /etc/rabbitmq/enabled_plugins
           subPath: enabled_plugins
           name: rabbitmq-claim
-        {{ if .Values.rabbitmq.tls.enabled }}  
+        {{ if .Values.rabbitmq.internal.tls.enabled }}  
         - mountPath: /etc/rabbitmq/tls.crt
           subPath: tls.crt
           name: rabbitmq-secret
@@ -98,15 +100,18 @@ spec:
             path: rabbitmq.tls.conf  
           - key: enabled_plugins
             path: enabled_plugins
-    {{ if .Values.rabbitmq.tls.enabled }}        
+    {{ if .Values.rabbitmq.internal.tls.enabled }}        
     - name: rabbitmq-secret
       secret:
-        secretName: {{ .Values.rabbitmq.tls.secretName }}
+        secretName: {{ .Values.rabbitmq.internal.tls.secretName }}
         items:
           - key: tls.crt
             path: tls.crt
           - key: tls.key
             path: tls.key 
-    {{ end }}                   
+    {{ end }}    
+    - name: rabbitmq-data
+      persistentVolumeClaim:
+        claimName: {{ .Values.rabbitmq.internal.persistence.pvc }}               
 status: {}
 {{ end }}

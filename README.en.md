@@ -24,46 +24,23 @@ helm pull fogcloud-charts/fogcloud-charts --untar
 2. edit myvalues.yaml
 3. install fogcloud-charts
 ```console
-kubectl create namespace fogcloud
-helm install -f myvalues.yaml fogcloud ./fogcloud-charts
+helm install -f myvalues.yaml ${RELEASE_NAME} -n ${NAMESPACE_NAME} ./fogcloud-charts
 ```
 4. upgrade fogcloud-charts
 ```console
-helm upgrade -f myvalues.yaml {RELEASE_NAME} ./fogcloud-charts
+helm upgrade -f myvalues.yaml ${RELEASE_NAME} -n ${NAMESPACE_NAME} ./fogcloud-charts 
 ```
-
-| value object | type | state |
-| --- | --- | --- |
-| k8sApiServer | string | k8s server api地址，用来创建k8s StatefulSet资源；可以通过```kubectl config view```获取 |
-| fogcloudWeb.apiURL | string | 设置前端服务访问的后端api域名 |
-| fogcloudWeb.mqttURL | string | 设置前端服务访问的后端mqtt服务域名 |
-| ingress.hosts.webAdmin | string | 设置管理后台域名，使用ingress发布前端服务时会用到 |
-| ingress.hosts.api | string | 设置后端api服务域名，使用ingress发布后端服务时会用到 |
-| ingress.tls.enabled | bool | 是否启用ingress tls |
-| ingress.tls.webAdmin.createWithCertFile | bool | 是否使用证书文件创建管理后台web服务的sercret对象；若为true，可将*.crt（证书）, *.key（密钥）文件放到fogcloud-charts/configs/cert/webAdmin目录下 |
-| mqttBroker.enabled | bool | 是否使用k8s创建mqtt broker |
-| mqttBroker.tls.enabled | bool | mqtt应用是否启用tls |
-| mqttBroker.tls.createWithCertFile | bool | 是否使用证书文件创建mqtt应用的sercret对象，启用mqttBroker.tls时有效；若为true，可将*.crt（证书）, *.key（密钥）文件放到fogcloud-charts/configs/cert/mqtt目录下 | 
-| rabbitmq.enabled | bool | 是否使用k8s创建rabbitmq |
-| rabbitmq.tls.enabled | bool | rabbitmq是否启用tls |
-| rabbitmq.tls.createWithCertFile | bool | 是否使用证书文件创建rabbitmq的sercret对象，启用rabbitmq.tls时有效；若为true，可将*.crt（证书）, *.key（密钥）文件放到fogcloud-charts/configs/cert/amqp目录下 | 
-| postgres.enabled | bool | 是否使用k8s创建postgresql应用（生产环境建议单独部署数据库应用） |
-| mongodb.enabled | bool | 是否使用k8s创建mongodb应用 |
-| redis.enabled | bool | 是否使用k8s创建redis应用 |
-| etcd.enabled | bool | 是否使用k8s创建etcd |
-| minio.enabled | bool | 是否使用k8s创建minio |
 
 ## Uninstall Chart
 
 ```console
-helm uninstall [RELEASE_NAME]
+helm uninstall ${RELEASE_NAME} -n ${NAMESPACE_NAME}
 ```
 
 ## Configuration
 
 | Parameter | Description | Default |
 | --- | --- | --- |
-| `namespace` | 应用所在命名空间 | `fogcloud` |
 | `environment` | 配置文件的环境 | `production` |
 | `imagePullPolicy` | 镜像拉取策略 | `Always` | 
 | `k8sApiServer` | k8s server api地址，用来创建k8s StatefulSet资源；可以通过`kubectl config view`获取 | `https://localhost:6443` |
@@ -112,11 +89,11 @@ helm uninstall [RELEASE_NAME]
 | **faasbuilder** | | |
 | `faasbuilder.createDockerconfigWithFile` | 使用文件创建dockerconfig对象 | `false` |
 | **mqttBroker** | | |
-| `mqttBroker.enabled` | 是否使用k8s创建mqtt broker | `true` |
-| `mqttBroker.nodeSelector.enabled` | 是否启用pod节点选择 | `false` |
-| `mqttBroker.nodeSelector.key` | k8s节点名 | |   
-| `mqttBroker.tls.enabled` | mqtt应用是否启用tls  | |
-| `mqttBroker.tls.createWithCertFile` | 是否使用证书文件创建mqtt应用的sercret对象，启用mqttBroker.tls时有效；若为true，可将*.crt（证书）, *.key（密钥）文件放到fogcloud-charts/configs/cert/mqtt目录下 |  | 
+| `mqttBroker.internal.enabled` | 是否使用k8s创建mqtt broker | `true` |
+| `mqttBroker.internal.nodeSelector.enabled` | 是否启用pod节点选择 | `false` |
+| `mqttBroker.internal.nodeSelector.key` | k8s节点名 | |   
+| `mqttBroker.internal.tls.enabled` | mqtt应用是否启用tls  | |
+| `mqttBroker.internal.tls.createWithCertFile` | 是否使用证书文件创建mqtt应用的sercret对象，启用mqttBroker.internal.tls时有效；若为true，可将*.crt（证书）, *.key（密钥）文件放到fogcloud-charts/configs/cert/mqtt目录下 |  | 
 | **rabbitmq** | | |
 | `rabbitmq.enabled `| 是否使用k8s创建rabbitmq |  |
 | `rabbitmq.tls.enabled` | rabbitmq是否启用tls |  |

@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: nginx-web-config
-  namespace: {{ .Values.namespace }}
+  
   labels:
     app: fogcloud
 data:

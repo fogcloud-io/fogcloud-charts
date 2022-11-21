@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: fog-config
-  namespace: {{ .Values.namespace }}
+  
 data:
   {{ range $path, $bytes := .Files.Glob "configs/fogcloud-core/*" }}
   fogcloud.yaml: |-
@@ -24,7 +24,7 @@ data:
     {{ $bytes | toString | nindent 4 }}
   {{ end }}
 
-  {{ if .Values.mqttBroker.enabled }}
+  {{ if eq .Values.mqttBroker.type "internal" }}
   {{ range $path, $bytes := .Files.Glob "configs/emq/*" }}
   {{ $path | base }}: |-
     {{ $bytes | toString | nindent 4 }}
@@ -41,7 +41,7 @@ data:
     {{ $bytes | toString | nindent 4 }}
   {{ end }}
   
-  {{ if .Values.rabbitmq.enabled }}
+  {{ if eq .Values.rabbitmq.type "internal" }}
   {{ range $path, $bytes := .Files.Glob "configs/rabbitmq/*" }}
   {{ $path | base }}: |-
     {{ $bytes | toString | nindent 4 }}

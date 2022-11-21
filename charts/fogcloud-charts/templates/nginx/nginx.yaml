@@ -1,3 +1,4 @@
+{{ $app := .Values.nginx }}
 # nginx-service
 apiVersion: v1
 kind: Service
@@ -6,7 +7,7 @@ metadata:
 {{ include "fogcloud.labels" . | indent 4 }}   
     srv: nginx
   name: nginx
-  namespace: {{ .Values.namespace }}
+  
 spec:
   {{ if eq .Values.expose.type "Ingress" }}
   type: ClusterIP
@@ -50,7 +51,7 @@ metadata:
 {{ include "fogcloud.labels" . | indent 4 }}   
     app: nginx
   name: nginx
-  namespace: {{ .Values.namespace }}
+  
 spec:
   replicas: {{ .Values.nginx.replicas }}
   selector:

@@ -6,7 +6,7 @@ metadata:
 {{ include "fogcloud.labels" . | indent 4 }}  
     srv: fogcloud-web
   name: fogcloud-web
-  namespace: {{ .Values.namespace }}
+  
 spec:
   {{ if eq .Values.expose.type "Ingress" }}
   type: ClusterIP
@@ -50,7 +50,7 @@ metadata:
 {{ include "fogcloud.labels" . | indent 4 }}  
     component: fogcloud-web
   name: fogcloud-web
-  namespace: {{ .Values.namespace }}
+  
 spec:
   replicas: {{ .Values.fogcloudWeb.replicas }}
   selector:

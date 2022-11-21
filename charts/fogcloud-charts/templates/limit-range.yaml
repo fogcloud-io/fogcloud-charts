@@ -3,7 +3,7 @@ apiVersion: v1
 kind: LimitRange
 metadata:
   name: fog-limit-range
-  namespace: {{ .Values.namespace }}
+  
 spec:
   limits:
   {{- range $_, $limit := .Values.resourceRangeLimit.limits }}

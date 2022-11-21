@@ -1,22 +1,6 @@
-{{ if .Values.minio.enabled }}
-# apiVersion: v1
-# kind: PersistentVolume
-# metadata:
-#   name: minio-pv
-# spec:
-#   capacity:
-#     storage: 10Gi
-#   hostPath:
-#     path: /var/lib/rancher/k3s/storage/fogcloud-dev/minio-pv
-#   volumeMode: Filesystem
-#   accessModes:
-#     - ReadWriteOnce
-#   persistentVolumeReclaimPolicy: Retain
-#   storageClassName: ""
-#   claimRef:
-#     name: minio-pvc
-#     namespace: {{ .Values.namespace }}
----
+{{ if eq .Values.minio.type "internal" }}
+{{ $persistence := .Values.minio.internal.persistence }}
+{{ if not $persistence.existed }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -24,15 +8,16 @@ metadata:
     "helm.sh/resource-policy": keep
   labels:
     pvc: minio-data
-  name: minio-pvc
-  namespace: {{ .Values.namespace }}
+  name: {{ $persistence.pvc }}
+  
 spec:
-  storageClassName: {{ .Values.storageClassName }}
+  storageClassName: {{ $persistence.storageClassName }}
   # volumeName: minio-pv
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 10Gi
+      storage: "{{ $persistence.storage }}"
 status: {}
+{{ end }}
 {{ end }}

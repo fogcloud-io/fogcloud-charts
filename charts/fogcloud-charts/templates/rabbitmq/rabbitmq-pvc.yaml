@@ -1,5 +1,5 @@
-{{ if eq .Values.mongodb.type "internal" }}
-{{ $persistence := .Values.mongodb.internal.persistence }}
+{{ if eq .Values.rabbitmq.type "internal" }}
+{{ $persistence := .Values.rabbitmq.internal.persistence }}
 {{ if not $persistence.existed }}
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -7,12 +7,11 @@ metadata:
   annotations:
     "helm.sh/resource-policy": keep
   labels:
-    pvc: mongo-data
-  name: mongo-pvc
+    pvc: rabbitmq-data
+  name: {{ $persistence.pvc }}
   
 spec:
   storageClassName: {{ $persistence.storageClassName }}
-  # volumeName: mongo-pv
   accessModes:
     - ReadWriteOnce
   resources:

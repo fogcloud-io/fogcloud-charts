@@ -8,7 +8,7 @@ metadata:
 {{ include "fogcloud.labels" . | indent 4 }}  
     ing: fogcloud-ingress
   name: fogcloud-ingress
-  namespace: {{ .Values.namespace }}
+  
 spec:
   {{ if .Values.expose.tls.enabled }}
   tls:
@@ -30,15 +30,25 @@ spec:
               service:
                 name: fogcloud-web
                 port:
-                  number: 4002              
+                  number: 80              
     - host: {{ .Values.expose.Ingress.hosts.api }}
       http:
         paths:
-          - path: /
+          - path: /api
             pathType: Prefix
             backend:
               service:
                 name: nginx
                 port:
-                  number: 80                                   
+                  number: 80    
+    - host: {{ .Values.expose.Ingress.hosts.api }}
+      http:
+        paths:
+          - path: /openapi
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx
+                port:
+                  number: 80                                                    
 {{ end }}                  

@@ -1,8 +1,11 @@
+{{ $autoWeb := eq .Values.expose.tls.cert.webAdmin.certSource "auto" }}
+{{ $autoApi := eq .Values.expose.tls.cert.api.certSource "auto" }}
+{{ if or $autoWeb $autoApi }}
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: issuer-fog
-  namespace: {{ .Values.namespace }}
+  
 spec:
   acme:
     server: https://acme-v02.api.letsencrypt.org/directory
@@ -14,3 +17,4 @@ spec:
         http01:
           ingress:
             class: {{ .Values.expose.Ingress.className }}
+{{ end }}            

@@ -1,4 +1,6 @@
-{{ if .Values.etcd.enabled }}
+{{ if eq .Values.etcd.type "internal" }}
+{{ $persistence := .Values.etcd.internal.persistence }}
+{{ if not $persistence.existed }}
 # apiVersion: v1
 # kind: PersistentVolume
 # metadata:
@@ -21,15 +23,16 @@ metadata:
     "helm.sh/resource-policy": keep
   labels:
     pvc: etcd-data
-  name: etcd-pvc
-  namespace: {{ .Values.namespace }}
+  name: {{ $persistence.pvc }}
+  
 spec:
-  storageClassName: {{ .Values.storageClassName }}
+  storageClassName: {{ $persistence.storageClassName }}
   # volumeName: etcd-pv
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi
+      storage: "{{ $persistence.storage }}"
 status: {}
+{{ end }}
 {{ end }}

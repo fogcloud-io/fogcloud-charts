@@ -24,18 +24,17 @@ helm pull fogcloud-charts/fogcloud-charts --untar
 2. 编辑myvalues.yaml文件，参考配置说明
 3. 安装fogcloud-charts
 ```console
-kubectl create namespace {NAMESPACE_NAME}
-helm install -f myvalues.yaml {RELEASE_NAME} --set namespace={NAMESPACE_NAME} ./fogcloud-charts
+helm install -f myvalues.yaml ${RELEASE_NAME} -n ${NAMESPACE_NAME} ./fogcloud-charts
 ```
 4. 升级fogcloud-charts
 ```console
-helm upgrade -f myvalues.yaml {RELEASE_NAME} ./fogcloud-charts
+helm upgrade -f myvalues.yaml ${RELEASE_NAME} -n ${NAMESPACE_NAME} ./fogcloud-charts 
 ```
 
 ## 卸载chart
 
 ```console
-helm uninstall {RELEASE_NAME}
+helm uninstall ${RELEASE_NAME} -n ${NAMESPACE_NAME}
 ```
 注意：默认启用了helm的资源保留，卸载时不会释放persistent volume资源；
 
@@ -43,7 +42,6 @@ helm uninstall {RELEASE_NAME}
 
 | 配置项 | 说明 | 默认值 |
 | --- | --- | --- |
-| `namespace` | 应用所在命名空间 | `fogcloud` |
 | `environment` | 配置文件的环境 | `production` |
 | `imagePullPolicy` | 镜像拉取策略 | `Always` | 
 | `k8sApiServer` | k8s server api地址，用来创建k8s StatefulSet资源；可以通过`kubectl config view`获取 | `https://localhost:6443` |
@@ -92,11 +90,11 @@ helm uninstall {RELEASE_NAME}
 | **faasbuilder** | | |
 | `faasbuilder.createDockerconfigWithFile` | 使用文件创建dockerconfig对象 | `false` |
 | **mqttBroker** | | |
-| `mqttBroker.enabled` | 是否使用k8s创建mqtt broker | `true` |
-| `mqttBroker.nodeSelector.enabled` | 是否启用pod节点选择 | `false` |
-| `mqttBroker.nodeSelector.key` | k8s节点名 | |   
-| `mqttBroker.tls.enabled` | mqtt应用是否启用tls  | |
-| `mqttBroker.tls.createWithCertFile` | 是否使用证书文件创建mqtt应用的sercret对象，启用mqttBroker.tls时有效；若为true，可将*.crt（证书）, *.key（密钥）文件放到fogcloud-charts/configs/cert/mqtt目录下 |  | 
+| `mqttBroker.internal.enabled` | 是否使用k8s创建mqtt broker | `true` |
+| `mqttBroker.internal.nodeSelector.enabled` | 是否启用pod节点选择 | `false` |
+| `mqttBroker.internal.nodeSelector.key` | k8s节点名 | |   
+| `mqttBroker.internal.tls.enabled` | mqtt应用是否启用tls  | |
+| `mqttBroker.internal.tls.createWithCertFile` | 是否使用证书文件创建mqtt应用的sercret对象，启用mqttBroker.internal.tls时有效；若为true，可将*.crt（证书）, *.key（密钥）文件放到fogcloud-charts/configs/cert/mqtt目录下 |  | 
 | **rabbitmq** | | |
 | `rabbitmq.enabled `| 是否使用k8s创建rabbitmq |  |
 | `rabbitmq.tls.enabled` | rabbitmq是否启用tls |  |

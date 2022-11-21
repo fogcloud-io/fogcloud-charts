@@ -6,7 +6,7 @@ metadata:
 {{ include "fogcloud.labels" . | indent 4 }}  
     component: fogcron-scheduler
   name: fogcron-scheduler
-  namespace: {{ .Values.namespace }}
+  
 spec:
   replicas: {{ .Values.fogcronScheduler.replicas }}
   selector:

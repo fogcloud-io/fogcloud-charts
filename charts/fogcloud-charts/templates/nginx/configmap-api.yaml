@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: nginx-api-config
-  namespace: {{ .Values.namespace }}
+  
   labels:
     app: fogcloud
 data:
@@ -27,7 +27,7 @@ data:
         proxy_pass http://fogcloud:4000/openapi/;
       }
 
-      {{- if .Values.fissionEnabled -}}
+      {{ if .Values.fissionEnabled }}
       location /faas/functions/ {
         proxy_pass http://router.fission.svc.cluster.local/;
       }

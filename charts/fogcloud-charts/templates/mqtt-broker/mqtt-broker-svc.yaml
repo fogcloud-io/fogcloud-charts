@@ -1,6 +1,6 @@
-{{ if .Values.mqttBroker.enabled }}
-{{ $svcType := .Values.mqttBroker.service.type }}
-{{ $mqttPorts := .Values.mqttBroker.service.ports }}
+{{ if eq .Values.mqttBroker.type "internal" }}
+{{ $svcType := .Values.mqttBroker.internal.service.type }}
+{{ $mqttPorts := .Values.mqttBroker.internal.service.ports }}
 --- 
 apiVersion: v1
 kind: Service
@@ -9,13 +9,13 @@ metadata:
 {{ include "fogcloud.labels" . | indent 4 }}   
     srv: mqtt-broker
   name: mqtt-broker
-  namespace: {{ .Values.namespace }}
+  
 spec:
   type: {{ $svcType }}
   {{ if or (eq $svcType "NodePort") (eq $svcType "LoadBalancer") }}
-  externalTrafficPolicy: {{ .Values.mqttBroker.service.externalTrafficPolicy }}
-    {{ if and (eq .Values.mqttBroker.service.externalTrafficPolicy "Local") (eq $svcType "LoadBalancer") }}
-  healthCheckNodePort: {{ .Values.mqttBroker.service.healthCheckNodePort }}
+  externalTrafficPolicy: {{ .Values.mqttBroker.internal.service.externalTrafficPolicy }}
+    {{ if and (eq .Values.mqttBroker.internal.service.externalTrafficPolicy "Local") (eq $svcType "LoadBalancer") }}
+  healthCheckNodePort: {{ .Values.mqttBroker.internal.service.healthCheckNodePort }}
     {{ end }}
   {{ end }}
   ports:

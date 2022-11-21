@@ -1,12 +1,12 @@
-{{- if .Values.mqttBroker.enabled -}}
-{{- if .Values.mqttBroker.tls.enabled -}}
-{{- $item := .Values.mqttBroker.tls -}}
+{{- if eq .Values.mqttBroker.type "internal" -}}
+{{- if .Values.mqttBroker.internal.tls.enabled -}}
+{{- $item := .Values.mqttBroker.internal.tls -}}
 {{- if eq $item.certSource "auto" -}}
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: {{ $item.secretName }}
-  namespace: {{ .Values.namespace }}
+  
 spec:
   dnsNames:
     - {{ .Values.expose.hosts.mqtt }}
@@ -18,7 +18,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: {{ $item.secretName }}
-  namespace: {{ .Values.namespace }}
+  
 type: kubernetes.io/tls
 data:
   {{ range $_, $bytes := .Files.Glob "configs/cert/mqtt/*.crt" }}

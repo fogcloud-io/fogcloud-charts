@@ -1,4 +1,4 @@
-{{ if .Values.mongodb.enabled }}
+{{ if eq .Values.mongodb.type "internal" }}
 # mongo-service
 apiVersion: v1
 kind: Service
@@ -7,7 +7,7 @@ metadata:
 {{ include "fogcloud.labels" . | indent 4 }}   
     srv: mongo
   name: mongo
-  namespace: {{ .Values.namespace }}
+  
 spec:
   ports:
     - name: "27017"
@@ -26,21 +26,21 @@ metadata:
 {{ include "fogcloud.labels" . | indent 4 }}   
     app: mongo
   name: mongo
-  namespace: {{ .Values.namespace }}
+  
 spec:
   containers:
-    - image: {{ .Values.mongodb.image }}:{{ .Values.mongodb.imageTag }}
+    - image: {{ .Values.mongodb.internal.image }}:{{ .Values.mongodb.internal.imageTag }}
       name: mongo
       env:
-        {{ range $fields := .Values.mongodb.envVars }}
+        {{ range $fields := .Values.mongodb.internal.envVars }}
         - name: {{ $fields.name }}
           value: "{{ $fields.value }}"
         {{ end }}  
       ports:
         - containerPort: 27017
-      {{- if .Values.mongodb.resources }}
+      {{- if .Values.mongodb.internal.resources }}
       resources:
-{{ toYaml .Values.mongodb.resources | indent 8 }}
+{{ toYaml .Values.mongodb.internal.resources | indent 8 }}
       {{- end }}
       volumeMounts:
         - mountPath: /data/db

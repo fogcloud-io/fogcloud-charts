@@ -19,8 +19,9 @@ data:
         proxy_pass http://fogcloud:4000/api/;
       }
 
-      location /ping {
-          return 200 "ok";
+      location /api/v1/ping {
+          default_type text/html;
+          return 200 "pong";
       }
 
       location /openapi/ {

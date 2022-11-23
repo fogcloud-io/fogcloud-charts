@@ -1,11 +1,10 @@
 {{ if eq .Values.mqttBroker.type "internal" }}
 {{ if eq .Values.mqttBroker.internal.type "emqx" }}
+{{ $app := .Values.mqttBroker.internal }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  
   name: emqx
-
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
@@ -26,17 +25,15 @@ rules:
 kind: RoleBinding 
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  
   name: emqx
 subjects:
   - kind: ServiceAccount
     name: emqx
-    
 roleRef:
   kind: Role
   name: emqx
   apiGroup: rbac.authorization.k8s.io
-
+  
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -50,7 +47,7 @@ spec:
   serviceName: mqtt-broker
   updateStrategy:
     type: RollingUpdate
-  replicas: {{ .Values.mqttBroker.internal.replicas }}
+  replicas: {{ $app.replicas }}
   selector:
     matchLabels:
       app: mqtt-broker    
@@ -67,16 +64,16 @@ spec:
                 matchLabels:
                   app: mqtt-broker
               topologyKey: "kubernetes.io/hostname"    
-      {{ if .Values.mqttBroker.internal.nodeSelector.enabled }}
+      {{ if $app.nodeSelector.enabled }}
       nodeSelector:
-        {{ .Values.mqttBroker.internal.nodeSelector.key }}: {{ .Values.mqttBroker.internal.nodeSelector.value }}
+        {{ $app.nodeSelector.key }}: {{ $app.nodeSelector.value }}
       {{ end }}
       containers:
         - name: mqtt-broker
-          image: {{ .Values.mqttBroker.internal.image }}:{{ .Values.mqttBroker.internal.imageTag }}
-          {{- if .Values.mqttBroker.internal.resources }}
+          image: {{ $app.image }}:{{ $app.imageTag }}
+          {{- if $app.resources }}
           resources:
-{{ toYaml .Values.mqttBroker.internal.resources | indent 12 }}
+{{ toYaml $app.resources | indent 12 }}
           {{- end }}          
           ports:
             - name: mqtt
@@ -103,16 +100,16 @@ spec:
             - name: emq-claim
               mountPath: /opt/emqx/data/loaded_plugins
               subPath: loaded_plugins
-            {{ if .Values.mqttBroker.internal.tls.enabled }}  
+            {{ if $app.tls.enabled }}  
             - name: mqtt-secret
               mountPath: /opt/emqx/etc/certs/fogcloud.key
               subPath: fogcloud.key
             - name: mqtt-secret
               mountPath: /opt/emqx/etc/certs/fogcloud.crt
               subPath: fogcloud.crt
-            {{ end }}  
+            {{ end }}
           env:
-            {{ if .Values.mqttBroker.internal.tls.enabled }}  
+            {{ if $app.tls.enabled }}  
             - name: EMQX_LISTENER__SSL__EXTERNAL__KEYFILE
               value: etc/certs/fogcloud.key
             - name: EMQX_LISTENER__SSL__EXTERNAL__CERTFILE
@@ -145,7 +142,11 @@ spec:
             - name: EMQX_CLUSTER__K8S__NAMESPACE
               value: {{ .Values.namespace }}
             - name: EMQX_CLUSTER__K8S__APISERVER
-              value: {{ .Values.k8sApiServer }}
+              value: {{ .Values.k8sApiServer }}  
+            {{ range $fields := $app.envVars }}
+            - name: {{ $fields.name }}
+              value: "{{ $fields.value }}"
+            {{ end }}
       volumes:
         - name: emq-claim
           configMap:
@@ -157,10 +158,10 @@ spec:
                 path: emqx_auth_http.conf
               - key: loaded_plugins
                 path: loaded_plugins
-        {{ if .Values.mqttBroker.internal.tls.enabled }}          
+        {{ if $app.tls.enabled }}          
         - name: mqtt-secret
           secret:
-            secretName: {{ .Values.mqttBroker.internal.tls.secretName }}
+            secretName: {{ $app.tls.secretName }}
             items:
               - key: tls.crt
                 path: fogcloud.crt
@@ -172,9 +173,9 @@ spec:
         name: emqx-data
       spec:
         accessModes: [ "ReadWriteOnce" ]
-        storageClassName: {{ .Values.mqttBroker.internal.persistence.storageClassName }}
+        storageClassName: {{ $app.persistence.storageClassName }}
         resources:
           requests:
-            storage: {{ .Values.mqttBroker.internal.persistence.storage }}                
+            storage: {{ $app.persistence.storage }}                
 {{ end }}                
 {{ end }}

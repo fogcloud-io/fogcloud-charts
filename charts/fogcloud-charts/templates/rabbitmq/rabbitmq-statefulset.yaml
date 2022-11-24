@@ -84,7 +84,7 @@ spec:
       requiredDuringSchedulingIgnoredDuringExecution:
         - labelSelector:
             matchLabels:
-              app: rabbitmq
+              app.kubernetes.io/component: rabbitmq
           topologyKey: "kubernetes.io/hostname"
 
   persistence:

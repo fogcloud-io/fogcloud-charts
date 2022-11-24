@@ -1,0 +1,100 @@
+{{ if eq .Values.rabbitmq.type "internal" }}
+{{ $app := .Values.rabbitmq.internal }}
+{{ $svcType := .Values.rabbitmq.internal.service.type }}
+{{ $ports := $app.service.ports }}
+apiVersion: rabbitmq.com/v1beta1
+kind: RabbitmqCluster
+metadata:
+  name: rabbitmq
+spec:
+  image: {{ $app.image }}:{{ $app.imageTag }}
+
+  {{ if $app.tls.enabled }}
+  tls: 
+    secretName: {{ $app.tls.secretName }}
+  {{ end }}
+
+  override:
+    service:
+      spec:
+        type: {{ $svcType }}
+        {{ if or (eq $svcType "NodePort") (eq $svcType "LoadBalancer") }}
+        externalTrafficPolicy: {{ .Values.mqttBroker.internal.service.externalTrafficPolicy }}
+          {{ if and (eq .Values.mqttBroker.internal.service.externalTrafficPolicy "Local") (eq $svcType "LoadBalancer") }}
+        healthCheckNodePort: {{ .Values.mqttBroker.internal.service.healthCheckNodePort }}
+          {{ end }}
+        {{ end }}        
+        ports:
+        - name: amqp
+          port: {{ $ports.amqp.port }}
+          targetPort: 5672
+          {{ if or (eq $svcType "NodePort") (eq $svcType "LoadBalancer") }}
+          nodePort: {{ $ports.amqp.nodePort }}
+          {{ end }}
+        - name: amqps
+          port: {{ $ports.amqps.port }}
+          targetPort: 5671
+          {{ if or (eq $svcType "NodePort") (eq $svcType "LoadBalancer") }}
+          nodePort: {{ $ports.amqps.nodePort }}
+          {{ end }}
+        - name: dashboard
+          port: 15672
+          targetPort: 15672             
+
+  rabbitmq:
+    additionalConfig: | 
+        auth_backends.1 = rabbit_auth_backend_internal
+        auth_backends.2 = cache
+        auth_cache.cached_backend = rabbit_auth_backend_http
+        auth_cache.cache_ttl = 30000
+
+        auth_http.http_method   = post
+        auth_http.user_path     = http://fogcloud:4000/rabbitmq/auth/user
+        auth_http.vhost_path    = http://fogcloud:4000/rabbitmq/auth/vhost
+        auth_http.resource_path = http://fogcloud:4000/rabbitmq/auth/resource
+        auth_http.topic_path    = http://fogcloud:4000/rabbitmq/auth/topic      
+
+        default_vhost = /
+        default_permissions.configure = .*
+        default_permissions.read = .*
+        default_permissions.write = .*
+
+        default_user_tags.administrator = true
+        default_user_tags.management = true
+        default_user_tags.custom_tag = true
+
+        {{ range $_, $var := $app.additionalConfigs }}
+        {{ $var.name }}: {{ $var.value }}
+        {{ end }}
+        
+    additionalPlugins:
+      - rabbitmq_management
+      - rabbitmq_management_visualiser
+      - rabbitmq_auth_backend_http
+      - rabbitmq_auth_backend_cache
+      - rabbitmq_peer_discovery_k8s
+      - rabbitmq_prometheus
+    envConfig: |
+      {{ range $_, $var :=  $app.envVars }}
+      {{ $var.name }} = {{ $var.value }}
+      {{ end }}
+
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchLabels:
+              app: rabbitmq
+          topologyKey: "kubernetes.io/hostname"
+
+  persistence:
+    storageClassName: {{ $app.persistence.storageClassName }}
+    storage: {{ $app.persistence.storage }}  
+    {{- if $app.resources }}
+
+  resources:
+{{ toYaml $app.resources | indent 4 }}
+    {{- end }}  
+
+  replicas: {{ $app.replicas }}
+{{ end }}  

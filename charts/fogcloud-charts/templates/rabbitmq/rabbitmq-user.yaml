@@ -1,0 +1,14 @@
+{{ if eq .Values.rabbitmq.type "internal" }}
+{{ $app := .Values.rabbitmq.internal }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: rabbitmq-default-user
+type: Opaque
+stringData:
+  username: {{ $app.defaultUsername }}
+  password: {{ $app.defaultPassword }}
+  default_user.conf: |
+    default_user = {{ $app.defaultUsername }}
+    default_pass = {{ $app.defaultPassword }}
+{{ end }}    

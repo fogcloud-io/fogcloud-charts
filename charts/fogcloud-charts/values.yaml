@@ -212,7 +212,12 @@ rabbitmq:
   type: internal
   internal:
     image: rabbitmq
-    imageTag: 3.8.0-management
+    imageTag: 3.10.2-management
+    replicas: 1
+    defaultUsername: rabbitmq
+    defaultPassword: fogcloud
+    additionalConfigs:
+    envVars:
     persistence:
       pvcExisted: false
       pvc: rabbitmq-pvc

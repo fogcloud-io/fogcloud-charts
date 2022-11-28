@@ -1,6 +1,51 @@
 apiVersion: v1
 entries:
+  fission-all:
+  - apiVersion: v2
+    appVersion: v1.16.3
+    created: "2022-11-28T07:47:26.894180598Z"
+    description: Fission is a fast serverless framework for Kubernetes.
+    digest: 7fbf5c4c071cd4334fbae06f48febde0b5e311966af02324d1324a98765f83bc
+    home: https://fission.io/
+    icon: https://fission.io/images/fission-logo-white.svg
+    keywords:
+    - fission
+    - serverless
+    - platform
+    - faas
+    - functions
+    - Integration & Delivery
+    maintainers:
+    - email: vishal@infracloud.io
+      name: Vishal Biyani
+    - email: sanket@infracloud.io
+      name: Sanket Sudake
+    name: fission-all
+    sources:
+    - https://github.com/fission/fission
+    - https://github.com/fission/keda-connectors
+    type: application
+    urls:
+    - https://github.com/fogcloud-io/fogcloud-charts/releases/download/fission-all-v1.16.3/fission-all-v1.16.3.tgz
+    version: v1.16.3
   fogcloud-charts:
+  - apiVersion: v2
+    appVersion: v4.12.1
+    created: "2022-11-28T07:47:27.057011918Z"
+    dependencies:
+    - name: fission-all
+      repository: file://../fission-all
+      version: 1.16.3
+    description: A Helm chart for fogcloud
+    digest: 5dc1cd1a6eb521ea9baf853cdd494d194a5c49018a57608b82c429e4a9445842
+    home: https://fogcloud.io
+    name: fogcloud-charts
+    sources:
+    - https://github.com/fogcloud-io/fogcloud-charts
+    type: application
+    urls:
+    - https://github.com/fogcloud-io/fogcloud-charts/releases/download/fogcloud-charts-1.1.15/fogcloud-charts-1.1.15.tgz
+    version: 1.1.15
   - apiVersion: v2
     appVersion: v4.12.1
     created: "2022-11-28T03:36:00.853920496Z"

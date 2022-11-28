@@ -1,4 +1,6 @@
-{{ if .Values.redis.enabled }}
+{{ if eq .Values.redis.type "internal" }}
+{{ $persistence := .Values.redis.internal.persistence }}
+{{ if not $persistence.existed }}
 # apiVersion: v1
 # kind: PersistentVolume
 # metadata:
@@ -15,7 +17,7 @@
 #   storageClassName: ""
 #   claimRef:
 #     name: redis-pvc
-#     namespace: {{ .Values.namespace }}
+#     
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -24,15 +26,16 @@ metadata:
     "helm.sh/resource-policy": keep
   labels:
     pvc: redis-data
-  name: redis-pvc
-  namespace: {{ .Values.namespace }}
+  name: {{ $persistence.pvc }}
+  
 spec:
-  storageClassName: {{ .Values.storageClassName }}
+  storageClassName: {{ $persistence.storageClassName }}
   # volumeName: redis-pv
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi
+      storage: "{{ $persistence.storage }}"
 status: {}
+{{ end }}
 {{ end }}

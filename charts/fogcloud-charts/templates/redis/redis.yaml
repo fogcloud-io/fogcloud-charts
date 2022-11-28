@@ -1,12 +1,14 @@
-{{ if .Values.redis.enabled }}
+{{ if eq .Values.redis.type "internal" }}
+{{ $app := .Values.redis.internal }}
 # redis-service
 apiVersion: v1
 kind: Service
 metadata:
   labels:
+{{ include "fogcloud.labels" . | indent 4 }}   
     srv: redis
   name: redis
-  namespace: {{ .Values.namespace }}
+  
 spec:
   ports:
     - name: "6379"
@@ -22,21 +24,25 @@ apiVersion: v1
 kind: Pod
 metadata:
   labels:
+{{ include "fogcloud.labels" . | indent 4 }}   
     app: redis
   name: redis
-  namespace: {{ .Values.namespace }}
+  
 spec:
   containers:
-    - image: {{ .Values.redis.image }}:{{ .Values.redis.imageTag }}
+    - image: {{ $app.image }}:{{ $app.imageTag }}
       name: redis
       env:
-        {{ range $fields := .Values.redis.envVars }}
+        {{ range $fields := $app.envVars }}
         - name: {{ $fields.name }}
           value: "{{ $fields.value }}"
         {{ end }}        
       ports:
         - containerPort: 6379
-      resources: {}
+      {{- if $app.resources }}
+      resources: 
+{{ toYaml $app.resources | indent 8 }}
+      {{- end }}
       volumeMounts:
         - mountPath: /data
           name: redis-data
@@ -44,6 +50,6 @@ spec:
   volumes:
     - name: redis-data
       persistentVolumeClaim:
-        claimName: redis-pvc
+        claimName: {{ $app.persistence.pvc }}
 status: {}
 {{ end }}

@@ -1,16 +1,15 @@
-{{ if .Values.mqttBroker.enabled }}
-{{ if eq .Values.mqttBroker.type "emqx" }}
+{{ if eq .Values.mqttBroker.type "internal" }}
+{{ if eq .Values.mqttBroker.internal.type "emqx" }}
+{{ $app := .Values.mqttBroker.internal }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  namespace: {{ .Values.namespace }}
   name: emqx
-
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  namespace: {{ .Values.namespace }}
+  
   name: emqx
 rules:
   - apiGroups:
@@ -26,30 +25,29 @@ rules:
 kind: RoleBinding 
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  namespace: {{ .Values.namespace }}
   name: emqx
 subjects:
   - kind: ServiceAccount
     name: emqx
-    namespace: {{ .Values.namespace }}
 roleRef:
   kind: Role
   name: emqx
   apiGroup: rbac.authorization.k8s.io
-
+  
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mqtt-broker
-  namespace: {{ .Values.namespace }}
+  
   labels:
+{{ include "fogcloud.labels" . | indent 4 }}   
     app: mqtt-broker
 spec:
   serviceName: mqtt-broker
   updateStrategy:
     type: RollingUpdate
-  replicas: {{ .Values.mqttBroker.replicas }}
+  replicas: {{ $app.replicas }}
   selector:
     matchLabels:
       app: mqtt-broker    
@@ -66,13 +64,17 @@ spec:
                 matchLabels:
                   app: mqtt-broker
               topologyKey: "kubernetes.io/hostname"    
-      {{ if .Values.mqttBroker.nodeSelector.enabled }}
+      {{ if $app.nodeSelector.enabled }}
       nodeSelector:
-        {{ .Values.mqttBroker.nodeSelector.key }}: {{ .Values.mqttBroker.nodeSelector.value }}
+        {{ $app.nodeSelector.key }}: {{ $app.nodeSelector.value }}
       {{ end }}
       containers:
         - name: mqtt-broker
-          image: {{ .Values.mqttBroker.image }}:{{ .Values.mqttBroker.imageTag }}
+          image: {{ $app.image }}:{{ $app.imageTag }}
+          {{- if $app.resources }}
+          resources:
+{{ toYaml $app.resources | indent 12 }}
+          {{- end }}          
           ports:
             - name: mqtt
               containerPort: 1883
@@ -87,8 +89,6 @@ spec:
             - name: dashboard
               containerPort: 18083
           volumeMounts:
-            # - name: emqx-headless-data
-            #   mountPath: /emq
             - name: emq-claim
               mountPath: /opt/emqx/etc/plugins/emqx_web_hook.conf
               subPath: emqx_web_hook.conf
@@ -98,16 +98,16 @@ spec:
             - name: emq-claim
               mountPath: /opt/emqx/data/loaded_plugins
               subPath: loaded_plugins
-            {{ if .Values.mqttBroker.tls.enabled }}  
+            {{ if $app.tls.enabled }}  
             - name: mqtt-secret
               mountPath: /opt/emqx/etc/certs/fogcloud.key
               subPath: fogcloud.key
             - name: mqtt-secret
               mountPath: /opt/emqx/etc/certs/fogcloud.crt
               subPath: fogcloud.crt
-            {{ end }}  
+            {{ end }}
           env:
-            {{ if .Values.mqttBroker.tls.enabled }}  
+            {{ if $app.tls.enabled }}  
             - name: EMQX_LISTENER__SSL__EXTERNAL__KEYFILE
               value: etc/certs/fogcloud.key
             - name: EMQX_LISTENER__SSL__EXTERNAL__CERTFILE
@@ -138,13 +138,14 @@ spec:
             - name: EMQX_CLUSTER__K8S__APP_NAME # 和EMQX_NAME一致
               value: mqtt-broker
             - name: EMQX_CLUSTER__K8S__NAMESPACE
-              value: {{ .Values.namespace }}
+              value: {{  .Release.Namespace }}
             - name: EMQX_CLUSTER__K8S__APISERVER
-              value: {{ .Values.k8sApiServer }}
+              value: {{ .Values.k8sApiServer }}  
+            {{ range $fields := $app.envVars }}
+            - name: {{ $fields.name }}
+              value: "{{ $fields.value }}"
+            {{ end }}
       volumes:
-        # - name: emqx-headless-data
-        #   persistentVolumeClaim:
-        #     claimName: emqx-headless-pvc
         - name: emq-claim
           configMap:
             name: fog-config
@@ -155,15 +156,24 @@ spec:
                 path: emqx_auth_http.conf
               - key: loaded_plugins
                 path: loaded_plugins
-        {{ if .Values.mqttBroker.tls.enabled }}          
+        {{ if $app.tls.enabled }}          
         - name: mqtt-secret
           secret:
-            secretName: {{ .Values.mqttBroker.tls.secretName }}
+            secretName: {{ $app.tls.secretName }}
             items:
               - key: tls.crt
                 path: fogcloud.crt
               - key: tls.key
                 path: fogcloud.key
-        {{ end }}        
+        {{ end }}
+  volumeClaimTemplates:
+    - metadata:
+        name: emqx-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: {{ $app.persistence.storageClassName }}
+        resources:
+          requests:
+            storage: {{ $app.persistence.storage }}                
 {{ end }}                
 {{ end }}

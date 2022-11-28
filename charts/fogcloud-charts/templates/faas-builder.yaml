@@ -4,8 +4,9 @@ kind: Service
 metadata:
   labels:
     srv: faasbuilder
+{{ include "fogcloud.labels" . | indent 4 }}    
   name: faasbuilder
-  namespace: {{ .Values.namespace }}
+  
 spec:
   ports:
     - name: "api"
@@ -22,9 +23,10 @@ kind: Deployment
 metadata:
   annotations:
   labels:
-    dep: faasbuilder
+    component: faasbuilder
+{{ include "fogcloud.labels" . | indent 4 }}    
   name: faasbuilder
-  namespace: {{ .Values.namespace }}
+  
 spec:
   replicas: {{ .Values.faasbuilder.replicas }}
   selector:
@@ -59,12 +61,15 @@ spec:
             privileged: true
           ports:
             - containerPort: 8090
-          resources: {}
+          {{- if .Values.faasbuilder.resources }}
+          resources:
+{{ toYaml .Values.fogcloud.resources | indent 12 }}
+          {{- end }}
           volumeMounts:
             - mountPath: /etc/faasbuilder/faasbuilder.yaml
               subPath: faasbuilder.yaml
               name: fogcloud-claim
-            {{ if .Values.faasbuilder.createDockerconfigWithFile }}  
+            {{ if .Values.faasbuilder.createKubeconfigWithFile }}  
             - mountPath: /etc/faasbuilder/kubeconfig
               subPath: kubeconfig
               name: fogcloud-claim
@@ -81,7 +86,7 @@ spec:
             items:
               - key: faasbuilder.yaml
                 path: faasbuilder.yaml
-              {{ if .Values.faasbuilder.createDockerconfigWithFile }}  
+              {{ if .Values.faasbuilder.createKubeconfigWithFile }}  
               - key: kubeconfig
                 path: kubeconfig
               {{ end }}           

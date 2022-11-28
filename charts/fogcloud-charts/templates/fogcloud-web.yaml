@@ -3,21 +3,40 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
+{{ include "fogcloud.labels" . | indent 4 }}  
     srv: fogcloud-web
   name: fogcloud-web
-  namespace: {{ .Values.namespace }}
+  
 spec:
-  type: {{ .Values.fogcloudWeb.service.type }}
-  {{ if eq .Values.fogcloudWeb.service.type "NodePort" }}  
-  externalTrafficPolicy: {{ .Values.fogcloudWeb.service.externalTrafficPolicy }}
+  {{ if eq .Values.expose.type "Ingress" }}
+  type: ClusterIP
+  {{ else if eq .Values.expose.type "LoadBalancer" }}
+  type: NodePort
+  {{ else }}
+  type: {{ .Values.expose.type }}
   {{ end }}
+  {{ if eq .Values.expose.type "LoadBalancer" }}
+  externalTrafficPolicy: {{ .Values.expose.LoadBalancer.externalTrafficPolicy }}
   ports:
-    - name: "http"
-      port: {{ .Values.fogcloudWeb.service.ports.httpPort.port }}
+    - name: http
+      port: 80
       targetPort: 8000
-      {{ if eq .Values.fogcloudWeb.service.type "NodePort" }}
-      nodePort: {{ .Values.fogcloudWeb.service.ports.httpPort.nodePort }}
-      {{ end }}      
+      nodePort: {{ .Values.expose.LoadBalancer.ports.webAdmin.httpPort }}
+  {{ end }} 
+  {{ if eq .Values.expose.type "NodePort" }}
+  externalTrafficPolicy: {{ .Values.expose.NodePort.externalTrafficPolicy }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8000
+      nodePort: {{ .Values.expose.NodePort.ports.webAdmin.httpPort }}
+  {{ end }}   
+  {{ if or (eq .Values.expose.type "Ingress") (eq .Values.expose.type "ClusterIP") }}
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8000
+  {{ end }}   
   selector:
     app: fogcloud-web
 status:
@@ -28,9 +47,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    dep: fogcloud-web
+{{ include "fogcloud.labels" . | indent 4 }}  
+    component: fogcloud-web
   name: fogcloud-web
-  namespace: {{ .Values.namespace }}
+  
 spec:
   replicas: {{ .Values.fogcloudWeb.replicas }}
   selector:
@@ -53,10 +73,21 @@ spec:
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           name: fogcloud-web
           env:
+            {{ if .Values.expose.tls.enabled }} 
             - name: API_BASE_URL
-              value: "{{ .Values.fogcloudWeb.apiURL }}"
+              value: "https://{{ .Values.expose.hosts.api }}/api/v1"
             - name: MQTT_BASE_URL
-              value: "{{ .Values.fogcloudWeb.mqttURL }}"
+              value: "wss://{{ .Values.expose.hosts.mqtt }}/mqtt"                
+            {{ else }}
+            - name: API_BASE_URL
+              value: "http://{{ .Values.expose.hosts.api }}/api/v1"
+            - name: MQTT_BASE_URL
+              value: "ws://{{ .Values.expose.hosts.mqtt }}/mqtt"          
+            {{ end }}
+          {{- if .Values.fogcloudWeb.resources }}
+          resources:
+{{ toYaml .Values.fogcloudWeb.resources | indent 12 }}
+          {{- end }}            
           ports:
             - containerPort: 80
             - containerPort: 443
@@ -71,8 +102,8 @@ spec:
       volumes:
         - name: nginx-claim
           configMap:
-            name: fog-config
+            name: nginx-web-config
             items:
-              - key: default_web.conf
+              - key: default.conf
                 path: default.conf
 status: {}

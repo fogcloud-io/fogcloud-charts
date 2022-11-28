@@ -1,23 +1,6 @@
-{{ if .Values.mongodb.enabled }}
-# apiVersion: v1
-# kind: PersistentVolume
-# metadata:
-#   name: mongo-pv
-# spec:
-#   capacity:
-#     storage: 5Gi
-#   hostPath:
-#     path: /var/lib/rancher/k3s/storage/fogcloud-dev/mongo-pv
-#   volumeMode: Filesystem
-#   accessModes:
-#     - ReadWriteOnce
-#   persistentVolumeReclaimPolicy: Retain
-#   storageClassName: "local-path"
-#   claimRef:
-#     name: mongo-pvc
-#     namespace: {{ .Values.namespace }}
-
----
+{{ if eq .Values.mongodb.type "internal" }}
+{{ $persistence := .Values.mongodb.internal.persistence }}
+{{ if not $persistence.existed }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -26,14 +9,15 @@ metadata:
   labels:
     pvc: mongo-data
   name: mongo-pvc
-  namespace: {{ .Values.namespace }}
+  
 spec:
-  storageClassName: {{ .Values.storageClassName }}
+  storageClassName: {{ $persistence.storageClassName }}
   # volumeName: mongo-pv
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi
+      storage: "{{ $persistence.storage }}"
 status: {}
+{{ end }}
 {{ end }}

@@ -1,0 +1,93 @@
+# fogcloud-service
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+  labels:
+    srv: fogcloud
+{{ include "fogcloud.labels" . | indent 4 }}
+  name: fogcloud
+  
+spec:
+  type: ClusterIP
+  ports:
+    - name: "http"
+      port: 4000
+      targetPort: 4000
+    - name: "http-debug"
+      port: 4001
+      targetPort: 15000  
+  selector:
+    app: fogcloud
+status:
+  loadBalancer: {}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    component: core
+{{ include "fogcloud.labels" . | indent 4 }}
+  name: fogcloud-core
+  
+spec:
+  replicas: {{ .Values.fogcloud.replicas }}
+  selector:
+    matchLabels:
+      app: fogcloud
+  strategy:
+    type: {{ .Values.fogcloud.strategy.type }}
+    {{ if eq .Values.fogcloud.strategy.type "RollingUpdate" }}
+    rollingUpdate:
+      maxSurge: {{ .Values.fogcloud.strategy.rollingUpdate.maxSurge | default "50%" }}
+      maxUnavailable: {{ .Values.fogcloud.strategy.rollingUpdate.maxUnavailable | default 0 }}
+    {{ end }}
+
+  template:
+    metadata:
+      annotations:
+      labels:
+        app: fogcloud
+    spec:
+      containers:
+        - args:
+            - fogcloud
+            - -c
+            - /etc/fogcloud/fogcloud.yaml
+            - -e
+            - {{ .Values.environment }}
+          image: {{ .Values.fogcloud.image }}:{{ .Values.fogcloud.imageTag }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          name: fogcloud-core
+          {{- if .Values.fogcloud.resources }}
+          resources:
+{{ toYaml .Values.fogcloud.resources | indent 12 }}
+          {{- end }}
+          ports:
+            - containerPort: 4000
+            - containerPort: 15000
+          env:
+            - name: FOG_ENABLE_TLS
+              value: "{{ .Values.expose.tls.enabled }}"
+            {{ range $fields := .Values.fogcloud.envVars }}
+            - name: {{ $fields.name }}
+              value: "{{ $fields.value }}"
+            {{ end }}    
+          volumeMounts:
+            - mountPath: /etc/fogcloud/fogcloud.yaml
+              subPath: fogcloud.yaml
+              name: fogcloud-claim
+      restartPolicy: {{ .Values.fogcloud.restartPolicy }}
+      imagePullSecrets:
+        {{ range $_, $secret := .Values.secret.imageCredentials }}
+        - name: {{ $secret.name }}
+        {{ end }}
+      volumes:
+        - name: fogcloud-claim
+          configMap:
+            name: fog-config
+            items:
+              - key: fogcloud.yaml
+                path: fogcloud.yaml
+status: {}

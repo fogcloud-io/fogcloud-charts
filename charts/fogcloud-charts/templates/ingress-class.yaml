@@ -1,9 +1,9 @@
-{{ if .Values.ingress.enabled }}
+{{ if eq .Values.expose.type "Ingress" }}
 apiVersion: networking.k8s.io/v1
 kind: IngressClass
 metadata:
-  name: {{ .Values.ingress.className }}
-  namespace: {{ .Values.namespace }}
+  name: {{ .Values.expose.Ingress.className }}
+  
 spec:
-  controller: {{ .Values.ingress.controller }}
+  controller: {{ .Values.expose.Ingress.controller }}
 {{ end }}

@@ -1,11 +1,13 @@
-{{ if .Values.etcd.enabled }}
+{{ if eq .Values.etcd.type "internal" }}
+{{ $app := .Values.etcd.internal }}
 apiVersion: v1
 kind: Service
 metadata:
   labels:
+{{ include "fogcloud.labels" . | indent 4 }}   
     srv: etcd1
   name: etcd1
-  namespace: {{ .Values.namespace }}
+  
 spec:
   ports:
     - name: "2379"
@@ -20,20 +22,25 @@ apiVersion: v1
 kind: Pod
 metadata:
   labels:
+{{ include "fogcloud.labels" . | indent 4 }}   
     app: etcd1
   name: etcd1
-  namespace: {{ .Values.namespace }}
+  
 spec:
   containers:
-    - image: {{ .Values.etcd.image }}:{{ .Values.etcd.imageTag }}
-      name: etcd1
+    - image: {{ $app.image }}:{{ $app.imageTag }}
+      name: etcd1     
       ports:
         - containerPort: 2379
+      {{- if $app.resources }}  
+      resources:
+{{ toYaml $app.resources | indent 8 }}
+      {{- end }}
       volumeMounts:
         - mountPath: /bitnami/etcd/data
           name: etcd1-data
       env:
-        {{ range $fields := .Values.etcd.envVars }}
+        {{ range $fields := $app.envVars }}
         - name: {{ $fields.name }}
           value:  "{{ $fields.value }}"
         {{ end }}            
@@ -41,6 +48,6 @@ spec:
   volumes:
     - name: etcd1-data
       persistentVolumeClaim:
-        claimName: etcd-pvc
+        claimName: {{ $app.persistence.pvc }}
 status: {}
 {{ end }}

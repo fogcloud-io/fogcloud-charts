@@ -2,13 +2,68 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-namespace: fogcloud
-environment: production # enum: development,test,production
+# 配置文件环境：development,test,production
+environment: production
 
 imagePullPolicy: Always
 
 k8sApiServer: "https://localhost:6443"
+# 是否启用云函数功能，若安装了fission可以设置为true
+fissionEnabled: false
 
+# 暴露web管理后台和api服务，有：Ingress, ClusterIP, NodePort, LoadBalancer这几种类型；
+# 若要公开服务，请使用LoadBalancer,Ingress,NodePort三种类型
+expose:
+  type: NodePort
+  insecureOSS: true
+  # 各个服务的域名，若启用对应服务的tls，请保证域名是外网可以访问的；
+  hosts:
+    api: localhost:8001
+    mqtt: localhost:8083
+  
+  tls:
+    enabled: false
+    cert:
+      webAdmin:
+        # x509证书创建方式，支持file, auto, none这三种方式
+        # file: 通过文件创建，可将对应证书文件：*.key，*.crt，放到fogcloud-charts/configs/cert/webAdmin目录下
+        # none: 不创建
+        # auto: 使用cert-manager自动生成
+        certSource: none
+        secretName: web-cert
+        dnsName: 
+      api:
+        certSource: none
+        secretName: api-cert
+        dnsName: 
+
+  Ingress:
+    className: traefik
+    controller: traefik.io/ingress-controller
+    annotations: {}
+    hosts:
+      # web管理后台域名
+      webAdmin: localhost
+      # 后端api服务域名
+      api: localhost
+
+  NodePort:
+    externalTrafficPolicy: Local
+    ports:
+      webAdmin:
+        httpPort: 8000
+      api:
+        httpPort: 8001
+
+  LoadBalancer:
+    externalTrafficPolicy: Local
+    healthCheckNodePort: 4000
+    ports:
+      webAdmin:
+        httpPort: 8000  
+      api:
+        httpPort: 8001  
+        
 secret:
   # 配置私有镜像仓库    
   imageCredentials:
@@ -18,36 +73,28 @@ secret:
     #   password:
     #   email:
 
-hosts:
-  webAdmin: app.fogcloud.io #web管理后台域名
-  api: api.fogcloud.io  #后端服务域名
-  mqtt: mqtt.fogcloud.io  #mqtt服务域名
-
 storageClassName: "local-path"
 
-# 用于发布fogcloud api/web服务
-ingress:
-  enabled: false
-  hosts:
-    webAdmin: app.fogcloud.io #web管理后台域名
-    api: api.fogcloud.io  #后端服务域名
-  tls: 
-    enabled: false
-    # 前端服务的证书
-    webAdmin:
-      createWithCertFile: false
-      secretName: fogcloud-cert
-    # 后端http接口证书  
-    api:
-      createWithCertFile: false
-      secretName: fogcloud-cert
-  className: traefik
-  controller: traefik.io/ingress-controller
+resourceRangeLimit:
+  limits:
+  - default:
+      memory: "512Mi"
+      cpu: "0.5"
+    defaultRequest:
+      memory: "256Mi"
+      cpu: "0.1"
+    min:
+      memory: "128Mi"
+      cpu: "0.1"
+    max:  
+      memory: "4Gi"
+      cpu: "2"
+    type: Container    
 
 fogcloud:
   restartPolicy: Always
   image: ghcr.io/fogcloud-io/fogcloud
-  imageTag: v4.11.1
+  imageTag: latest
   replicas: 1
   strategy: 
     type: RollingUpdate # enum: Recreate, RollingUpdate
@@ -55,182 +102,247 @@ fogcloud:
       maxSurge: 50%
       maxUnavailable: 0
   resources:
-    limits:
-      cpu: 100m
-      memory: 128Mi
+    # limits:
+    #   cpu: "0.5"
+    #   memory: "128Mi"
 
 fogcloudWeb:
   image: ghcr.io/fogcloud-io/fogcloud-web
-  imageTag: v4.11.1
+  imageTag: latest
   replicas: 1
-  apiURL: http://localhost:4000/api/v1
-  mqttURL:  http://localhost:8083/mqtt
   strategy: 
     type: RollingUpdate # enum: Recreate, RollingUpdate
     rollingUpdate:
       maxSurge: 50%
-      maxUnavailable: 0  
-  service:
-    type: ClusterIP
-    externalTrafficPolicy: Cluster
-    ports:
-      httpPort:
-        port: 4002
-        nodePort: 8888
+      maxUnavailable: 0
+  resources:
+    # limits:
+    #   cpu: "1"
+    #   memory: "128Mi"
 
 faasbuilder:
   image: ghcr.io/fogcloud-io/faas-builder
   imageTag: latest
-  createDockerconfigWithFile: false
+  createKubeconfigWithFile: false
   replicas: 1
+  resources:
+    # limits:
+    #   cpu: "0.1"
+    #   memory: "128Mi"  
   strategy: 
     type: RollingUpdate # enum: Recreate, RollingUpdate
     rollingUpdate:
       maxSurge: 50%
-      maxUnavailable: 0    
+      maxUnavailable: 0
 
 fogcronScheduler:
   image: ghcr.io/fogcloud-io/fogcron-scheduler
   imageTag: latest
   replicas: 1
+  resources:
+    # limits:
+    #   cpu: "1"
+    #   memory: "128Mi"  
   strategy: 
     type: RollingUpdate # enum: Recreate, RollingUpdate
     rollingUpdate:
       maxSurge: 50%
       maxUnavailable: 0    
 
-mqttBroker:
-  enabled: true
-  type: emqx
-  image: emqx/emqx
-  imageTag: 4.2.8
-  nodeSelector:
-    enabled: false
-    key: kubernetes.io/hostname
-    value: fogcloud-prod1
-  replicas: 1
-  tls:
-    enabled: false
-    secretName: fogcloud-cert
-    createWithCertFile: false
-  service:
-    type: ClusterIP
-    externalTrafficPolicy: Local
-    healthCheckNodePort: 30000
-    ports:
-      - name: "mqtt-tcp"
-        port: 1883
-        targetPort: 1883
-        nodePort: 1883
-      - name: "mqtt-tcp-tls"
-        port: 8883
-        targetPort: 8883
-        nodePort: 8883
-      - name: "http-api"
-        port: 8081
-        targetPort: 8081
-        nodePort: 8081
-      - name: "mqtt-ws"
-        port: 8083
-        targetPort: 8083
-        nodePort: 8083
-      - name: "mqtt-wss"
-        port: 8084
-        targetPort: 8084
-        nodePort: 8084
-      - name: "admin"
-        port: 18083
-        targetPort: 18083
-        nodePort: 18083
-
 nginx:
   image: nginx
   imageTag: 1.21
   replicas: 1
-  service:
-    type: ClusterIP
-    externalTrafficPolicy: Local
-    healthCheckNodePort: 30010
-    ports:
-      - name: "http"
-        port: 80
-        targetPort: 80
-        nodePort: 8000
+  resources:
+    # limits:
+    #   cpu: "1"
+    #   memory: "128Mi"  
+
+mqttBroker:
+  type: internal
+  internal:
+    type: emqx
+    image: emqx/emqx
+    imageTag: 4.2.8
+    persistence:
+      pvcExisted: false
+      pvc: emqx-pvc
+      storageClassName: local-path
+      storage: 1Gi      
+    resources:
+      limits:
+        cpu: "1"
+        memory: "512Mi"  
+    nodeSelector:
+      enabled: false
+      key: kubernetes.io/hostname
+      value: fogcloud-prod1
+    replicas: 1
+    tls:
+      enabled: false
+      certSource: none # file, auto, none
+      secretName: mqtt-cert
+    service:
+      type: NodePort
+      externalTrafficPolicy: Local
+      healthCheckNodePort: 30000
+      ports:
+        mqttTcp:
+          port: 1883
+          nodePort: 1883
+        mqttTcpTls:
+          port: 8883
+          nodePort: 8883
+        httpApi:
+          port: 8081
+          nodePort: 8081
+        mqttWs:
+          port: 8083
+          nodePort: 8083
+        mqttWss:
+          port: 8084
+          nodePort: 8084
+        admin:
+          port: 18083
+          nodePort: 18083        
 
 rabbitmq:
-  enabled: true
-  image: rabbitmq
-  imageTag: 3.8.0-management
-  tls:
-    enabled: false
-    secretName: fogcloud-cert
-    createWithCertFile: false  
-  service:
-    externalTrafficPolicy: Local
-    healthCheckNodePort: 30001
-    type: ClusterIP
-    ports:
-      - name: "amqp"
-        port: 5672
-        targetPort: 5672
-        nodePort: 5672
-      - name: "amqp-tls"
-        port: 5671
-        targetPort: 5671
-        nodePort: 5671
-      - name: "dasboard"
-        port: 15672
-        targetPort: 15672
+  type: internal
+  internal:
+    image: rabbitmq
+    imageTag: 3.10.2-management
+    replicas: 1
+    defaultUsername: rabbitmq
+    defaultPassword: fogcloud
+    additionalConfigs:
+    envVars:
+    persistence:
+      pvcExisted: false
+      pvc: rabbitmq-pvc
+      storageClassName: local-path
+      storage: 5Gi  
+    resources:
+      limits:
+        cpu: "1"
+        memory: "512Mi"  
+    tls:
+      enabled: false
+      certSource: none # file, auto, none 
+      secretName: amqp-cert
+    service:
+      externalTrafficPolicy: Cluster
+      healthCheckNodePort: 30001
+      type: NodePort
+      ports:
+        amqp:
+          port: 5672
+          nodePort: 5672
+        amqps:
+          port: 5671
+          nodePort: 5671
 
 postgres:
-  enabled: true
-  image: postgres
-  imageTag: 13
-  envVars:
-    - name: POSTGRES_DB
-      value: fogcloud
-    - name: POSTGRES_PASSWORD
-      value: fogcloud
-    - name: POSTGRES_USER
-      value: postgres
+  type: internal
+  internal: 
+    image: postgres
+    imageTag: 13
+    persistence:
+      pvcExisted: false
+      pvc: postgres-pvc
+      storageClassName: local-path
+      storage: 2Gi
+    resources:
+      limits:
+        cpu: "0.1"
+        memory: "128Mi"  
+    envVars:
+      - name: POSTGRES_DB
+        value: fogcloud
+      - name: POSTGRES_PASSWORD
+        value: fogcloud
+      - name: POSTGRES_USER
+        value: postgres
 
 mongodb:
-  enabled: true
-  image: mongo
-  imageTag: 4.4-rc-focal
-  envVars:
+  type: internal
+  internal:
+    enabled: true
+    image: mongo  
+    imageTag: 4.4-rc-focal
+    persistence:
+      pvcExisted: false
+      pvc: mongo-pvc
+      storageClassName: local-path
+      storage: 1Gi    
+    resources:
+      limits:
+        cpu: "0.1"
+        memory: "128Mi"  
+    envVars:
 
 redis:
-  enabled: true
-  image: redis
-  imageTag: 6.2
-  envVars:
+  type: internal
+  internal:
+    image: redis
+    imageTag: 6.2
+    persistence:
+      pvcExisted: false
+      pvc: redis-pvc
+      storageClassName: local-path
+      storage: 1Gi     
+    resources:
+      limits:
+        cpu: "0.1"
+        memory: "128Mi"  
+    envVars:
 
 etcd:
-  enabled: true
-  image: bitnami/etcd
-  imageTag: 3.5.1
-  replicas: 1
-  envVars:
-    - name: ALLOW_NONE_AUTHENTICATION
-      value: "yes"
-    - name: ETCD_ADVERTISE_CLIENT_URLS
-      value: "http://etcd1:2379"
-    - name: ETCD_LISTEN_CLIENT_URLS
-      value: "http://0.0.0.0:2379"
+  type: internal
+  internal:
+    enabled: true
+    image: bitnami/etcd
+    imageTag: 3.5.1
+    persistence:
+      pvcExisted: false
+      pvc: etcd-pvc
+      storageClassName: local-path
+      storage: 1Gi    
+    resources:
+      limits:
+        cpu: "0.1"
+        memory: "128Mi"  
+    replicas: 1
+    envVars:
+      - name: ALLOW_NONE_AUTHENTICATION
+        value: "yes"
+      - name: ETCD_ADVERTISE_CLIENT_URLS
+        value: "http://etcd1:2379"
+      - name: ETCD_LISTEN_CLIENT_URLS
+        value: "http://0.0.0.0:2379"
 
 minio:
-  enabled: true
-  image: minio/minio
-  imageTag: latest
-  envVars:
-    - name: MINIO_ACCESS_KEY
-      value: "1234567890"
-    - name: MINIO_REGION_NAME
-      value: "cn-south-1"
-    - name: MINIO_ROOT_PASSWORD
-      value: "fogcloud"
-    - name: MINIO_ROOT_USER
-      value: "minio"
-    - name: MINIO_SECRET_KEY
-      value: "abcdefghi"
+  type: internal
+  internal: 
+    enabled: true
+    image: minio/minio
+    imageTag: latest
+    persistence:
+      pvcExisted: false
+      pvc: minio-pvc
+      storageClassName: local-path
+      storage: 10Gi     
+    resources:
+      limits:
+        cpu: "0.1"
+        memory: "128Mi"  
+    envVars:
+      - name: MINIO_ACCESS_KEY
+        value: "1234567890"
+      - name: MINIO_REGION_NAME
+        value: "cn-south-1"
+      - name: MINIO_ROOT_PASSWORD
+        value: "fogcloud"
+      - name: MINIO_ROOT_USER
+        value: "minio"
+      - name: MINIO_SECRET_KEY
+        value: "abcdefghi"

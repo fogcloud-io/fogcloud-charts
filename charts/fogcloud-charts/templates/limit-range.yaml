@@ -1,0 +1,13 @@
+{{ if .Values.resourceRangeLimit }}
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: fog-limit-range
+  
+spec:
+  limits:
+  {{- range $_, $limit := .Values.resourceRangeLimit.limits }}
+  - 
+{{ toYaml $limit | indent 4 }}
+  {{ end }}
+{{ end }}

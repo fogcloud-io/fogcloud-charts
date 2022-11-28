@@ -1,16 +1,18 @@
-{{ if .Values.mqttBroker.enabled }}
-{{ if eq .Values.mqttBroker.type "hmq" }}
+{{ if eq .Values.mqttBroker.type "internal" }}
+{{ if eq .Values.mqttBroker.internal.type "hmq" }}
 # hmq
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: mqtt-broker
-  namespace: {{ .Values.namespace }}
+  
+  labels:
+{{ include "fogcloud.labels" . | indent 4 }}   
 spec:
   selector:
     matchLabels:
       app: mqtt-broker
-  replicas: {{ .Values.mqttBroker.replicas }}
+  replicas: {{ .Values.mqttBroker.internal.replicas }}
   template:
     metadata:
       labels:
@@ -26,7 +28,7 @@ spec:
             - hmq
             - -c
             - /etc/hmq/hmq.config
-          image: {{ .Values.mqttBroker.image }}:{{ .Values.mqttBroker.imageTag }}
+          image: {{ .Values.mqttBroker.internal.image }}:{{ .Values.mqttBroker.internal.imageTag }}
           ports:
             - name: mqtt
               containerPort: 1883
@@ -67,7 +69,7 @@ spec:
                 path: rabbitmq.json
         - name: mqtt-secret
           secret:
-            secretName: {{ .Values.mqttBroker.tls.secretName }}
+            secretName: {{ .Values.mqttBroker.internal.tls.secretName }}
             items:
               - key: tls.crt
                 path: fogcloud.crt

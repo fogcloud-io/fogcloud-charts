@@ -1,12 +1,14 @@
-{{ if .Values.minio.enabled }}
+{{ if eq .Values.minio.type "internal" }}
+{{ $app := .Values.minio.internal }}
 # minio-service
 apiVersion: v1
 kind: Service
 metadata:
   labels:
+{{ include "fogcloud.labels" . | indent 4 }}   
     srv: minio
   name: minio
-  namespace: {{ .Values.namespace }}
+  
 spec:
   ports:
     - name: "9000"
@@ -25,14 +27,15 @@ apiVersion: v1
 kind: Pod
 metadata:
   labels:
+{{ include "fogcloud.labels" . | indent 4 }}   
     app: minio
   name: minio
-  namespace: {{ .Values.namespace }}
+  
 spec:
   containers:
     - name: minio
       env:
-        {{ range $fields := .Values.minio.envVars }}
+        {{ range $fields := $app.envVars }}
         - name: {{ $fields.name }}
           value: "{{ $fields.value }}"
         {{ end }}
@@ -41,11 +44,14 @@ spec:
         - --console-address
         - :9001
         - /data
-      image: {{ .Values.minio.image }}:{{ .Values.minio.imageTag }}
+      image: {{ $app.image }}:{{ $app.imageTag }}
       ports:
         - containerPort: 9000
         - containerPort: 9001
-      resources: {}
+      {{- if $app.resources }}
+      resources:
+{{ toYaml $app.resources | indent 8 }}
+      {{- end }}
       volumeMounts:
         - mountPath: /data
           name: minio-data
@@ -53,6 +59,6 @@ spec:
   volumes:
     - name: minio-data
       persistentVolumeClaim:
-        claimName: minio-pvc
+        claimName: {{ $app.persistence.pvc }}
 status: {}
 {{ end }}

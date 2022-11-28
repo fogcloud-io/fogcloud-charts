@@ -1,12 +1,14 @@
-{{ if .Values.postgres.enabled }}
+{{ if eq .Values.postgres.type "internal" }}
+{{ $app := .Values.postgres.internal }}
 # postgres-service
 apiVersion: v1
 kind: Service
 metadata:
   labels:
+{{ include "fogcloud.labels" . | indent 4 }}   
     srv: postgres
   name: postgres
-  namespace: {{ .Values.namespace }}
+  
 spec:
   ports:
     - name: "5432"
@@ -22,21 +24,25 @@ apiVersion: v1
 kind: Pod
 metadata:
   labels:
+{{ include "fogcloud.labels" . | indent 4 }}   
     app: postgres
   name: postgres
-  namespace: {{ .Values.namespace }}
+  
 spec:
   containers:
     - env:
-        {{ range $fields := .Values.postgres.envVars }}
+        {{ range $fields := $app.envVars }}
         - name: {{ $fields.name }}
           value: "{{ $fields.value }}"
         {{ end }}  
-      image: {{ .Values.postgres.image }}:{{ .Values.postgres.imageTag }}
+      image: {{ $app.image }}:{{ $app.imageTag }}
       name: postgres
       ports:
         - containerPort: 5432
-      resources: {}
+      {{- if $app.resources }}
+      resources:
+{{ toYaml $app.resources | indent 8 }}
+      {{- end }}
       volumeMounts:
         - mountPath: /var/lib/postgresql/data
           name: postgres-data
@@ -44,6 +50,6 @@ spec:
   volumes:
     - name: postgres-data
       persistentVolumeClaim:
-        claimName: postgres-pvc
+        claimName: {{ $app.persistence.pvc }}
 status: {}
 {{ end }}

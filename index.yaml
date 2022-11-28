@@ -28,6 +28,20 @@ entries:
     urls:
     - https://github.com/fogcloud-io/fogcloud-charts/releases/download/fission-all-v1.16.3/fission-all-v1.16.3.tgz
     version: v1.16.3
+  fogcloud:
+  - apiVersion: v2
+    appVersion: v4.12.1
+    created: "2022-11-28T09:54:56.208371898Z"
+    description: A Helm chart for fogcloud
+    digest: 1a80b53de9089d6f1abc3060cbe6ab3e1a002553b3f2567e4a8c7daab0740eed
+    home: https://fogcloud.io
+    name: fogcloud
+    sources:
+    - https://github.com/fogcloud-io/fogcloud-charts
+    type: application
+    urls:
+    - https://github.com/fogcloud-io/fogcloud-charts/releases/download/fogcloud-1.1.16/fogcloud-1.1.16.tgz
+    version: 1.1.16
   fogcloud-charts:
   - apiVersion: v2
     appVersion: v4.12.1
@@ -306,4 +320,4 @@ entries:
     urls:
     - https://github.com/fogcloud-io/fogcloud-charts/releases/download/fogcloud-charts-1.0.0/fogcloud-charts-1.0.0.tgz
     version: 1.0.0
-generated: "2022-11-04T08:53:19.475411993Z"
+generated: "2022-11-28T09:54:56.2084916Z"

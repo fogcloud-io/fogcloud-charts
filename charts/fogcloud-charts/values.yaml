@@ -2,7 +2,6 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-namespace: fogcloud
 # 配置文件环境：development,test,production
 environment: production
 
@@ -161,7 +160,6 @@ nginx:
 
 mqttBroker:
   type: internal
-  external:
   internal:
     type: emqx
     image: emqx/emqx

@@ -1,0 +1,6 @@
+dependencies:
+- name: fission-all
+  repository: file://../fission-all
+  version: v1.16.3
+digest: sha256:db3d5d9ee9f8bf64abf053489ca62ef04927d90756646efd3f1fdc218e3c0213
+generated: "2022-11-28T15:13:22.566678+08:00"

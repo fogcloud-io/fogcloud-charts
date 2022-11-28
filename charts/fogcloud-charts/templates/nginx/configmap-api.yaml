@@ -30,7 +30,7 @@ data:
 
       {{ if .Values.fissionEnabled }}
       location /faas/functions/ {
-        proxy_pass http://router.fission.svc.cluster.local/;
+        proxy_pass http://router/;
       }
       {{ end }}
 

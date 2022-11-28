@@ -8,7 +8,6 @@
 - [安装 kubernetes](https://docs.k3s.io/installation) 1.19+ 
 - [安装并设置 kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/) 1.19+
 - [安装 helm](https://helm.sh/docs/intro/install/) 3+
-- [使用helm安装 fission](https://fission.io/docs/installation/#with-helm)
 
 ## 获取chart
 
@@ -38,7 +37,7 @@ helm uninstall ${RELEASE_NAME} -n ${NAMESPACE_NAME}
 ```
 注意：默认启用了helm的资源保留，卸载时不会释放persistent volume资源；
 
-## 配置说明：
+## 配置说明
 
 | 配置项 | 说明 | 默认值 |
 | --- | --- | --- |
@@ -90,25 +89,32 @@ helm uninstall ${RELEASE_NAME} -n ${NAMESPACE_NAME}
 | **faasbuilder** | | |
 | `faasbuilder.createDockerconfigWithFile` | 使用文件创建dockerconfig对象 | `false` |
 | **mqttBroker** | | |
-| `mqttBroker.internal.enabled` | 是否使用k8s创建mqtt broker | `true` |
+| `mqttBroker.type` | mqtt-broker创建方式：`internal`，`external`；1）`internal`：使用helm自动创建；2）`external`：使用外部的mqtt-broker | `internal` |
+| `mqttBroker.internal.type` | mqtt-broker类型选择，默认`emqx`，不建议修改 | `emqx` |
+| `mqttBroker.internal.image` | mqtt-broker镜像 | `emqx/emqx` |
+| `mqttBroker.internal.imageTag` | mqtt-broker镜像版本 | `4.2.8` |
+| `mqttBroker.internal.persistence` | | |
+| `mqttBroker.internal.persistence.pvcExisted` | 是否使用已存在的pvc | `false`|
+| `mqttBroker.internal.persistence.pvc` | pvc名称 | `emqx-pvc` |
+| `mqttBroker.internal.persistence.storageClassName` | pvc绑定的`stogrageClassName` | `local-path` |
 | `mqttBroker.internal.nodeSelector.enabled` | 是否启用pod节点选择 | `false` |
 | `mqttBroker.internal.nodeSelector.key` | k8s节点名 | |   
 | `mqttBroker.internal.tls.enabled` | mqtt应用是否启用tls  | |
 | `mqttBroker.internal.tls.createWithCertFile` | 是否使用证书文件创建mqtt应用的sercret对象，启用mqttBroker.internal.tls时有效；若为true，可将*.crt（证书）, *.key（密钥）文件放到fogcloud-charts/configs/cert/mqtt目录下 |  | 
 | **rabbitmq** | | |
-| `rabbitmq.enabled `| 是否使用k8s创建rabbitmq |  |
-| `rabbitmq.tls.enabled` | rabbitmq是否启用tls |  |
-| `rabbitmq.tls.createWithCertFile` | 是否使用证书文件创建rabbitmq的sercret对象，启用rabbitmq.tls时有效；若为true，可将*.crt（证书）, *.key（密钥）文件放到fogcloud-charts/configs/cert/amqp目录下 |  | 
+| `rabbitmq.type `| rabbitmq创建方式：`internal`，`external`；1）`internal`：使用helm自动创建；2）`external`：使用外部的rabbitmq | `internal` |
+| `rabbitmq.internal.tls.enabled` | rabbitmq是否启用tls |  |
+| `rabbitmq.internal.tls.createWithCertFile` | 是否使用证书文件创建rabbitmq的sercret对象，启用rabbitmq.tls时有效；若为true，可将*.crt（证书）, *.key（密钥）文件放到fogcloud-charts/configs/cert/amqp目录下 |  | 
 | **postgres** | | |
-| `postgres.enabled` | 是否使用k8s创建postgresql应用（生产环境不建议使用容器部署） |`true` | 
+| `postgres.type` | 如果使用外部的`postgres`，设置为`external` |`internal` | 
 | **mongodb** | | |
-| `mongodb.enabled` | 是否使用k8s创建mongodb应用 （生产环境不建议使用容器部署）| `true`| 
+| `mongodb.type` | 如果使用外部的`mongodb`，设置为`external`| `internal`| 
 | **redis** | | |
-| `redis.enabled` | 是否使用k8s创建redis应用（生产环境不建议使用容器部署）|`true` | 
+| `redis.type` | 如果使用外部的`redis`，设置为`external` |`internal` | 
 | **etcd** | | |
-| `etcd.enabled` | 是否使用k8s创建etcd（生产环境不建议使用容器部署） |`true` | 
+| `etcd.type` | 如果使用外部的`etcd`，设置为`external` |`internal` | 
 | **minio** | | |
-| `minio.enabled` | 是否使用k8s创建minio（生产环境不建议使用容器部署） | `true` |
+| `minio.type` | 如果使用外部的`minio`，设置为`external` | `internal` |
 
 
 ## 使用许可

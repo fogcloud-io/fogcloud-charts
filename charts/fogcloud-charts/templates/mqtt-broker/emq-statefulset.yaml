@@ -138,7 +138,7 @@ spec:
             - name: EMQX_CLUSTER__K8S__APP_NAME # 和EMQX_NAME一致
               value: mqtt-broker
             - name: EMQX_CLUSTER__K8S__NAMESPACE
-              value: {{ .Values.namespace }}
+              value: {{  .Release.Namespace }}
             - name: EMQX_CLUSTER__K8S__APISERVER
               value: {{ .Values.k8sApiServer }}  
             {{ range $fields := $app.envVars }}

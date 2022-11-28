@@ -21,11 +21,16 @@ helm pull fogcloud-charts/fogcloud-charts --untar
 
 1. cp fogcloud-charts/values.yaml ./myvalues.yaml
 2. edit myvalues.yaml
-3. install fogcloud-charts
+3. install fission
+```console
+helm install fission ./fission-all -n fission
+```
+4. install fogcloud-charts
 ```console
 helm install -f myvalues.yaml ${RELEASE_NAME} -n ${NAMESPACE_NAME} ./fogcloud-charts
+helm uninstall fission -n fission
 ```
-4. upgrade fogcloud-charts
+5. upgrade fogcloud-charts
 ```console
 helm upgrade -f myvalues.yaml ${RELEASE_NAME} -n ${NAMESPACE_NAME} ./fogcloud-charts 
 ```

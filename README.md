@@ -15,17 +15,22 @@
 helm repo add fogcloud-charts https://fogcloud-io.github.io/fogcloud-charts
 helm repo update
 helm pull fogcloud-charts/fogcloud-charts --untar
+helm pull fogcloud-charts/fission-all --untar
 ```
 运行后在当前目录会生成fogcloud-charts文件夹
 
 ## 安装chart
 1. 拷贝fogcloud-charts目录的values.yaml文件，并命名为myvalues.yaml
 2. 编辑myvalues.yaml文件，参考配置说明
-3. 安装fogcloud-charts
+3. 安装fission
+```console
+helm install fission ./fission-all -n fission
+```
+4. 安装fogcloud-charts
 ```console
 helm install -f myvalues.yaml ${RELEASE_NAME} -n ${NAMESPACE_NAME} ./fogcloud-charts
 ```
-4. 升级fogcloud-charts
+5. 升级fogcloud-charts
 ```console
 helm upgrade -f myvalues.yaml ${RELEASE_NAME} -n ${NAMESPACE_NAME} ./fogcloud-charts 
 ```
@@ -34,6 +39,7 @@ helm upgrade -f myvalues.yaml ${RELEASE_NAME} -n ${NAMESPACE_NAME} ./fogcloud-ch
 
 ```console
 helm uninstall ${RELEASE_NAME} -n ${NAMESPACE_NAME}
+helm uninstall fission -n fission
 ```
 注意：默认启用了helm的资源保留，卸载时不会释放persistent volume资源；
 

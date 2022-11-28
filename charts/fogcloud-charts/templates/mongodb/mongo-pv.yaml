@@ -5,7 +5,9 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   annotations:
+    {{ if $persistence.keep }}
     "helm.sh/resource-policy": keep
+    {{ end }}
   labels:
     pvc: mongo-data
   name: mongo-pvc

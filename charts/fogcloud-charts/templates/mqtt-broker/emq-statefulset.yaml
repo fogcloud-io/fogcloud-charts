@@ -89,8 +89,6 @@ spec:
             - name: dashboard
               containerPort: 18083
           volumeMounts:
-            - name: emqx-data
-              mountPath: "/opt/emqx/data/mnesia"
             - name: emq-claim
               mountPath: /opt/emqx/etc/plugins/emqx_web_hook.conf
               subPath: emqx_web_hook.conf

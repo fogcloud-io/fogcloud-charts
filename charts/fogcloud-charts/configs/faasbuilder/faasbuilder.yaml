@@ -24,7 +24,7 @@ development: &development
   <<: *defaults
   REPO_URL: 192.168.10.73:30002
   REPO_API_URL: http://192.168.10.73:30002
-  FISSION_API_URL: http://controller
+  FISSION_API_URL: http://controller.fission.svc.cluster.local
   REPO_PROJECT: library
   ACCESS_KEY: admin
   ACCESS_SECRET: Harbor12345

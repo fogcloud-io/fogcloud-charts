@@ -17,7 +17,6 @@ maintainers:
   name: Sanket Sudake
 name: fission-all
 sources:
-- https://github.com/fission/fission
-- https://github.com/fission/keda-connectors
+- https://github.com/fogcloud-io/fogcloud-charts
 type: application
 version: v1.16.3

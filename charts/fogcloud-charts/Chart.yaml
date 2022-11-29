@@ -1,5 +1,5 @@
 apiVersion: v2
-name: fogcloud-charts
+name: fogcloud
 description: A Helm chart for fogcloud
 
 # A chart can be either an 'application' or a 'library' chart.
@@ -15,7 +15,7 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 1.1.15
+version: 1.1.16
 
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
@@ -29,6 +29,6 @@ sources:
   - https://github.com/fogcloud-io/fogcloud-charts
 
 dependencies:
-  - name: fission-all
-    version: "1.16.3"
-    repository: "file://../fission-all"
+  # - name: fission-all
+  #   version: "1.16.3"
+  #   repository: "file://../fission-all"

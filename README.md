@@ -14,26 +14,32 @@
 ```console
 helm repo add fogcloud-charts https://fogcloud-io.github.io/fogcloud-charts
 helm repo update
-helm pull fogcloud-charts/fogcloud-charts --untar
+helm pull fogcloud-charts/fogcloud --untar
+helm pull fogcloud-charts/fission-all --untar
 ```
 运行后在当前目录会生成fogcloud-charts文件夹
 
 ## 安装chart
 1. 拷贝fogcloud-charts目录的values.yaml文件，并命名为myvalues.yaml
 2. 编辑myvalues.yaml文件，参考配置说明
-3. 安装fogcloud-charts
+3. 安装fission
 ```console
-helm install -f myvalues.yaml ${RELEASE_NAME} -n ${NAMESPACE_NAME} ./fogcloud-charts
+helm install fission ./fission-all -n fission
 ```
-4. 升级fogcloud-charts
+4. 安装fogcloud-charts
 ```console
-helm upgrade -f myvalues.yaml ${RELEASE_NAME} -n ${NAMESPACE_NAME} ./fogcloud-charts 
+helm install -f myvalues.yaml ${RELEASE_NAME} -n ${NAMESPACE_NAME} ./fogcloud
+```
+5. 升级fogcloud-charts
+```console
+helm upgrade -f myvalues.yaml ${RELEASE_NAME} -n ${NAMESPACE_NAME} ./fogcloud 
 ```
 
 ## 卸载chart
 
 ```console
 helm uninstall ${RELEASE_NAME} -n ${NAMESPACE_NAME}
+helm uninstall fission -n fission
 ```
 注意：默认启用了helm的资源保留，卸载时不会释放persistent volume资源；
 
@@ -87,7 +93,7 @@ helm uninstall ${RELEASE_NAME} -n ${NAMESPACE_NAME}
 | `fogcloud.strategy.rollingUpdate.maxSurge` | 应用更新时最大新版本pod新增数量比例| `50%` |
 | `fogcloud.strategy.rollingUpdate.maxUnavailable` | 应用更新时的最大不可用pod数量 | `0` |
 | **faasbuilder** | | |
-| `faasbuilder.createDockerconfigWithFile` | 使用文件创建dockerconfig对象 | `false` |
+| `faasbuilder.createKubeconfigWithFile` | 使用文件创建`kubeconfig`对象，用于创建云函数；若启用可将kubeconfig文件放到`fogcloud/configs/kubeconfig`目录下，并删除该目录的kubeconfig-demo文件 | `false` |
 | **mqttBroker** | | |
 | `mqttBroker.type` | mqtt-broker创建方式：`internal`，`external`；1）`internal`：使用helm自动创建；2）`external`：使用外部的mqtt-broker | `internal` |
 | `mqttBroker.internal.type` | mqtt-broker类型选择，默认`emqx`，不建议修改 | `emqx` |
@@ -104,7 +110,7 @@ helm uninstall ${RELEASE_NAME} -n ${NAMESPACE_NAME}
 | **rabbitmq** | | |
 | `rabbitmq.type `| rabbitmq创建方式：`internal`，`external`；1）`internal`：使用helm自动创建；2）`external`：使用外部的rabbitmq | `internal` |
 | `rabbitmq.internal.tls.enabled` | rabbitmq是否启用tls |  |
-| `rabbitmq.internal.tls.createWithCertFile` | 是否使用证书文件创建rabbitmq的sercret对象，启用rabbitmq.tls时有效；若为true，可将*.crt（证书）, *.key（密钥）文件放到fogcloud-charts/configs/cert/amqp目录下 |  | 
+| `rabbitmq.internal.tls.createWithCertFile` | 是否使用证书文件创建rabbitmq的sercret对象，启用rabbitmq.tls时有效；若为true，可将*.crt（证书）, *.key（密钥）文件放到`fogcloud/configs/cert/amqp`目录下，并删除该目录下的示例`tls.key`,`tls.crt`文件 |  | 
 | **postgres** | | |
 | `postgres.type` | 如果使用外部的`postgres`，设置为`external` |`internal` | 
 | **mongodb** | | |

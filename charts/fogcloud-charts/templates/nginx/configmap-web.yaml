@@ -23,11 +23,11 @@ data:
         }
 
         {{ if .Values.expose.insecureOSS }}
-        location /api/v1/oss {
+        location /api {
           return 301 http://{{ .Values.expose.hosts.api }}$request_uri;
         }
         {{ else }}
-        location /api/v1/oss {
+        location /api {
           return 301 https://{{ .Values.expose.hosts.api }}$request_uri;
         }
         {{ end }}

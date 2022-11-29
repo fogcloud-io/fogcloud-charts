@@ -28,6 +28,9 @@ helm install fission ./fission-all -n fission
 ```
 4. 安装fogcloud-charts
 ```console
+export NAMESPACE_NAME=fogcloud
+export RELEASE_NAME=fogcloud
+kubectl create namespace ${NAMESPACE_NAME}
 helm install -f myvalues.yaml ${RELEASE_NAME} -n ${NAMESPACE_NAME} ./fogcloud
 ```
 5. 升级fogcloud-charts

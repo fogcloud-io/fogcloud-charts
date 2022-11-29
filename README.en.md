@@ -28,8 +28,10 @@ helm install fission ./fission-all -n fission
 ```
 4. install fogcloud-charts
 ```console
+export NAMESPACE_NAME=fogcloud
+export RELEASE_NAME=fogcloud
+kubectl create namespace ${NAMESPACE_NAME}
 helm install -f myvalues.yaml ${RELEASE_NAME} -n ${NAMESPACE_NAME} ./fogcloud
-helm uninstall fission -n fission
 ```
 5. upgrade fogcloud-charts
 ```console
@@ -40,6 +42,7 @@ helm upgrade -f myvalues.yaml ${RELEASE_NAME} -n ${NAMESPACE_NAME} ./fogcloud
 
 ```console
 helm uninstall ${RELEASE_NAME} -n ${NAMESPACE_NAME}
+helm uninstall fission -n fission
 ```
 
 ## Configuration

@@ -9,7 +9,7 @@ serviceType: ClusterIP
 ## routerServiceType to consider while creating Fission Router service.
 ## For minikube, set this to NodePort, elsewhere use LoadBalancer or ClusterIP.
 ##
-routerServiceType: LoadBalancer
+routerServiceType: ClusterIP
 
 ## repository represents base repository for images used in the chart.
 ## Keep it empty for using existing local image

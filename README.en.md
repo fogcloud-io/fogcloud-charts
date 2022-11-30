@@ -1,6 +1,8 @@
 # fogcloud-charts
 [![standard-readme compliant](https://img.shields.io/badge/licence-Apache%202.0-blue)](https://www.apache.org/licenses/LICENSE-2.0) [![standard-readme compliant](https://img.shields.io/static/v1?label=official&message=demo&color=<COLOR>)](https://app.fogcloud.io)
 
+[中文](readme.md) | English
+
 [FogCloud](https://fogcloud.io) is a cloud native IoT PaaS.
 
 ## Prerequisites
@@ -31,6 +33,7 @@ helm install fission ./fission-all -n fission
 export NAMESPACE_NAME=fogcloud
 export RELEASE_NAME=fogcloud
 kubectl create namespace ${NAMESPACE_NAME}
+kubectl apply -f ./fogcloud/operator/rabbitmq-cluster-operator.yaml
 helm install -f myvalues.yaml ${RELEASE_NAME} -n ${NAMESPACE_NAME} ./fogcloud
 ```
 5. upgrade fogcloud-charts
@@ -43,6 +46,7 @@ helm upgrade -f myvalues.yaml ${RELEASE_NAME} -n ${NAMESPACE_NAME} ./fogcloud
 ```console
 helm uninstall ${RELEASE_NAME} -n ${NAMESPACE_NAME}
 helm uninstall fission -n fission
+kubectl delete -f ./fogcloud/operator/rabbitmq-cluster-operator.yaml
 ```
 
 ## Configuration

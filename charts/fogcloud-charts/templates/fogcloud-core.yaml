@@ -79,6 +79,13 @@ spec:
               subPath: fogcloud.yaml
               name: fogcloud-claim
       restartPolicy: {{ .Values.fogcloud.restartPolicy }}
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app: fogcloud
+              topologyKey: "kubernetes.io/hostname"        
       imagePullSecrets:
         {{ range $_, $secret := .Values.secret.imageCredentials }}
         - name: {{ $secret.name }}

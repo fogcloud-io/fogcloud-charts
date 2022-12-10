@@ -44,6 +44,13 @@ spec:
               subPath: fogcron.yaml
               name: fogcron-scheduler-claim
       restartPolicy: Always
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app: fogcron-scheduler
+              topologyKey: "kubernetes.io/hostname"        
       imagePullSecrets:
         {{ range $_, $secret := .Values.secret.imageCredentials }}
         - name: {{ $secret.name }}

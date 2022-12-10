@@ -99,6 +99,13 @@ spec:
         {{ range $_, $secret := .Values.secret.imageCredentials }}
         - name: {{ $secret.name }}
         {{ end }}
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app: fogcloud-web
+              topologyKey: "kubernetes.io/hostname"          
       volumes:
         - name: nginx-claim
           configMap:

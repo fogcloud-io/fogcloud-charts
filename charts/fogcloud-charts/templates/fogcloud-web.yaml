@@ -84,6 +84,10 @@ spec:
             - name: MQTT_BASE_URL
               value: "ws://{{ .Values.expose.hosts.mqtt }}/mqtt"          
             {{ end }}
+            {{ range $fields := .Values.fogcloudWeb.envVars }}
+            - name: {{ $fields.name }}
+              value: "{{ $fields.value }}"
+            {{ end }}            
           {{- if .Values.fogcloudWeb.resources }}
           resources:
 {{ toYaml .Values.fogcloudWeb.resources | indent 12 }}

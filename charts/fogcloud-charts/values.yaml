@@ -110,6 +110,11 @@ fogcloudWeb:
   image: ghcr.io/fogcloud-io/fogcloud-web
   imageTag: latest
   replicas: 1
+  envVars:
+    - name: "GATEWAY_CLOUD_STATUS"
+      value: "true"
+    - name: "MAP_CONFIG"
+      value: "china" 
   strategy: 
     type: RollingUpdate # enum: Recreate, RollingUpdate
     rollingUpdate:

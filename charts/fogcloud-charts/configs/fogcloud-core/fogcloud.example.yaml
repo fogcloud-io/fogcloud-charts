@@ -57,40 +57,33 @@ defaults: &defaults
   MONGO_URI: mongodb://127.0.0.1:27017
   MONGO_DBNAME: fogcloud
 
-  # mqtt服务器配置
-  MQTT:
-    # mqtt服务器类型：emqx, vernemq, hmq  
-    BROKER_TYPE: emqx
-
-    BROKER_ADAPTOR:
-      emqx:
-        HTTP_AUTH_PATH: /mqtt/auth/emqx
-        HTTP_ACL_PATH: /mqtt/acl/emqx
-        HTTP_WEBHOOK_PATH: /mqtt/webhook/emqx
-      verne:
-        HTTP_AUTH_PATH: /mqtt/auth/verne
-        HTTP_ACL_PATH: /mqtt/acl/verne
-        HTTP_WEBHOOK_PATH: /mqtt/webhook/verne
-      hmq:
-        AMQP_QUEUE_NAME: fogcloud
-        AMQP_EXCHANGE: mqtt.bridge
-        HTTP_AUTH_PATH: /mqtt/auth/hmq
-        HTTP_ACL_PATH: /mqtt/acl/hmq
-
-    # mqtt服务器http服务域名和身份信息
-    BROKER_HOST: 127.0.0.1
-    BROKER_ID: admin
-    BROKER_SECRET: public
-
-    # mqtt服务对应端口
-    BROKER_API_PORT: 8081
-    BROKER_TCP_PORT: 1883
-    BROKER_TLS_PORT: 8883
-    BROKER_WS_PORT: 8083
-    BROKER_WSS_PORT: 8084
-
-    # mqtt连接池大小
-    CLIENT_POOL_SIZE: 5
+  MQTT_BROKER_TYPE: emqx
+  MQTT_BROKER_ADAPTOR:
+    emqx:
+      HTTP_AUTH_PATH: /mqtt/auth/emqx
+      HTTP_ACL_PATH: /mqtt/acl/emqx
+      HTTP_WEBHOOK_PATH: /mqtt/webhook/emqx
+    verne:
+      HTTP_AUTH_PATH: /mqtt/auth/verne
+      HTTP_ACL_PATH: /mqtt/acl/verne
+      HTTP_WEBHOOK_PATH: /mqtt/webhook/verne
+    hmq:
+      AMQP_QUEUE_NAME: fogcloud
+      AMQP_EXCHANGE: mqtt.bridge
+      HTTP_AUTH_PATH: /mqtt/auth/hmq
+      HTTP_ACL_PATH: /mqtt/acl/hmq
+  # mqtt服务器http服务域名和身份信息
+  MQTT_BROKER_HOST: 127.0.0.1
+  MQTT_BROKER_ID: admin
+  MQTT_BROKER_SECRET: public
+  # mqtt服务对应端口
+  MQTT_BROKER_API_PORT: 8081
+  MQTT_BROKER_TCP_PORT: 1883
+  MQTT_BROKER_TLS_PORT: 8883
+  MQTT_BROKER_WS_PORT: 8083
+  MQTT_BROKER_WSS_PORT: 8084
+  # mqtt连接池大小
+  MQTT_CLIENT_POOL_SIZE: 5
 
   # rabbitmq配置
   RABBITMQ_TLS: false
@@ -134,32 +127,7 @@ development: &development
   CRON_WORKER_BROKER_ENDPOINTS: redis://redis:6379/1
   CRON_WORKER_RESULT_BACKEND_ENDPOINT: redis://redis:6379/2
 
-  MQTT:
-    BROKER_TYPE: emqx
-    BROKER_ADAPTOR:
-      emqx:
-        HTTP_AUTH_PATH: /mqtt/auth/emqx
-        HTTP_ACL_PATH: /mqtt/acl/emqx
-        HTTP_WEBHOOK_PATH: /mqtt/webhook/emqx
-      verne:
-        HTTP_WEBHOOK_PATH: /mqtt/webhook/verne
-      hmq:
-        AMQP_QUEUE_NAME: fogcloud
-        AMQP_EXCHANGE: mqtt.bridge
-        HTTP_AUTH_PATH: /mqtt/auth/hmq
-        HTTP_ACL_PATH: /mqtt/acl/hmq
-
-    BROKER_HOST: mqtt-broker
-    BROKER_ID: admin
-    BROKER_SECRET: public
-
-    BROKER_API_PORT: 8081
-    BROKER_TCP_PORT: 1883
-    BROKER_TLS_PORT: 8883
-    BROKER_WS_PORT: 8083
-    BROKER_WSS_PORT: 8084
-
-    CLIENT_POOL_SIZE: 5
+  MQTT_BROKER_HOST: mqtt-broker
 
   REDIS_HOST: redis
   POSTGRES_HOST: postgres

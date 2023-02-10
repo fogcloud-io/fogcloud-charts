@@ -98,9 +98,6 @@ spec:
             - name: emq-claim
               mountPath: /opt/emqx/data/loaded_plugins
               subPath: loaded_plugins
-            - name: emq-auth-claim
-              mountPath: /opt/emqx/etc/plugins/emqx_auth_mnesia.conf
-              subPath: emqx_auth_mnesia.conf
             {{ if $app.tls.enabled }}  
             - name: mqtt-secret
               mountPath: /opt/emqx/etc/certs/fogcloud.key
@@ -162,13 +159,7 @@ spec:
               - key: emqx_auth_http.conf
                 path: emqx_auth_http.conf
               - key: loaded_plugins
-                path: loaded_plugins
-        - name: emq-auth-claim
-          configMap:
-            name: emqx-auth-mnesia-config
-            items:
-              - key: emqx_auth_mnesia.conf
-                path: emqx_auth_mnesia.conf                
+                path: loaded_plugins           
         {{ if $app.tls.enabled }}          
         - name: mqtt-secret
           secret:

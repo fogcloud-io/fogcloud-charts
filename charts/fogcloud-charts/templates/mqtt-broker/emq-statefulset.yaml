@@ -143,7 +143,11 @@ spec:
             - name: EMQX_CLUSTER__K8S__NAMESPACE
               value: {{  .Release.Namespace }}
             - name: EMQX_CLUSTER__K8S__APISERVER
-              value: {{ .Values.k8sApiServer }}  
+              value: {{ .Values.k8sApiServer }}
+            - name: EMQX_DASHBOARD__DEFAULT_USER__LOGIN
+              value: "{{ $app.dashboardUsername }}"
+            - name: EMQX_DASHBOARD__DEFAULT_USER__PASSWORD
+              value: "{{ $app.dashboardPassword }}"
             {{ range $fields := $app.envVars }}
             - name: {{ $fields.name }}
               value: "{{ $fields.value }}"

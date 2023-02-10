@@ -169,8 +169,10 @@ mqttBroker:
     type: emqx
     image: emqx/emqx
     imageTag: 4.2.8
-    defaultUsername: fogcloud-core
-    defaultPassword: oavcvziD^srz
+    defaultUsername: fogcloud
+    defaultPassword: "4Jy!YC7bdpsjU*6k"
+    dashboardUsername: admin
+    dashboardPassword: "%PWpPb*qhB*g82dY"
     persistence:
       pvcExisted: false
       pvc: emqx-pvc

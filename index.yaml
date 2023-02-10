@@ -30,6 +30,19 @@ entries:
     version: v1.16.3
   fogcloud:
   - apiVersion: v2
+    appVersion: v4.16.0
+    created: "2023-02-10T13:16:43.843973022Z"
+    description: A Helm chart for fogcloud
+    digest: 78385c4a05c107319853bca4be44dd9419a2603ea77ad01284ed420a5e42bf4f
+    home: https://fogcloud.io
+    name: fogcloud
+    sources:
+    - https://github.com/fogcloud-io/fogcloud-charts
+    type: application
+    urls:
+    - https://github.com/fogcloud-io/fogcloud-charts/releases/download/fogcloud-1.1.22/fogcloud-1.1.22.tgz
+    version: 1.1.22
+  - apiVersion: v2
     appVersion: v4.15.1
     created: "2023-02-10T01:44:56.256230401Z"
     description: A Helm chart for fogcloud
@@ -372,4 +385,4 @@ entries:
     urls:
     - https://github.com/fogcloud-io/fogcloud-charts/releases/download/fogcloud-charts-1.0.0/fogcloud-charts-1.0.0.tgz
     version: 1.0.0
-generated: "2023-02-10T01:44:56.256427106Z"
+generated: "2023-02-10T13:16:43.844034222Z"

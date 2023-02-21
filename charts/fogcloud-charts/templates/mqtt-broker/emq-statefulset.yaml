@@ -145,6 +145,10 @@ spec:
               value: "{{ $app.dashboardUsername }}"
             - name: EMQX_DASHBOARD__DEFAULT_USER__PASSWORD
               value: "{{ $app.dashboardPassword }}"
+            - name: EMQX_MANAGEMENT__DEFAULT_APPLICATION__ID
+              value: "{{ $app.defaultUsername }}"
+            - name: EMQX_MANAGEMENT__DEFAULT_APPLICATION__SECRET
+              value: "{{ $app.defaultUsername }}"
             {{ range $fields := $app.envVars }}
             - name: {{ $fields.name }}
               value: "{{ $fields.value }}"

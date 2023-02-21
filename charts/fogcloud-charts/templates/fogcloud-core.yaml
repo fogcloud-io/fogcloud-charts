@@ -70,10 +70,16 @@ spec:
           env:
             - name: FOG_ENABLE_TLS
               value: "{{ .Values.expose.tls.enabled }}"
+            {{ if eq .Values.mqttBroker.type "internal" }}
             - name: FOG_MQTT_BROKER_ID
               value: "{{ .Values.mqttBroker.internal.defaultUsername }}"
             - name: FOG_MQTT_BROKER_SECRET
               value: "{{ .Values.mqttBroker.internal.defaultPassword }}"
+            - name: FOG_MQTT_DASHBOARD_USERNAME
+              value: "{{ .Values.mqttBroker.internal.dashboardUsername }}"
+            - name: FOG_MQTT_DASHBOARD_PASSWORD
+              value: "{{ .Values.mqttBroker.internal.dashboardPassword }}"
+            {{ end }}  
             {{ range $fields := .Values.fogcloud.envVars }}
             - name: {{ $fields.name }}
               value: "{{ $fields.value }}"

@@ -148,7 +148,7 @@ spec:
             - name: EMQX_MANAGEMENT__DEFAULT_APPLICATION__ID
               value: "{{ $app.defaultUsername }}"
             - name: EMQX_MANAGEMENT__DEFAULT_APPLICATION__SECRET
-              value: "{{ $app.defaultUsername }}"
+              value: "{{ $app.defaultPassword }}"
             {{ range $fields := $app.envVars }}
             - name: {{ $fields.name }}
               value: "{{ $fields.value }}"

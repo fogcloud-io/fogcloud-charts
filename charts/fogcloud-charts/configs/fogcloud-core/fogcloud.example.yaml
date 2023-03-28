@@ -24,7 +24,7 @@ defaults: &defaults
 
   # 管理后台初始账号和密码
   APP_ID: root
-  APP_SECRET: fogcloud
+  APP_SECRET: "^#sJGEcn^nZ%_A)3"
 
   # 系统api错误提示国际化文件路径
   I18N_FILEPATH:
@@ -75,8 +75,8 @@ defaults: &defaults
   # mqtt服务器域名
   MQTT_BROKER_HOST: 127.0.0.1
   # mqtt服务器mqtt super账号信息
-  MQTT_BROKER_ID: admin
-  MQTT_BROKER_SECRET: public
+  MQTT_BROKER_ID: fogcloud
+  MQTT_BROKER_SECRET: "w&GB_7fh#NMpxFfA"
   # mqtt服务器管理后台身份信息
   MQTT_DASHBOARD_USERNAME: admin
   MQTT_DASHBOARD_PASSWORD: public  
@@ -93,7 +93,7 @@ defaults: &defaults
   RABBITMQ_TLS: false
   RABBITMQ_HOST: 127.0.0.1
   RABBITMQ_PORT: 5672
-  RABBITMQ_USER: rabbitmq
+  RABBITMQ_USER: fogcloud
   RABBITMQ_PASSWORD: fogcloud
   RABBITMQ_EVENTS_EX: fogcloud.event_notify
   RABBITMQ_QUEUE_MAX_LENGTH: 100

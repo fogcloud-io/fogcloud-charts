@@ -80,6 +80,12 @@ spec:
             - name: FOG_MQTT_DASHBOARD_PASSWORD
               value: "{{ .Values.mqttBroker.internal.dashboardPassword }}"
             {{ end }}  
+            {{ if eq .Values.rabbitmq.type "internal" }}
+            - name: FOG_RABBITMQ_USER
+              value: "{{ .Values.rabbitmq.internal.defaultUsername }}"
+            - name: FOG_RABBITMQ_PASSWORD
+              value: "{{ .Values.rabbitmq.internal.defaultPassword }}"
+            {{ end }}            
             {{ range $fields := .Values.fogcloud.envVars }}
             - name: {{ $fields.name }}
               value: "{{ $fields.value }}"

@@ -11,8 +11,7 @@ defaults: &defaults
   ENABLE_TLS: true
   # 是否启用不安全的oss下载；true：使用http下载，false：使用https下载；
   INSECURE_OSS: true
-  # 是否打开遥测
-  ENABLE_TELEMETRY: true
+  
   # geo文件路径
   GEO_DATABASE_FILEPATH: /etc/fogcloud/IP2LOCATION-LITE-DB3.BIN
   # topics定义文件路径
@@ -21,6 +20,11 @@ defaults: &defaults
   IP_WHITE_TABLE: []
   # 用于加密的key值，生产环境请使用长度超过16字节的随机字符串
   AUTH_KEY: "not-a-secure-key"
+
+  # 是否开启云网关
+  ENABLE_CLOUD_GATEWAY: true
+  # 是否打开遥测
+  ENABLE_TELEMETRY: true
 
   # 管理后台初始账号和密码
   APP_ID: root

@@ -97,11 +97,13 @@ spec:
       restartPolicy: {{ .Values.fogcloud.restartPolicy }}
       affinity:
         podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            - labelSelector:
-                matchLabels:
-                  app: fogcloud
-              topologyKey: "kubernetes.io/hostname"        
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: fogcloud
+                topologyKey: "kubernetes.io/hostname"
+              weight: 100                 
       imagePullSecrets:
         {{ range $_, $secret := .Values.secret.imageCredentials }}
         - name: {{ $secret.name }}

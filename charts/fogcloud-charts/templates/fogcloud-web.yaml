@@ -84,6 +84,10 @@ spec:
             - name: MQTT_BASE_URL
               value: "ws://{{ .Values.expose.hosts.mqtt }}/mqtt"          
             {{ end }}
+            {{ if .Values.cloudGatewayEnabled }}
+            - name: "GATEWAY_CLOUD_STATUS"
+              value: "true"          
+            {{ end }}
             {{ range $fields := .Values.fogcloudWeb.envVars }}
             - name: {{ $fields.name }}
               value: "{{ $fields.value }}"

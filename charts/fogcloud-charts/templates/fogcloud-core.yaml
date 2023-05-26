@@ -85,7 +85,15 @@ spec:
               value: "{{ .Values.rabbitmq.internal.defaultUsername }}"
             - name: FOG_RABBITMQ_PASSWORD
               value: "{{ .Values.rabbitmq.internal.defaultPassword }}"
-            {{ end }}            
+            {{ end }}
+            {{ if .Values.cloudGatewayEnabled }}
+            - name: FOG_ENABLE_CLOUD_GATEWAY 
+              value: "true"
+            {{ end }}
+            {{ if .Values.telemetryEnabled }}
+            - name: FOG_ENABLE_TELEMETRY 
+              value: "true"            
+            {{ end }}          
             {{ range $fields := .Values.fogcloud.envVars }}
             - name: {{ $fields.name }}
               value: "{{ $fields.value }}"

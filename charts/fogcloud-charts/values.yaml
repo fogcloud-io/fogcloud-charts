@@ -10,6 +10,11 @@ imagePullPolicy: Always
 k8sApiServer: "https://localhost:6443"
 # 是否启用云函数功能，若安装了fission可以设置为true
 fissionEnabled: false
+# 是否启用云网关功能
+cloudGatewayEnabled: true
+# 是否启用遥测
+telemetryEnabled: true
+
 
 # 暴露web管理后台和api服务，有：Ingress, ClusterIP, NodePort, LoadBalancer这几种类型；
 # 若要公开服务，请使用LoadBalancer,Ingress,NodePort三种类型
@@ -93,7 +98,7 @@ resourceRangeLimit:
 
 fogcloud:
   restartPolicy: Always
-  image: ghcr.io/fogcloud-io/fogcloud
+  image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-fogcloud
   imageTag: latest
   replicas: 1
   strategy: 
@@ -107,14 +112,14 @@ fogcloud:
     #   memory: "128Mi"
 
 fogcloudWeb:
-  image: ghcr.io/fogcloud-io/fogcloud-web
+  image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-fogcloud-web
   imageTag: latest
   replicas: 1
   envVars:
-    - name: "GATEWAY_CLOUD_STATUS"
-      value: "true"
     - name: "MAP_CONFIG"
-      value: "china" 
+      value: "china"
+    - name: "DEPLOYMENT_CONFIG"
+      value: "private"
   strategy: 
     type: RollingUpdate # enum: Recreate, RollingUpdate
     rollingUpdate:
@@ -126,7 +131,7 @@ fogcloudWeb:
     #   memory: "128Mi"
 
 faasbuilder:
-  image: ghcr.io/fogcloud-io/faas-builder
+  image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-faas-builder
   imageTag: latest
   createKubeconfigWithFile: false
   replicas: 1
@@ -141,7 +146,7 @@ faasbuilder:
       maxUnavailable: 25%
 
 fogcronScheduler:
-  image: ghcr.io/fogcloud-io/fogcron-scheduler
+  image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-fogcron-scheduler
   imageTag: latest
   replicas: 1
   resources:

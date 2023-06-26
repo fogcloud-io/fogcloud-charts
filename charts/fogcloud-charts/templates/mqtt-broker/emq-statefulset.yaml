@@ -89,6 +89,8 @@ spec:
             - name: dashboard
               containerPort: 18083
           volumeMounts:
+            - name: emqx-data
+              mountPath: "/opt/emqx/data/mnesia"
             - name: emq-claim
               mountPath: /opt/emqx/etc/plugins/emqx_web_hook.conf
               subPath: emqx_web_hook.conf
@@ -177,6 +179,11 @@ spec:
   volumeClaimTemplates:
     - metadata:
         name: emqx-data
+        annotations:
+          {{- if $app.persistence.keep }}
+          "helm.sh/resource-policy": keep
+          {{- end }}
+          volume.alpha.kubernetes.io/storage-class: manual
       spec:
         accessModes: [ "ReadWriteOnce" ]
         storageClassName: {{ $app.persistence.storageClassName }}

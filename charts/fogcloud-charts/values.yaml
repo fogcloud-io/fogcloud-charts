@@ -194,6 +194,7 @@ mqttBroker:
     dashboardUsername: admin
     dashboardPassword: "%PWpPb*qhB*g82dY"
     persistence:
+      keep: true
       pvcExisted: false
       pvc: emqx-pvc
       storageClassName: local-path

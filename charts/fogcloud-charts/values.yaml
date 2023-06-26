@@ -43,7 +43,7 @@ expose:
         dnsName: 
 
   Ingress:
-    className: traefik
+    className: traefik-lb
     controller: traefik.io/ingress-controller
     annotations: {}
     hosts:
@@ -107,9 +107,12 @@ fogcloud:
       maxSurge: 25%
       maxUnavailable: 25%
   resources:
-    # limits:
-    #   cpu: "0.5"
-    #   memory: "128Mi"
+    limits:
+      cpu: "0.5"
+      memory: "512Mi"
+    requests:
+      cpu: "0.01"
+      memory: "64Mi"  
 
 fogcloudWeb:
   image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-fogcloud-web
@@ -126,9 +129,12 @@ fogcloudWeb:
       maxSurge: 25%
       maxUnavailable: 25%
   resources:
-    # limits:
-    #   cpu: "1"
-    #   memory: "128Mi"
+    limits:
+      cpu: "0.1"
+      memory: "64Mi"
+    requests:
+      cpu: "0.01"
+      memory: "32Mi"
 
 faasbuilder:
   image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-faas-builder
@@ -136,9 +142,12 @@ faasbuilder:
   createKubeconfigWithFile: false
   replicas: 1
   resources:
-    # limits:
-    #   cpu: "0.1"
-    #   memory: "128Mi"  
+    limits:
+      cpu: "0.1"
+      memory: "64Mi"
+    requests:
+      cpu: "0.01"
+      memory: "32Mi"      
   strategy: 
     type: RollingUpdate # enum: Recreate, RollingUpdate
     rollingUpdate:
@@ -150,9 +159,12 @@ fogcronScheduler:
   imageTag: latest
   replicas: 1
   resources:
-    # limits:
-    #   cpu: "1"
-    #   memory: "128Mi"  
+    limits:
+      cpu: "0.1"
+      memory: "64Mi"
+    requests:
+      cpu: "0.01"
+      memory: "32Mi"       
   strategy: 
     type: RollingUpdate # enum: Recreate, RollingUpdate
     rollingUpdate:
@@ -164,9 +176,12 @@ nginx:
   imageTag: 1.21
   replicas: 1
   resources:
-    # limits:
-    #   cpu: "1"
-    #   memory: "128Mi"  
+    limits:
+      cpu: "0.1"
+      memory: "64Mi"
+    requests:
+      cpu: "0.01"
+      memory: "32Mi"        
 
 mqttBroker:
   type: internal
@@ -186,7 +201,10 @@ mqttBroker:
     resources:
       limits:
         cpu: "1"
-        memory: "512Mi"  
+        memory: "512Mi"
+      requests:
+        cpu: "0.1"
+        memory: "128Mi"    
     nodeSelector:
       enabled: false
       key: kubernetes.io/hostname
@@ -238,7 +256,10 @@ rabbitmq:
     resources:
       limits:
         cpu: "1"
-        memory: "512Mi"  
+        memory: "512Mi"
+      requests:
+        cpu: "0.1"
+        memory: "128Mi"  
     tls:
       enabled: false
       certSource: none # file, auto, none 
@@ -268,8 +289,11 @@ postgres:
       storage: 2Gi
     resources:
       limits:
-        cpu: "0.1"
-        memory: "128Mi"  
+        cpu: "1"
+        memory: "512Mi"
+      requests:
+        cpu: "0.01"
+        memory: "64Mi"  
     envVars:
       - name: POSTGRES_DB
         value: fogcloud
@@ -292,8 +316,11 @@ mongodb:
       storage: 1Gi    
     resources:
       limits:
+        cpu: "1"
+        memory: "512Mi"
+      requests:
         cpu: "0.1"
-        memory: "128Mi"  
+        memory: "128Mi"    
     envVars:
 
 redis:
@@ -310,7 +337,10 @@ redis:
     resources:
       limits:
         cpu: "0.1"
-        memory: "128Mi"  
+        memory: "128Mi"
+      requests:
+        cpu: "0.01"
+        memory: "8Mi"   
     envVars:
 
 etcd:
@@ -328,7 +358,10 @@ etcd:
     resources:
       limits:
         cpu: "0.1"
-        memory: "128Mi"  
+        memory: "256Mi"
+      requests:
+        cpu: "0.01"
+        memory: "64Mi"    
     replicas: 1
     envVars:
       - name: ALLOW_NONE_AUTHENTICATION
@@ -353,7 +386,10 @@ minio:
     resources:
       limits:
         cpu: "0.1"
-        memory: "128Mi"  
+        memory: "256Mi"
+      requests:
+        cpu: "0.01"
+        memory: "64Mi"   
     envVars:
       - name: MINIO_ACCESS_KEY
         value: "1234567890"

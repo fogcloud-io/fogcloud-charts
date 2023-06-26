@@ -287,7 +287,7 @@ postgres:
       keep: true
       pvc: postgres-pvc
       storageClassName: local-path
-      storage: 2Gi
+      storage: 10Gi
     resources:
       limits:
         cpu: "1"
@@ -314,7 +314,7 @@ mongodb:
       pvcExisted: false
       pvc: mongo-pvc
       storageClassName: local-path
-      storage: 1Gi    
+      storage: 30Gi    
     resources:
       limits:
         cpu: "1"

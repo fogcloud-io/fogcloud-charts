@@ -28,6 +28,10 @@ data:
         proxy_pass http://fogcloud:4000/openapi/;
       }
 
+      location /openapp/ {
+        proxy_pass http://fogcloud:4000/openapp/;
+      }
+
       {{ if .Values.fissionEnabled }}
       location /faas/functions/ {
         proxy_pass http://router.fission.svc.cluster.local/;

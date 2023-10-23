@@ -58,7 +58,7 @@ spec:
     matchLabels:
       app: nginx
   strategy:
-    type: Recreate
+    type: RollingUpdate
   template:
     metadata:
       labels:

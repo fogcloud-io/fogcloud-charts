@@ -123,10 +123,18 @@ spec:
             - name: EMQX_LISTENER__WSS__EXTERNAL__CACERTFILE
               value: etc/certs/fogcloud.crt
             {{ end }}  
+            - name: EMQX_NODE__PROCESS_LIMIT
+              value: "2097152"
+            - name: EMQX_NODE__MAX_PORTS
+              value: "1048576"
+            - name: EMQX_LISTENER__SSL__EXTERNAL__ACCEPTORS
+              value: "64"
+            - name: EMQX_LISTENER__SSL__EXTERNAL__MAX_CONNECTIONS
+              value: "204800"
             - name: EMQX_LISTENER__TCP__EXTERNAL__ACCEPTORS
               value: "64"
             - name: EMQX_LISTENER__TCP__EXTERNAL__MAX_CONNECTIONS
-              value: "1024000"
+              value: "204800"
             - name: EMQX_NAME
               value: mqtt-broker
             - name: EMQX_CLUSTER__K8S__ADDRESS__TYPE

@@ -1,0 +1,5 @@
+{{- $name := "fogcron" }}
+{{- $rawConfig :=  .Files.Get "configs/fogcron/fogcron.yaml" | fromYaml }}
+{{- $newConfig := .Values.fogcronScheduler.config }}
+{{- $env := .Values.environment }}
+{{- template "fog.config.merge" (dict "name" $name "defaultConfig" $rawConfig "newConfig" $newConfig "env" $env) }}

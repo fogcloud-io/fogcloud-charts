@@ -33,6 +33,9 @@ development: &development
   REDIS_HOST: redis
   POSTGRES_HOST: postgres
 
+beta:
+  <<: *development
+
 test:
   <<: *development
 

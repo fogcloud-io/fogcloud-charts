@@ -12,6 +12,8 @@ k8sApiServer: "https://localhost:6443"
 fissionEnabled: false
 # 是否启用云网关功能
 cloudGatewayEnabled: true
+# 是否启用tdengine历史数据存储
+tdengineEnabled: true
 # 是否启用遥测
 telemetryEnabled: true
 
@@ -71,12 +73,7 @@ expose:
         
 secret:
   # 配置私有镜像仓库    
-  imageCredentials:
-    # - registry:
-    #   name:
-    #   username:
-    #   password:
-    #   email:
+  imageCredentials: []
 
 storageClassName: "local-path"
 
@@ -99,7 +96,159 @@ resourceRangeLimit:
 fogcloud:
   restartPolicy: Always
   image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-fogcloud
+  imageTag: v5.3.0
+  config: {}
+  replicas: 1
+  service:
+    externalTrafficPolicy: Local
+    type: ClusterIP
+    ports:
+      http:
+        nodePort: 4000
+      grpc:
+        nodePort: 4001
+  strategy: 
+    type: RollingUpdate # enum: Recreate, RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  resources:
+    # limits:
+    #   cpu: "0.5"
+    #   memory: "128Mi"
+
+fogcloudWeb:
+  image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-fogcloud-web
+  imageTag: v5.3.0
+  replicas: 1
+  envVars:
+    - name: "MAP_CONFIG"
+      value: "china"
+    - name: "DEPLOYMENT_CONFIG"
+      value: "public"
+    - name: "GATEWAY_CLOUD_STATUS"
+      value: "true"
+    - name: "GLOB_APPLIANCE_STATUS"
+      value: "true"
+    - name: "GLOB_TOPIC_PREFIX"
+      value: "fogcloud"
+  strategy: 
+    type: RollingUpdate # enum: Recreate, RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  resources:
+    # limits:
+    #   cpu: "1"
+    #   memory: "128Mi"
+
+faasbuilder:
+  image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-faas-builder
   imageTag: latest
+  config: {}
+  createKubeconfigWithFile: false
+  replicas: 1
+  resources:
+    # limits:
+    #   cpu: "0.1"
+    #   memory: "128Mi"  
+  strategy: 
+    type: RollingUpdate # enum: Recreate, RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+
+fogcronScheduler:
+  image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-fogcron-scheduler
+  imageTag: latest
+  replicas: 1
+  config: {}
+  resources:
+    # limits:
+    #   cpu: "1"
+    #   memory: "128Mi"  
+  strategy: 
+    type: RollingUpdate # enum: Recreate, RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+
+fognotifier:
+  image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-fognotifier
+  imageTag: latest
+  replicas: 1
+  config: {}
+  resources:
+    limits:
+      cpu: "1"
+      memory: "128Mi"
+    requests:
+      cpu: "0.01"
+      memory: "16Mi"
+  strategy: 
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+
+mqttwebhook:
+  image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-mqttwebhook
+  imageTag: v5.1.1
+  replicas: 1
+  config: {}
+  resources:
+    limits:
+      cpu: "1"
+      memory: "128Mi"
+    requests:
+      cpu: "0.01"
+      memory: "16Mi"
+  strategy: 
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+
+fogthinghistory:
+  image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-fogthinghistory
+  imageTag: v5.0.0
+  replicas: 1
+  config: {}
+  resources:
+    limits:
+      cpu: "0.5"
+      memory: "128Mi"
+    requests:
+      cpu: "0.01"
+      memory: "16Mi"
+  strategy: 
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+
+fogreviser:
+  enabled: true
+  image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-fogreviser
+  imageTag: v2.2.0
+  replicas: 1
+  config: {}
+  resources:
+    limits:
+      cpu: "0.5"
+      memory: "32Mi"
+    requests:
+      cpu: "0.01"
+      memory: "16Mi"
+  strategy: 
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+
+nginx:
+  image: nginx
+  imageTag: 1.21
   replicas: 1
   strategy: 
     type: RollingUpdate # enum: Recreate, RollingUpdate
@@ -112,83 +261,14 @@ fogcloud:
       memory: "512Mi"
     requests:
       cpu: "0.01"
-      memory: "64Mi"  
-
-fogcloudWeb:
-  image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-fogcloud-web
-  imageTag: latest
-  replicas: 1
-  envVars:
-    - name: "MAP_CONFIG"
-      value: "china"
-    - name: "DEPLOYMENT_CONFIG"
-      value: "private"
-  strategy: 
-    type: RollingUpdate # enum: Recreate, RollingUpdate
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-  resources:
-    limits:
-      cpu: "0.1"
-      memory: "64Mi"
-    requests:
-      cpu: "0.01"
-      memory: "32Mi"
-
-faasbuilder:
-  image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-faas-builder
-  imageTag: latest
-  createKubeconfigWithFile: false
-  replicas: 1
-  resources:
-    limits:
-      cpu: "0.1"
-      memory: "64Mi"
-    requests:
-      cpu: "0.01"
-      memory: "32Mi"      
-  strategy: 
-    type: RollingUpdate # enum: Recreate, RollingUpdate
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-
-fogcronScheduler:
-  image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-fogcron-scheduler
-  imageTag: latest
-  replicas: 1
-  resources:
-    limits:
-      cpu: "0.1"
-      memory: "64Mi"
-    requests:
-      cpu: "0.01"
-      memory: "32Mi"       
-  strategy: 
-    type: RollingUpdate # enum: Recreate, RollingUpdate
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%    
-
-nginx:
-  image: nginx
-  imageTag: 1.21
-  replicas: 1
-  resources:
-    limits:
-      cpu: "0.1"
-      memory: "64Mi"
-    requests:
-      cpu: "0.01"
-      memory: "32Mi"        
+      memory: "16Mi"
 
 mqttBroker:
   type: internal
   internal:
     type: emqx
     image: emqx/emqx
-    imageTag: 4.2.8
+    imageTag: 4.2.14
     defaultUsername: fogcloud
     defaultPassword: "4Jy!YC7bdpsjU*6k"
     dashboardUsername: admin
@@ -202,10 +282,10 @@ mqttBroker:
     resources:
       limits:
         cpu: "1"
-        memory: "512Mi"
+        memory: "1Gi"
       requests:
-        cpu: "0.1"
-        memory: "128Mi"    
+        cpu: "0.01"
+        memory: "256Mi"
     nodeSelector:
       enabled: false
       key: kubernetes.io/hostname
@@ -237,19 +317,20 @@ mqttBroker:
           nodePort: 8084
         admin:
           port: 18083
-          nodePort: 18083        
+          nodePort: 18083
 
 rabbitmq:
   type: internal
   internal:
     image: rabbitmq
-    imageTag: 3.10.2-management
+    imageTag: 3.10.24-management
     replicas: 1
     defaultUsername: rabbitmq
     defaultPassword: fogcloud
     additionalConfigs:
     envVars:
     persistence:
+      keep: true
       pvcExisted: false
       pvc: rabbitmq-pvc
       storageClassName: local-path
@@ -257,10 +338,10 @@ rabbitmq:
     resources:
       limits:
         cpu: "1"
-        memory: "512Mi"
+        memory: "1Gi"
       requests:
-        cpu: "0.1"
-        memory: "128Mi"  
+        cpu: "0.01"
+        memory: "256Mi"
     tls:
       enabled: false
       certSource: none # file, auto, none 
@@ -283,18 +364,15 @@ postgres:
     image: postgres
     imageTag: 13
     persistence:
-      pvcExisted: false
+      pvcExisted: true
       keep: true
       pvc: postgres-pvc
       storageClassName: local-path
-      storage: 10Gi
+      storage: 2Gi
     resources:
       limits:
-        cpu: "1"
-        memory: "512Mi"
-      requests:
-        cpu: "0.01"
-        memory: "64Mi"  
+        cpu: "0.1"
+        memory: "128Mi"  
     envVars:
       - name: POSTGRES_DB
         value: fogcloud
@@ -306,7 +384,6 @@ postgres:
 mongodb:
   type: internal
   internal:
-    enabled: true
     image: mongo  
     imageTag: 4.4-rc-focal
     persistence:
@@ -314,14 +391,11 @@ mongodb:
       pvcExisted: false
       pvc: mongo-pvc
       storageClassName: local-path
-      storage: 30Gi    
+      storage: 1Gi    
     resources:
       limits:
-        cpu: "1"
-        memory: "512Mi"
-      requests:
         cpu: "0.1"
-        memory: "128Mi"    
+        memory: "128Mi"  
     envVars:
 
 redis:
@@ -338,16 +412,16 @@ redis:
     resources:
       limits:
         cpu: "0.1"
-        memory: "128Mi"
-      requests:
-        cpu: "0.01"
-        memory: "8Mi"   
+        memory: "128Mi"  
     envVars:
 
 etcd:
-  type: internal
+  type: external
   internal:
-    enabled: true
+    service:
+      type: ClusterIP
+      nodePorts:
+        api: "2379"
     image: bitnami/etcd
     imageTag: 3.5.1
     persistence:
@@ -359,10 +433,7 @@ etcd:
     resources:
       limits:
         cpu: "0.1"
-        memory: "256Mi"
-      requests:
-        cpu: "0.01"
-        memory: "64Mi"    
+        memory: "128Mi"  
     replicas: 1
     envVars:
       - name: ALLOW_NONE_AUTHENTICATION
@@ -373,9 +444,13 @@ etcd:
         value: "http://0.0.0.0:2379"
 
 minio:
-  type: internal
+  type: external
   internal: 
-    enabled: true
+    service:
+      type: ClusterIP
+      nodePorts:
+        api: "19000"
+        console: "19001"
     image: minio/minio
     imageTag: latest
     persistence:
@@ -387,10 +462,7 @@ minio:
     resources:
       limits:
         cpu: "0.1"
-        memory: "256Mi"
-      requests:
-        cpu: "0.01"
-        memory: "64Mi"   
+        memory: "128Mi"  
     envVars:
       - name: MINIO_ACCESS_KEY
         value: "1234567890"
@@ -402,3 +474,122 @@ minio:
         value: "minio"
       - name: MINIO_SECRET_KEY
         value: "abcdefghi"
+
+tdengine:
+  enabled: false
+  replicaCount: 3
+  resources:
+    limits:
+      cpu: "0.1"
+      memory: "128Mi"
+    requests:
+      cpu: "0.01"
+      memory: "64Mi"
+
+nats:
+  enabled: true
+  config:
+    cluster:
+      enabled: true
+      replicas: 3
+    jetstream:
+      enabled: true
+    merge:
+      system_account: SYS
+      accounts:
+        SYS: 
+          users:
+            - user: admin
+              password: public
+        APP:
+          jetstream:
+              max_memory: 1G
+              max_filestore: 10G
+              max_streams: 100
+              max_consumers: 100
+          jetstream: enabled
+          users:
+            - user: "fogcloud"
+              password: "root"
+  service:
+    ports:
+      monitor:
+        enabled: true
+  natsBox:
+    enabled: false
+  reloader:
+    enabled: true
+  container:
+    merge:
+      resources:
+        limits:
+          cpu: 1000m
+          memory: 256Mi
+        requests:
+          cpu: 10m
+          memory: 16Mi
+
+minio-cluster:
+  enabled: true
+  mode: distributed
+  nameOverride: minio
+  auth:
+    rootUser: "minio"
+    rootPassword: "fogcloud"
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 256Mi
+    requests:
+      cpu: 10m
+      memory: 128Mi
+  statefulset:
+    replicaCount: 4
+  persistence:
+    storageClass: local-path
+    size: 30Gi
+
+redis-cluster:
+  enabled: false
+  nameOverride: redis
+  global:
+    storageClass: local-path
+  master:
+    persistence:
+      size: 1Gi
+  sentinel:
+    enabled: true
+  auth:
+    password: "fogcloud"
+  replica:
+    persistence:
+      size: 1Gi
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 256Mi
+      requests:
+        cpu: 10m
+        memory: 16Mi
+
+etcd-cluster:
+  service:
+    type: NodePort
+    nodePorts:
+      client: "12379"
+  enabled: true
+  replicaCount: 3
+  logLevel: "debug"
+  auth:
+    rbac:
+      create: false
+  persistence:
+    storageClass: "local-path"
+    size: 2Gi
+  resources:
+    limits:
+      cpu: "0.1"
+      memory: "256Mi"
+    requests:
+      cpu: "0.01"
+      memory: "32Mi"

@@ -22,6 +22,9 @@ data:
   {{ range $_, $bytes := .Files.Glob "configs/cert/webAdmin/*.crt"  }}
   tls.crt: {{ $bytes | toString | b64enc }}
   {{ end }}
+  {{ range $_, $bytes := .Files.Glob "configs/cert/webAdmin/*.pem"  }}
+  tls.crt: {{ $bytes | toString | b64enc }}
+  {{ end }}
   {{ range $_, $bytes := .Files.Glob "configs/cert/webAdmin/*.key"  }}
   tls.key: {{ $bytes | toString | b64enc }}
   {{ end }}

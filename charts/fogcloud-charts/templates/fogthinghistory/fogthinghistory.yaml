@@ -1,0 +1,92 @@
+{{ if .Values.tdengineEnabled }}
+{{ $app := .Values.fogthinghistory }}
+{{ $appName := "fogthinghistory" }}
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    srv: {{ $appName }}
+{{ include "fogcloud.labels" . | indent 4 }}    
+  name: {{ $appName }}
+
+spec:
+  ports:
+    - name: "api"
+      port: 8300
+      targetPort: 8300
+  selector:
+    app: {{ $appName }}
+status:
+  loadBalancer: {}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+  labels:
+    component: {{ $appName }}
+{{ include "fogcloud.labels" . | indent 4 }}    
+  name: {{ $appName }}
+  
+spec:
+  replicas: {{ $app.replicas }}
+  selector:
+    matchLabels:
+      app: {{ $appName }}
+  strategy:
+    type: {{ $app.strategy.type }}
+    {{ if eq $app.strategy.type "RollingUpdate" }}
+    rollingUpdate:
+      maxSurge: {{ $app.strategy.rollingUpdate.maxSurge | default "50%" }}
+      maxUnavailable: {{ $app.strategy.rollingUpdate.maxUnavailable | default 0 }}
+    {{ end }}
+  template:
+    metadata:
+      annotations:
+      labels:
+        app: {{ $appName }}
+    spec:
+      containers:
+        - image: {{ $app.image }}:{{ $app.imageTag }}
+          args:
+            - -c
+            - /etc/{{ $appName }}/{{ $appName }}.yaml
+            - -e
+            - {{ .Values.environment }}
+          env: []
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          name: {{ $appName }}
+          ports:
+            - containerPort: 8090
+          {{- if $app.resources }}
+          resources:
+{{ toYaml $app.resources | indent 12 }}
+          {{- end }}
+          volumeMounts:
+            - mountPath: /etc/{{ $appName }}/{{ $appName }}.yaml
+              subPath: {{ $appName }}.yaml
+              name: {{ $appName }}-config
+      restartPolicy: Always
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: {{ $appName }}
+                topologyKey: "kubernetes.io/hostname"
+              weight: 100
+      imagePullSecrets:
+        {{ range $_, $secret := .Values.secret.imageCredentials }}
+        - name: {{ $secret.name }}
+        {{ end }}
+      volumes:
+        - name: {{ $appName }}-config
+          configMap:
+            name: {{ $appName }}-config
+            items:
+              - key: config.yaml
+                path: {{ $appName }}.yaml
+status: {}
+{{ end }}

@@ -1,4 +1,6 @@
+{{ if .Values.fissionEnabled }}
 # faasproxy-service
+{{ $appName := "faasbuilder" }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -68,11 +70,11 @@ spec:
           volumeMounts:
             - mountPath: /etc/faasbuilder/faasbuilder.yaml
               subPath: faasbuilder.yaml
-              name: fogcloud-claim
+              name: {{ $appName }}-claim
             {{ if .Values.faasbuilder.createKubeconfigWithFile }}  
             - mountPath: /etc/faasbuilder/kubeconfig
               subPath: kubeconfig
-              name: fogcloud-claim
+              name: fog-claim
             {{ end }}  
       restartPolicy: Always
       affinity:
@@ -89,14 +91,19 @@ spec:
         - name: {{ $secret.name }}
         {{ end }}
       volumes:
-        - name: fogcloud-claim
+        - name: {{ $appName }}-claim
+          configMap:
+            name: {{ $appName }}-config
+            items:
+              - key: config.yaml
+                path: faasbuilder.yaml
+        {{- if .Values.faasbuilder.createKubeconfigWithFile }}        
+        - name: fog-claim
           configMap:
             name: fog-config
             items:
-              - key: faasbuilder.yaml
-                path: faasbuilder.yaml
-              {{ if .Values.faasbuilder.createKubeconfigWithFile }}  
               - key: kubeconfig
                 path: kubeconfig
-              {{ end }}           
+        {{- end }}
 status: {}
+{{ end }}

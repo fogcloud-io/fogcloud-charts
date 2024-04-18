@@ -1,0 +1,5 @@
+{{- $name := "fognotifier" }}
+{{- $rawConfig :=  .Files.Get "configs/fognotifier/fognotifier.yaml" | fromYaml }}
+{{- $newConfig := .Values.fognotifier.config }}
+{{- $env := .Values.environment }}
+{{- template "fog.config.merge" (dict "name" $name "defaultConfig" $rawConfig "newConfig" $newConfig "env" $env) }}

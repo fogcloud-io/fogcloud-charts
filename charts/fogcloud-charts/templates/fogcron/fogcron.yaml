@@ -1,4 +1,5 @@
 # fogcron-scheduler
+{{ $appName := "fogcron" }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -60,8 +61,8 @@ spec:
       volumes:
         - name: fogcron-scheduler-claim
           configMap:
-            name: fog-config
+            name: {{ $appName }}-config
             items:
-              - key: fogcron.yaml
+              - key: config.yaml
                 path: fogcron.yaml
 status: {}

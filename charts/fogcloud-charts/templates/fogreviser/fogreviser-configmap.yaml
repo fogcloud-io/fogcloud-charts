@@ -1,0 +1,5 @@
+{{- $name := "fogreviser" }}
+{{- $rawConfig :=  .Files.Get "configs/fogreviser/fogreviser.yaml" | fromYaml }}
+{{- $newConfig := .Values.fogreviser.config }}
+{{- $env := .Values.environment }}
+{{- template "fog.config.merge" (dict "name" $name "defaultConfig" $rawConfig "newConfig" $newConfig "env" $env) }}

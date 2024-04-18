@@ -1,0 +1,30 @@
+defaults: &defaults
+  LISTEN: :8100
+  LOG_LEVEL: debug
+
+  NATS_URL: nats://localhost:4222
+  NATS_QUEUE: mqtt
+  NATS_USERNAME: fogcloud
+  NATS_PASSWORD: root
+
+  REDIS_HOST: localhost
+  REDIS_PORT: 6379
+  REDIS_PASSWORD:
+  REDIS_DB: 1
+  REDIS_USERNAME:
+
+  MQTT_BROKER_ID: admin # 用于过滤该mqtt client的上报消息
+  MQTT_BROKER_SECRET: public 
+
+development: &development
+  <<: *defaults
+
+  NATS_URL: nats://fogcloud-nats:4222
+
+  REDIS_HOST: redis
+
+beta:
+  <<: *development
+
+production:
+  <<: *development

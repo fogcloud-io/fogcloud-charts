@@ -1,0 +1,5 @@
+{{- $name := "fogthinghistory" }}
+{{- $rawConfig :=  .Files.Get "configs/fogthinghistory/fogthinghistory.yaml" | fromYaml }}
+{{- $newConfig := .Values.fogthinghistory.config }}
+{{- $env := .Values.environment }}
+{{- template "fog.config.merge" (dict "name" $name "defaultConfig" $rawConfig "newConfig" $newConfig "env" $env) }}

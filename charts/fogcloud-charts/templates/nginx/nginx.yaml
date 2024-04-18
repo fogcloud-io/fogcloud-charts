@@ -58,7 +58,12 @@ spec:
     matchLabels:
       app: nginx
   strategy:
-    type: RollingUpdate
+    type: {{ .Values.nginx.strategy.type | default "RollingUpdate" }}
+    {{- if eq .Values.nginx.strategy.type "RollingUpdate" }}
+    rollingUpdate:
+      maxSurge: {{ .Values.nginx.strategy.rollingUpdate.maxSurge | default "50%" }}
+      maxUnavailable: {{ .Values.nginx.strategy.rollingUpdate.maxUnavailable | default 0 }}
+    {{- end }}
   template:
     metadata:
       labels:
@@ -84,11 +89,13 @@ spec:
       restartPolicy: Always
       affinity:
         podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            - labelSelector:
-                matchLabels:
-                  app: nginx
-              topologyKey: "kubernetes.io/hostname"    
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: nginx
+                topologyKey: "kubernetes.io/hostname"
+              weight: 100
       volumes:
         - name: nginx-claim
           configMap:

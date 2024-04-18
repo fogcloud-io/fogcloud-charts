@@ -1,0 +1,5 @@
+{{- $name := "fogcore" }}
+{{- $rawConfig :=  .Files.Get "configs/fogcloud-core/fogcloud.example.yaml" | fromYaml }}
+{{- $newConfig := .Values.fogcloud.config }}
+{{- $env := .Values.environment }}
+{{- template "fog.config.merge" (dict "name" $name "defaultConfig" $rawConfig "newConfig" $newConfig "env" $env) }}

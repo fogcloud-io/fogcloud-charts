@@ -1,18 +1,28 @@
 {{ if eq .Values.etcd.type "internal" }}
 {{ $app := .Values.etcd.internal }}
+{{ $svcType := .Values.etcd.internal.service.type | default "ClusterIP" }}
 apiVersion: v1
 kind: Service
 metadata:
   labels:
 {{ include "fogcloud.labels" . | indent 4 }}   
-    srv: etcd1
-  name: etcd1
-  
+    srv: fogcloud-etcd
+  name: fogcloud-etcd
 spec:
+  type: {{ $svcType }}
+  {{ if or (eq $svcType "NodePort") (eq $svcType "LoadBalancer") }}
+  externalTrafficPolicy: "Local"
+    {{ if and (eq $app.service.externalTrafficPolicy "Local") (eq $svcType "LoadBalancer") }}
+  healthCheckNodePort: {{ $app.service.healthCheckNodePort }}
+    {{ end }}
+  {{ end }}
   ports:
     - name: "2379"
       port: 2379
       targetPort: 2379
+      {{ if or (eq $svcType "NodePort") (eq $svcType "LoadBalancer") }}
+      nodePort: {{ $app.service.nodePorts.api }}
+      {{ end }}
   selector:
     app: etcd1
 status:

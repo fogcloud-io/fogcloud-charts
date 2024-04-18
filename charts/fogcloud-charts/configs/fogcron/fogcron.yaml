@@ -9,7 +9,7 @@ defaults: &defaults
 
 development: &development
   <<: *defaults
-  ETCD_ENDPOINTS: etcd1:2379
+  ETCD_ENDPOINTS: fogcloud-etcd:2379
   BROKER_ENDPOINTS: redis://redis:6379/1
   RESULT_BACKEND_ENDPOINT: redis://redis:6379/2
 
@@ -20,7 +20,10 @@ dev:
   RESULT_BACKEND_ENDPOINT: redis://192.168.10.223:6379/2
 
 test:
-  <<: *development  
+  <<: *development
+
+beta:
+  <<: *development
 
 production:
   <<: *development

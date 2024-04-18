@@ -60,5 +60,25 @@ spec:
               service:
                 name: nginx
                 port:
-                  number: 80                                                 
+                  number: 80
+    - host: {{ .Values.expose.Ingress.hosts.api }}
+      http:
+        paths:
+          - path: /fognotifier
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx
+                port:
+                  number: 80
+    - host: {{ .Values.expose.Ingress.hosts.api }}
+      http:
+        paths:
+          - path: /fogthinghistory
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx
+                port:
+                  number: 80
 {{ end }}                  

@@ -1,22 +1,36 @@
 {{ if eq .Values.minio.type "internal" }}
 {{ $app := .Values.minio.internal }}
+{{ $svcType := .Values.minio.internal.service.type | default "ClusterIP" }}
 # minio-service
 apiVersion: v1
 kind: Service
 metadata:
   labels:
 {{ include "fogcloud.labels" . | indent 4 }}   
-    srv: minio
-  name: minio
+    srv: fogcloud-minio
+  name: fogcloud-minio
   
 spec:
+  type: {{ $svcType }}
+  {{ if or (eq $svcType "NodePort") (eq $svcType "LoadBalancer") }}
+  externalTrafficPolicy: "Local"
+    {{ if and (eq $app.service.externalTrafficPolicy "Local") (eq $svcType "LoadBalancer") }}
+  healthCheckNodePort: {{ $app.service.healthCheckNodePort }}
+    {{ end }}
+  {{ end }}
   ports:
-    - name: "9000"
+    - name: "api"
       port: 9000
       targetPort: 9000
-    - name: "9001"
+      {{ if or (eq $svcType "NodePort") (eq $svcType "LoadBalancer") }}
+      nodePort: {{ $app.service.nodePorts.api }}
+      {{ end }}
+    - name: "console"
       port: 9001
       targetPort: 9001
+      {{ if or (eq $svcType "NodePort") (eq $svcType "LoadBalancer") }}
+      nodePort: {{ $app.service.nodePorts.console }}
+      {{ end }}
   selector:
     app: minio
 status:

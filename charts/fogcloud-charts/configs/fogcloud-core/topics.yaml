@@ -1,0 +1,73 @@
+DEVICE_DEBUG_TOPIC: fogcloud/+/+/debug
+DEVICE_ALL_TOPIC: fogcloud/+/+/thing/#
+DEVICE_ALL_USER_TOPIC: fogcloud/+/+/user/#
+
+DEVICE_SUB_TOPIC:
+  thing_property_post_reply: fogcloud/+/+/thing/down/property/post_reply
+  thing_property_set: fogcloud/+/+/thing/down/property/set
+  thing_event_post_reply: fogcloud/+/+/thing/down/event/+/post_reply
+  thing_service: fogcloud/+/+/thing/down/service/+
+  thing_sub_downlink: fogcloud/+/+/thing/down/sub
+
+  thing_through_down_raw: fogcloud/+/+/thing/down/through
+  thing_sub_through_down_raw: fogcloud/+/+/thing/down/sub/through
+
+  thing_topo_downlink: fogcloud/+/+/thing/down/topo
+
+  thing_shadow_downlink: fogcloud/+/+/thing/down/shadow
+
+  thing_ntp_downlink: fogcloud/+/+/thing/down/ntp
+
+  thing_auth_register: fogcloud/+/+/thing/down/ext/register
+
+  thing_ota_downlink: fogcloud/+/+/thing/down/ota
+
+  thing_sys_downlink: fogcloud/+/+/thing/down/sys
+
+  thing_mesh_downlink: fogcloud/+/+/thing/down/mesh
+
+  thing_modbus_sub_downlink: fogcloud/+/+/thing/down/modbus/sub
+  thing_modbus_downlink: fogcloud/+/+/thing/down/modbus
+
+DEVICE_PUB_TOPIC:
+  thing_property_post: fogcloud/+/+/thing/up/property/post
+  thing_event_post: fogcloud/+/+/thing/up/event/+/post
+  thing_service_reply: fogcloud/+/+/thing/up/service/+/reply
+  thing_sub_uplink: fogcloud/+/+/thing/up/sub
+
+  thing_through_up_raw: fogcloud/+/+/thing/up/through
+  thing_sub_through_up_raw: fogcloud/+/+/thing/up/sub/through
+
+  thing_topo_uplink: fogcloud/+/+/thing/up/topo
+
+  thing_shadow_uplink: fogcloud/+/+/thing/up/shadow
+
+  thing_ntp_uplink: fogcloud/+/+/thing/up/ntp
+
+  thing_ota_uplink: fogcloud/+/+/thing/up/ota
+
+  thing_sys_uplink: fogcloud/+/+/thing/up/sys
+
+  thing_file_uplink: fogcloud/+/+/thing/up/file
+  thing_mesh_uplink: fogcloud/+/+/thing/up/mesh
+  thing_log_uplink: fogcloud/+/+/thing/up/log
+  thing_modbus_sub_uplink: fogcloud/+/+/thing/up/modbus/sub
+  thing_modbus_uplink: fogcloud/+/+/thing/up/modbus
+  thing_modbus_subs_uplink: fogcloud/+/+/thing/up/modbus/subs/history
+
+FOG_PROJECT_ALL_EVENT_TOPIC: fogcloud/project/+/event/#
+FOG_SYSTEM_ALL_EVENT_TOPIC: fogcloud/system/#
+
+FOGEDGE_THING_UPLINK: fogcloud/+/+/edge/thing/up
+FOGEDGE_THING_LOGIN: fogcloud/+/+/edge/thing/login
+FOGEDGE_THING_LOGOUT: fogcloud/+/+/edge/thing/logout
+FOGEDGE_THING_DOWNLINK: fogcloud/+/+/edge/thing/down
+
+FOG_APP_EVENT_TOPIC: fogcloud/app/+/event
+
+FOG_PROJECT_SUB_EVENT_TOPIC:
+  event_device_status: fogcloud/project/+/event/device/status
+  event_device_limit: fogcloud/project/+/event/device/limit
+FOG_SYSTEM_SUB_EVENT_TOPIC:
+  EVENT_LICENCE: fogcloud/system/event/licence
+  EVENT_LICENCE_LIMIT: fogcloud/system/event/licence/limit

@@ -130,11 +130,11 @@ spec:
             - name: EMQX_LISTENER__SSL__EXTERNAL__ACCEPTORS
               value: "64"
             - name: EMQX_LISTENER__SSL__EXTERNAL__MAX_CONNECTIONS
-              value: "204800"
+              value: "2048000"
             - name: EMQX_LISTENER__TCP__EXTERNAL__ACCEPTORS
               value: "64"
             - name: EMQX_LISTENER__TCP__EXTERNAL__MAX_CONNECTIONS
-              value: "204800"
+              value: "2048000"
             - name: EMQX_NAME
               value: mqtt-broker
             - name: EMQX_CLUSTER__K8S__ADDRESS__TYPE

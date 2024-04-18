@@ -75,12 +75,12 @@ spec:
           env:
             {{ if .Values.expose.tls.enabled }} 
             - name: API_BASE_URL
-              value: "https://{{ .Values.expose.hosts.api }}/api/v1"
+              value: "https://{{ .Values.expose.hosts.api }}"
             - name: MQTT_BASE_URL
               value: "wss://{{ .Values.expose.hosts.mqtt }}/mqtt"                
             {{ else }}
             - name: API_BASE_URL
-              value: "http://{{ .Values.expose.hosts.api }}/api/v1"
+              value: "http://{{ .Values.expose.hosts.api }}"
             - name: MQTT_BASE_URL
               value: "ws://{{ .Values.expose.hosts.mqtt }}/mqtt"          
             {{ end }}

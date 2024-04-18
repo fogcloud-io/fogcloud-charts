@@ -4,21 +4,6 @@ metadata:
   name: fog-config
   
 data:
-  {{ range $path, $bytes := .Files.Glob "configs/fogcloud-core/*" }}
-  fogcloud.yaml: |-
-    {{ $bytes | toString | nindent 4 }}
-  {{ end }}
-
-  {{ range $path, $bytes := .Files.Glob "configs/fogcron/*" }}
-  fogcron.yaml: |-
-    {{ $bytes | toString | nindent 4 }}
-  {{ end }}
-
-  {{ range $path, $bytes := .Files.Glob "configs/faasbuilder/*" }}
-  faasbuilder.yaml: |-
-    {{ $bytes | toString | nindent 4 }}
-  {{ end }}
-
   {{ range $path, $bytes := .Files.Glob "configs/kubeconfig/*" }}
   kubeconfig: |-
     {{ $bytes | toString | nindent 4 }}

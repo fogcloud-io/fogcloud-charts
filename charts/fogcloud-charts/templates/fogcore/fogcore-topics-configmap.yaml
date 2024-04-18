@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fogcore-topics-config
+  
+data:
+  topics.yaml: |-
+{{ (.Files.Get "configs/fogcloud-core/topics.yaml") | toString | indent 4 }}

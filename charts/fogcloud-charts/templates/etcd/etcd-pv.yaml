@@ -1,21 +1,6 @@
 {{ if eq .Values.etcd.type "internal" }}
 {{ $persistence := .Values.etcd.internal.persistence }}
 {{ if not $persistence.existed }}
-# apiVersion: v1
-# kind: PersistentVolume
-# metadata:
-#   name: etcd-pv
-# spec:
-#   capacity:
-#     storage: 1Gi
-#   volumeMode: Filesystem
-#   accessModes:
-#     - ReadWriteOnce
-#   persistentVolumeReclaimPolicy: Retain
-#   storageClassName: ""
-#   claimRef:
-#     name: etcd-pvc
-# ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

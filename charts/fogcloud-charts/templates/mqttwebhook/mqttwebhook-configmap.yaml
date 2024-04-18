@@ -1,0 +1,5 @@
+{{- $name := "mqttwebhook" }}
+{{- $rawConfig :=  .Files.Get "configs/mqttwebhook/mqttwebhook.yaml" | fromYaml }}
+{{- $newConfig := .Values.mqttwebhook.config }}
+{{- $env := .Values.environment }}
+{{- template "fog.config.merge" (dict "name" $name "defaultConfig" $rawConfig "newConfig" $newConfig "env" $env) }}

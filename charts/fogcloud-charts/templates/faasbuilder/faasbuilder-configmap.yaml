@@ -1,0 +1,5 @@
+{{- $name := "faasbuilder" }}
+{{- $rawConfig :=  .Files.Get "configs/faasbuilder/faasbuilder.yaml" | fromYaml }}
+{{- $newConfig := .Values.faasbuilder.config }}
+{{- $env := .Values.environment }}
+{{- template "fog.config.merge" (dict "name" $name "defaultConfig" $rawConfig "newConfig" $newConfig "env" $env) }}

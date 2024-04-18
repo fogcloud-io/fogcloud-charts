@@ -3,7 +3,9 @@ defaults: &defaults
   # 默认域名
   HOST: 0.0.0.0
   # http-api监听端口
-  PORT: 4000
+  HTTP_LISTEN: ":4000"
+  # grpc监听地址
+  GRPC_LISTEN: ":4001"
   # 日志级别：debug, info, warn, error, fatal
   LOG_LEVEL: debug
   # gin运行模式：debug, test, release；生产环境请使用release；
@@ -11,34 +13,63 @@ defaults: &defaults
   ENABLE_TLS: true
   # 是否启用不安全的oss下载；true：使用http下载，false：使用https下载；
   INSECURE_OSS: true
-  
+
   # geo文件路径
   GEO_DATABASE_FILEPATH: /etc/fogcloud/IP2LOCATION-LITE-DB3.BIN
+  # 设备地理位置级别：region, country
+  GEO_LOCATION_LEVEL: region
   # topics定义文件路径
   THING_TOPICS_FILEPATH: /etc/fogcloud/topics.yaml
   # 部分接口ip白名单，仅白名单内的ip可以访问，这些接口包括：用户注册()，
   IP_WHITE_TABLE: []
   # 用于加密的key值，生产环境请使用长度超过16字节的随机字符串
   AUTH_KEY: "not-a-secure-key"
+  # 公共实例使用限制
+  PUBLIC_USAGE_LIMIT: true
 
   # 是否开启云网关
   ENABLE_CLOUD_GATEWAY: true
   # 是否打开遥测
   ENABLE_TELEMETRY: true
+  # 禁用mongo历史数据存储
+  DISABLE_MONGO_HISTORY_SAVE: false
+  # 禁用tdengine历史数据存储
+  DISABLE_TDENGINE_HISTORY_SAVE: false
+  # 禁用物模型触发场景
+  DISABLE_THING_MODEL_TRIGGER: false
 
   # 管理后台初始账号和密码
   APP_ID: root
   APP_SECRET: "^#sJGEcn^nZ%_A)3"
+
+  # 设备物模型历史数据保留天数
+  DEVICE_DATA_EXPIRATION_DAYS: 7
 
   # 系统api错误提示国际化文件路径
   I18N_FILEPATH:
     ZH: /etc/fogcloud/active.zh.json
     EN: /etc/fogcloud/active.en.json
 
+  # nats配置
+  NATS_URL: nats://localhost:4222
+  NATS_USERNAME: fogcloud
+  NATS_PASSWORD: root
+  EVENT_REQUEST_BATCH: 5000
+  EVENT_MAX_ACK_PENDING: 10000
+  # mqtt status 处理任务池大小
+  MQTT_STATUS_TASK_POOL_SIZE: 50
+  # mqtt publish 处理任务池大小
+  MQTT_PUBLISH_TASK_POOL_SIZE: 200
+  # mqtt subscribe 处理任务池大小
+  MQTT_SUB_TASK_POOL_SIZE: 10
+  # 设备认证速率限制：500-S,1000-M
+  THING_AUTH_RATE_LIMIT: "500-S"
+
   # redis配置
   REDIS_HOST: 127.0.0.1
   REDIS_PORT: 6379
   REDIS_PASSWORD:
+  REDIS_DB: 0
 
   # cron定时调度器配置
   CRON_WORKER_MACHINE_ID: 1
@@ -61,6 +92,8 @@ defaults: &defaults
   MONGO_URI: mongodb://127.0.0.1:27017
   MONGO_DBNAME: fogcloud
 
+  # mqtt相关配置
+  # mqtt服务器类型：emqx, vernemq, hmq
   MQTT_BROKER_TYPE: emqx
   MQTT_BROKER_ADAPTOR:
     emqx:
@@ -79,11 +112,11 @@ defaults: &defaults
   # mqtt服务器域名
   MQTT_BROKER_HOST: 127.0.0.1
   # mqtt服务器mqtt super账号信息
-  MQTT_BROKER_ID: fogcloud
-  MQTT_BROKER_SECRET: "w&GB_7fh#NMpxFfA"
+  MQTT_BROKER_ID: admin
+  MQTT_BROKER_SECRET: public
   # mqtt服务器管理后台身份信息
   MQTT_DASHBOARD_USERNAME: admin
-  MQTT_DASHBOARD_PASSWORD: public  
+  MQTT_DASHBOARD_PASSWORD: public
   # mqtt服务对应端口
   MQTT_BROKER_API_PORT: 8081
   MQTT_BROKER_TCP_PORT: 1883
@@ -97,10 +130,10 @@ defaults: &defaults
   RABBITMQ_TLS: false
   RABBITMQ_HOST: 127.0.0.1
   RABBITMQ_PORT: 5672
-  RABBITMQ_USER: fogcloud
+  RABBITMQ_USER: rabbitmq
   RABBITMQ_PASSWORD: fogcloud
   RABBITMQ_EVENTS_EX: fogcloud.event_notify
-  RABBITMQ_QUEUE_MAX_LENGTH: 100
+  RABBITMQ_QUEUE_MAX_LENGTH: 1000000
 
   # minio配置
   MINIO_HOST: 127.0.0.1
@@ -131,21 +164,27 @@ development: &development
   <<: *defaults
   NAME: fogcloud_development
 
-  CRON_WORKER_ETCD_ENDPOINTS: etcd1:2379
+  CRON_WORKER_ETCD_ENDPOINTS: fogcloud-etcd:2379
   CRON_WORKER_BROKER_ENDPOINTS: redis://redis:6379/1
   CRON_WORKER_RESULT_BACKEND_ENDPOINT: redis://redis:6379/2
 
   MQTT_BROKER_HOST: mqtt-broker
 
   REDIS_HOST: redis
+  NATS_URL: nats://fogcloud-nats:4222
   POSTGRES_HOST: postgres
   MONGO_URI: mongodb://mongo:27017
   EMQ_HOST: mqtt-broker
-  MINIO_HOST: minio
+  MINIO_HOST: fogcloud-minio
   RABBITMQ_HOST: rabbitmq
   FAAS_STORE_ENDPOINT: https://fogcloud.io
   FAAS_BUILDER_ENDPOINT: http://faasbuilder:8090
   FAAS_ENDPOINT: http://gateway.openfaas.svc.cluster.local:8080
+
+beta:
+  <<: *development
+  RABBITMQ_USER: rabbitmq
+  RABBITMQ_PASSWORD: fogcloud
 
 test:
   <<: *development
@@ -156,4 +195,3 @@ production:
   <<: *development
   NAME: fogcloud
   HOST: app.fogcloud.io
-  FAAS_STORE_ENDPOINT: https://fogcloud.io

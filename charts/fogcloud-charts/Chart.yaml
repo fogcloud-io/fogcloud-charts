@@ -15,12 +15,13 @@ type: application
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 1.1.36
+version: 2.1.0
+
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.
 # It is recommended to use it with quotes.
-appVersion: "v4.25.0"
+appVersion: "v5.3.0"
 
 home: https://fogcloud.io
 
@@ -31,3 +32,30 @@ dependencies:
   # - name: fission-all
   #   version: "1.16.3"
   #   repository: "file://../fission-all"
+  # - name: natsBitnami
+  #   version: "7.10.3"
+  #   repository: "file://../nats-bitnami"
+  #   condition: natsBitnami.enabled
+  - name: nats
+    version: "1.1.4"
+    repository: "file://../nats"
+    condition: nats.enabled
+  - name: common
+    version: "2.13.3"
+    repository: "file://../common"
+  - name: etcd-cluster
+    version: "9.10.5"
+    repository: "file://../etcd-cluster"
+    condition: etcd-cluster.enabled
+  - name: redis-cluster
+    version: "18.3.2"
+    repository: "file://../redis-cluster"
+    condition: redis-cluster.enabled
+  - name: minio-cluster
+    version: "12.9.3"
+    repository: "file://../minio-cluster"
+    condition: minio-cluster.enabled
+  - name: tdengine
+    version: "3.0.2"
+    repository: "file://../tdengine"
+    condition: tdengine.enabled

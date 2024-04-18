@@ -1,0 +1,42 @@
+defaults: &defaults
+  PORT: 8300
+  DB_NAME: fogcloud
+  DebugLog: true
+  TDENGINE_URL: root:taosdata@tcp(localhost:6030)/
+  NATS_USERNAME: fogcloud
+  NATS_Password: root
+  NATS_URL: localhost:4222
+  FOGCLOUD_GRPC_URL: 127.0.0.1:4001
+  AUTH_KEY: 1234567890 #jwt
+
+test:
+  <<: *defaults
+  PORT: 8300
+  DB_NAME: fogcloud
+  DebugLog: true
+  TDENGINE_URL: root:taosdata@tcp(localhost:6030)/
+  NATS_USERNAME: fogcloud
+  NATS_Password: root
+  NATS_URL: localhost:4222
+  FOGCLOUD_GRPC_URL: 127.0.0.1:4001
+
+development: &development
+  <<: *defaults
+  NATS_URL: fogcloud-nats:4222
+  TDENGINE_URL: root:taosdata@tcp(fogcloud-tdengine:6030)/
+  AUTH_KEY: "not-a-secure-key"
+  FOGCLOUD_GRPC_URL: "fogcloud:4001"
+
+beta:
+  <<: *development
+
+production:
+  <<: *development
+  PORT: 8300
+  DB_NAME: fogcloud
+  DebugLog: true
+  TDENGINE_URL: root:taosdata@tcp(fogcloud-tdengine:6030)/
+  NATS_USERNAME: fogcloud
+  NATS_Password: root
+  NATS_URL: fogcloud-nats:4222
+  FOGCLOUD_GRPC_URL: fogcloud:4001

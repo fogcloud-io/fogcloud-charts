@@ -1,0 +1,21 @@
+dependencies:
+- name: nats
+  repository: file://../nats
+  version: 1.1.4
+- name: common
+  repository: file://../common
+  version: 2.13.3
+- name: etcd-cluster
+  repository: file://../etcd-cluster
+  version: 9.10.5
+- name: redis-cluster
+  repository: file://../redis-cluster
+  version: 18.3.2
+- name: minio-cluster
+  repository: file://../minio-cluster
+  version: 12.9.3
+- name: tdengine
+  repository: file://../tdengine
+  version: 3.0.2
+digest: sha256:dc96afb209f6f6fa982714c812b54fde8fe080625f590c59c7cb297e074eea2e
+generated: "2024-02-04T19:53:57.911094+08:00"

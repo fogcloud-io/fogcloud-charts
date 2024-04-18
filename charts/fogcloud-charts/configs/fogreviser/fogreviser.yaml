@@ -1,0 +1,30 @@
+defaults: &defaults
+  LOG_LEVEL: info
+  UPDATE_FREQUENCY: 2
+  
+  REDIS_HOST: 127.0.0.1
+  REDIS_PORT: 6379
+  REDIS_PASSWORD:
+  REDIS_DB: 0
+
+  POSTGRES_HOST: 127.0.0.1
+  POSTGRES_PORT: 5432
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: fogcloud
+  POSTGRES_DBNAME: fogcloud
+  POSTGRES_SSLMODE: disable
+
+  MQTT_BROKER_HOST: 127.0.0.1
+  MQTT_BROKER_ID: admin
+  MQTT_BROKER_SECRET: public
+  MQTT_BROKER_API_PORT: 8081
+
+beta:
+  <<: *defaults
+  REDIS_HOST: redis
+  POSTGRES_HOST: postgres
+  MQTT_BROKER_HOST: mqtt-broker
+
+production:
+  <<: *defaults
+  MQTT_BROKER_HOST: mqtt-broker

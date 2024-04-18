@@ -1,4 +1,7 @@
 # fogcloud-service
+{{ $app := .Values.fogcloud }}
+{{ $appName := "fogcore" }}
+{{ $svcType := .Values.fogcloud.service.type | default "ClusterIP" }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -9,14 +12,29 @@ metadata:
   name: fogcloud
   
 spec:
-  type: ClusterIP
+  type: {{ $svcType }}
+  {{ if or (eq $svcType "NodePort") (eq $svcType "LoadBalancer") }}
+  externalTrafficPolicy: {{ $app.service.externalTrafficPolicy }}
+    {{ if and (eq $app.service.externalTrafficPolicy "Local") (eq $svcType "LoadBalancer") }}
+  healthCheckNodePort: {{ $app.service.healthCheckNodePort }}
+    {{ end }}
+  {{ end }}
   ports:
     - name: "http"
-      port: 4000
-      targetPort: 4000
-    - name: "http-debug"
-      port: 4001
-      targetPort: 15000  
+      port: {{ $app.config.HTTP_LISTEN | default ":4000" |  trimPrefix ":" | atoi }}
+      targetPort: {{ $app.config.HTTP_LISTEN | default ":4000" |  trimPrefix ":" | atoi }}
+      {{ if or (eq $svcType "NodePort") (eq $svcType "LoadBalancer") }}
+      nodePort: {{ $app.service.ports.http.nodePort }}
+      {{ end }}
+    - name: "grpc"
+      port: {{ $app.config.GRPC_LISTEN | default ":4001" |  trimPrefix ":" | atoi }}
+      targetPort: {{ $app.config.GRPC_LISTEN | default ":4001" |  trimPrefix ":" | atoi }}
+      {{ if or (eq $svcType "NodePort") (eq $svcType "LoadBalancer") }}
+      nodePort: {{ $app.service.ports.grpc.nodePort }}
+      {{ end }}
+    - name: "pprof"
+      port: 15000
+      targetPort: 15000
   selector:
     app: fogcloud
 status:
@@ -32,16 +50,16 @@ metadata:
   name: fogcloud-core
   
 spec:
-  replicas: {{ .Values.fogcloud.replicas }}
+  replicas: {{ $app.replicas }}
   selector:
     matchLabels:
       app: fogcloud
   strategy:
-    type: {{ .Values.fogcloud.strategy.type }}
-    {{ if eq .Values.fogcloud.strategy.type "RollingUpdate" }}
+    type: {{ $app.strategy.type }}
+    {{ if eq $app.strategy.type "RollingUpdate" }}
     rollingUpdate:
-      maxSurge: {{ .Values.fogcloud.strategy.rollingUpdate.maxSurge | default "50%" }}
-      maxUnavailable: {{ .Values.fogcloud.strategy.rollingUpdate.maxUnavailable | default 0 }}
+      maxSurge: {{ $app.strategy.rollingUpdate.maxSurge | default "50%" }}
+      maxUnavailable: {{ $app.strategy.rollingUpdate.maxUnavailable | default 0 }}
     {{ end }}
 
   template:
@@ -57,12 +75,12 @@ spec:
             - /etc/fogcloud/fogcloud.yaml
             - -e
             - {{ .Values.environment }}
-          image: {{ .Values.fogcloud.image }}:{{ .Values.fogcloud.imageTag }}
+          image: {{ $app.image }}:{{ $app.imageTag }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           name: fogcloud-core
-          {{- if .Values.fogcloud.resources }}
+          {{- if $app.resources }}
           resources:
-{{ toYaml .Values.fogcloud.resources | indent 12 }}
+{{ toYaml $app.resources | indent 12 }}
           {{- end }}
           ports:
             - containerPort: 4000
@@ -94,15 +112,20 @@ spec:
             - name: FOG_ENABLE_TELEMETRY 
               value: "true"            
             {{ end }}          
-            {{ range $fields := .Values.fogcloud.envVars }}
+            {{ range $fields := $app.envVars }}
             - name: {{ $fields.name }}
               value: "{{ $fields.value }}"
-            {{ end }}    
+            {{ end }}
+            - name: FOG_DISABLE_TDENGINE_HISTORY_SAVE
+              value: "{{ not .Values.tdengineEnabled }}"
           volumeMounts:
             - mountPath: /etc/fogcloud/fogcloud.yaml
               subPath: fogcloud.yaml
               name: fogcloud-claim
-      restartPolicy: {{ .Values.fogcloud.restartPolicy }}
+            - mountPath: /etc/fogcloud/topics.yaml
+              subPath: topics.yaml
+              name: topics-claim
+      restartPolicy: {{ $app.restartPolicy }}
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
@@ -119,8 +142,14 @@ spec:
       volumes:
         - name: fogcloud-claim
           configMap:
-            name: fog-config
+            name: {{ $appName }}-config
             items:
-              - key: fogcloud.yaml
+              - key: config.yaml
                 path: fogcloud.yaml
+        - name: topics-claim
+          configMap:
+            name: fogcore-topics-config
+            items:
+              - key: topics.yaml
+                path: topics.yaml
 status: {}

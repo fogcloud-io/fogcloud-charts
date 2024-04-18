@@ -1,6 +1,7 @@
 DEVICE_DEBUG_TOPIC: fogcloud/+/+/debug
 DEVICE_ALL_TOPIC: fogcloud/+/+/thing/#
 DEVICE_ALL_USER_TOPIC: fogcloud/+/+/user/#
+DEVICE_USER_TOPIC_PREFIX: fogcloud
 
 DEVICE_SUB_TOPIC:
   thing_property_post_reply: fogcloud/+/+/thing/down/property/post_reply

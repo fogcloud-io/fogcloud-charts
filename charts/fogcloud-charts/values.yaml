@@ -268,7 +268,7 @@ mqttBroker:
   internal:
     type: emqx
     image: emqx/emqx
-    imageTag: 4.2.14
+    imageTag: 4.2.8
     defaultUsername: fogcloud
     defaultPassword: "4Jy!YC7bdpsjU*6k"
     dashboardUsername: admin
@@ -579,7 +579,6 @@ etcd-cluster:
       client: "12379"
   enabled: true
   replicaCount: 3
-  logLevel: "debug"
   auth:
     rbac:
       create: false

@@ -1,0 +1,35 @@
+{{- if .Values.emqx.enabled -}}
+{{- if .Values.emqx.tls.enabled -}}
+{{- $item := .Values.emqx.tls -}}
+{{- if eq $item.certSource "auto" -}}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ $item.secretName }}
+  
+spec:
+  dnsNames:
+    - {{ .Values.expose.hosts.mqtt }}
+  secretName: {{ $item.secretName }}
+  issuerRef:
+    name: issuer-fog
+{{- else if eq $item.certSource "file" -}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ $item.secretName }}
+  
+type: kubernetes.io/tls
+data:
+  {{ range $_, $bytes := .Files.Glob "configs/cert/mqtt/*.crt" }}
+  tls.crt: {{ $bytes | toString | b64enc }}
+  {{ end }}
+  {{ range $_, $bytes := .Files.Glob "configs/cert/mqtt/*.pem" }}
+  tls.crt: {{ $bytes | toString | b64enc }}
+  {{ end }}
+  {{ range $_, $bytes := .Files.Glob "configs/cert/mqtt/*.key" }}
+  tls.key: {{ $bytes | toString | b64enc }}
+  {{ end }}
+{{- end -}}
+{{- end -}}
+{{- end -}}

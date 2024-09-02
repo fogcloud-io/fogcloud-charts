@@ -28,5 +28,5 @@ data:
     {{- $myConfig = set $myConfig . (get $rawConfig .) }}
   {{- end }}
 {{- end }}
-{{ merge (dict .env .newConfig) $myConfig | toYaml | indent 4 }}
+{{ mergeOverwrite $myConfig (dict .env .newConfig) | toYaml | indent 4 }}
 {{- end -}}

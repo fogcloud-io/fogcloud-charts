@@ -28,7 +28,11 @@ helm pull fogcloud-charts/fission-all --untar
 ```console
 helm install fission ./fission-all -n fission
 ```
-4. install fogcloud-charts
+4. install emqx-operator
+```console
+helm upgrade --install emqx-operator ./emqx-operator -n emqx-operator --create-namespace
+```
+5. install fogcloud-charts
 ```console
 export NAMESPACE_NAME=fogcloud
 export RELEASE_NAME=fogcloud
@@ -36,7 +40,7 @@ kubectl create namespace ${NAMESPACE_NAME}
 kubectl apply -f ./fogcloud/operator/rabbitmq-cluster-operator.yaml
 helm install -f myvalues.yaml ${RELEASE_NAME} -n ${NAMESPACE_NAME} ./fogcloud
 ```
-5. upgrade fogcloud-charts
+6. upgrade fogcloud-charts
 ```console
 helm upgrade -f myvalues.yaml ${RELEASE_NAME} -n ${NAMESPACE_NAME} ./fogcloud 
 ```
@@ -57,6 +61,9 @@ kubectl delete -f ./fogcloud/operator/rabbitmq-cluster-operator.yaml
 | `imagePullPolicy` | 镜像拉取策略 | `Always` | 
 | `k8sApiServer` | k8s server api地址，用来创建k8s StatefulSet资源；可以通过`kubectl config view`获取 | `https://localhost:6443` |
 | `fissionEnabled` | 是否启用了云函数功能 | `false` |
+| `cloudGatewayEnabled` | 是否启用云网关功能 | `true` |
+| `tdengineEnabled` | 是否启用tdengine历史数据存储功能 | `true` |
+| `telemetryEnabled` | 是否启用遥测功能 | `true` |
 | **expose** | | | 
 | `expose.type` | 如何暴露服务：`Ingress`、`ClusterIP`、`NodePort`或`LoadBalancer`，其他值将被忽略，服务的创建将被跳过。| `ClusterIP` |
 | `expose.insecureOSS` | 不安全的oss下载 | `true` | 
@@ -90,7 +97,8 @@ kubectl delete -f ./fogcloud/operator/rabbitmq-cluster-operator.yaml
 | `secret.imageCredentials[].username` | 私有镜像仓库用户名 | `""` |
 | `secret.imageCredentials[].password`| 私有镜像仓库密码 | `""` |
 | `storageClassName` |  | `local-path` |
-| **fogcloud** | api服务相关配置 | |
+| **fogcloud** | fogcloud-core服务相关配置 | |
+| `fogcloud.config` | fogcloud-core配置设置，参考`configs/fogcloud-core/fogcloud.example.yaml`配置文件 | `{}` |
 | `fogcloud.restartPolicy` | pod重启策略：`Always` | `Always` |
 | `fogcloud.image` | 镜像地址 | `ghcr.io/fogcloud-io/fogcloud` | 
 | `fogcloud.imageTag` | 镜像版本 | `v4.13.0` |
@@ -98,7 +106,17 @@ kubectl delete -f ./fogcloud/operator/rabbitmq-cluster-operator.yaml
 | `fogcloud.strategy.type` | 应用更新策略：`RollingUpdate`，`Recreate`；1）`RollingUpdate`滚动更新；2）`Recreate`重启更新 | `RollingUpdate` |
 | `fogcloud.strategy.rollingUpdate.maxSurge` | 应用更新时最大新版本pod新增数量比例| `50%` |
 | `fogcloud.strategy.rollingUpdate.maxUnavailable` | 应用更新时的最大不可用pod数量 | `0` |
+| **fogcloudWeb** | fogcloud-web服务相关配置 | |
+| `fogcloudWeb.restartPolicy` | pod重启策略：`Always` | `Always` |
+| `fogcloudWeb.image` | 镜像地址 | `ghcr.io/fogcloud-io/fogcloud` | 
+| `fogcloudWeb.imageTag` | 镜像版本 | `v4.13.0` |
+| `fogcloudWeb.replicas` | deployment复制节点数量 | `3` |
+| `fogcloudWeb.envVars` | fogcloud-web环境变量 | `[{"name":"MAP_CONFIG","value": "china"},{"name":"DEPLOYMENT_CONFIG", "value":"public"},{"name":"GATEWAY_CLOUD_STATUS","value":"true"},{"name":"GLOB_APPLIANCE_STATUS","value":"true"},{"name":"GLOB_TOPIC_PREFIX","value":"fogcloud"}]` |
+| `fogcloudWeb.strategy.type` | 应用更新策略：`RollingUpdate`，`Recreate`；1）`RollingUpdate`滚动更新；2）`Recreate`重启更新 | `RollingUpdate` |
+| `fogcloudWeb.strategy.rollingUpdate.maxSurge` | 应用更新时最大新版本pod新增数量比例| `50%` |
+| `fogcloudWeb.strategy.rollingUpdate.maxUnavailable` | 应用更新时的最大不可用pod数量 | `0` |
 | **faasbuilder** | | |
+| `faasbuilder.config` | faasbuilder相关配置，参考`configs/faasbuilder/faasbuilder.yaml`配置文件 | `{}` |
 | `faasbuilder.createKubeconfigWithFile` | 使用文件创建`kubeconfig`对象，用于创建云函数；若启用可将kubeconfig文件放到`fogcloud/configs/kubeconfig`目录下，并删除该目录的kubeconfig-demo文件 | `false` |
 | **mqttBroker** | | |
 | `mqttBroker.type` | mqtt-broker创建方式：`internal`，`external`；1）`internal`：使用helm自动创建；2）`external`：使用外部的mqtt-broker | `internal` |

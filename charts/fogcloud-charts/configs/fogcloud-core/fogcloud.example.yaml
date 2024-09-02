@@ -26,6 +26,8 @@ defaults: &defaults
   AUTH_KEY: "not-a-secure-key"
   # 公共实例使用限制
   PUBLIC_USAGE_LIMIT: true
+  # 固件文件大小限制，单位MB
+  FIRMWARE_FILE_SIZE_LIMIT: 30
 
   # 是否开启云网关
   ENABLE_CLOUD_GATEWAY: true
@@ -37,6 +39,18 @@ defaults: &defaults
   DISABLE_TDENGINE_HISTORY_SAVE: false
   # 禁用物模型触发场景
   DISABLE_THING_MODEL_TRIGGER: false
+  # 禁用设备日志存储
+  DISABLE_THING_LOG_SAVE: false
+  # 禁用场景触发场景
+  DISABLE_SCENE_TRIGGER: false
+  # 禁用sql触发场景
+  DISABLE_SQL_TRIGGER: false
+  # 禁用边缘计算
+  DISABLE_FOGEDGE: false
+  # 禁用设备调试日志
+  DISABLE_THING_DEBUG_LOG: false
+  # 禁用场景联动执行结果存储
+  DISABLE_SCENE_RESULT_SAVE: false
 
   # 管理后台初始账号和密码
   APP_ID: root
@@ -70,6 +84,7 @@ defaults: &defaults
   REDIS_PORT: 6379
   REDIS_PASSWORD:
   REDIS_DB: 0
+  REDIS_USERNAME: ""
 
   # cron定时调度器配置
   CRON_WORKER_MACHINE_ID: 1
@@ -87,14 +102,16 @@ defaults: &defaults
   POSTGRES_PASSWORD: fogcloud
   POSTGRES_DBNAME: fogcloud
   POSTGRES_SSLMODE: disable
+  POSTGRES_MAX_POOL_SIZE: 10
 
   # mongo配置
   MONGO_URI: mongodb://127.0.0.1:27017
   MONGO_DBNAME: fogcloud
+  MONGO_MAX_POOL_SIZE: 10
 
   # mqtt相关配置
-  # mqtt服务器类型：emqx, vernemq, hmq
-  MQTT_BROKER_TYPE: emqx
+  # mqtt服务器类型：emqx, vernemq, hmq, emqx_v5
+  MQTT_BROKER_TYPE: emqx_v5
   MQTT_BROKER_ADAPTOR:
     emqx:
       HTTP_AUTH_PATH: /mqtt/auth/emqx
@@ -109,8 +126,13 @@ defaults: &defaults
       AMQP_EXCHANGE: mqtt.bridge
       HTTP_AUTH_PATH: /mqtt/auth/hmq
       HTTP_ACL_PATH: /mqtt/acl/hmq
+    emqx_v5:
+      HTTP_AUTH_PATH: /mqtt/auth/emqx_v5
+      HTTP_ACL_PATH: /mqtt/acl/emqx_v5
+      HTTP_WEBHOOK_PATH: /mqtt/webhook/emqx_v5
   # mqtt服务器域名
   MQTT_BROKER_HOST: 127.0.0.1
+  MQTT_BROKER_API_URL: "http://127.0.0.1:18083"
   # mqtt服务器mqtt super账号信息
   MQTT_BROKER_ID: admin
   MQTT_BROKER_SECRET: public
@@ -168,7 +190,9 @@ development: &development
   CRON_WORKER_BROKER_ENDPOINTS: redis://redis:6379/1
   CRON_WORKER_RESULT_BACKEND_ENDPOINT: redis://redis:6379/2
 
-  MQTT_BROKER_HOST: mqtt-broker
+  MQTT_BROKER_HOST: emqx-listeners
+  MQTT_BROKER_API_URL: "http://emqx-dashboard:18083"
+  MQTT_BROKER_TCP_PORT: 1880
 
   REDIS_HOST: redis
   NATS_URL: nats://fogcloud-nats:4222

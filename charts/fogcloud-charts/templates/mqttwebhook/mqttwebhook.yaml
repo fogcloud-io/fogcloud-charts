@@ -46,6 +46,14 @@ spec:
       labels:
         app: {{ $appName }}
     spec:
+      {{- if .Values.affinityEnabled }}
+      affinity:
+      {{ $app.affinity | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if $app.tolerations }}
+      tolerations:
+      {{ toYaml $app.tolerations | nindent 8 }}
+      {{- end }}
       containers:
         - image: {{ $app.image }}:{{ $app.imageTag }}
           args:

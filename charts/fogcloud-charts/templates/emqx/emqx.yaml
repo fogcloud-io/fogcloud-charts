@@ -1,0 +1,271 @@
+{{ if .Values.emqx.enabled }}
+{{ $app := .Values.emqx }}
+{{ $svcType := .Values.emqx.service.listenersServiceType }}
+{{ $mqttPorts := .Values.emqx.service.ports }}
+apiVersion: apps.emqx.io/v2beta1
+kind: EMQX
+metadata:
+  name: emqx
+spec:
+  image: {{ $app.image }}
+  bootstrapAPIKeys: 
+    - key: {{ $app.appKey }}
+      secret: {{ $app.appSecret }}
+  config:
+    data: |-
+      {{ if $app.tls.enabled }}
+      listeners.ssl.default {
+        enabled: {{ $app.tls.enabled }}
+        bind = "0.0.0.0:8883"
+        ssl_options {
+          cacertfile = "/mounted/cert/tls.crt"
+          certfile = "/mounted/cert/tls.crt"
+          keyfile = "/mounted/cert/tls.key"
+        }
+        max_conn_rate = "{{ $app.limiter.maxConnRate }}"
+        messages_rate = "{{ $app.limiter.messagesRate }}"
+        bytes_rate = "{{ $app.limiter.bytesRate }}"
+      }
+      {{ end }}
+      listeners.tcp.default {
+        bind = "0.0.0.0:1883"
+        max_conn_rate = "{{ $app.limiter.maxConnRate }}"
+        messages_rate = "{{ $app.limiter.messagesRate }}"
+        bytes_rate = "{{ $app.limiter.bytesRate }}"
+      }
+      listeners.tcp.internal {
+        bind = "0.0.0.0:1880"
+        enable_authn = false
+      }
+      listeners.ws.default {
+        bind = "0.0.0.0:8083"
+        max_conn_rate = "{{ $app.limiter.maxConnRate }}"
+        messages_rate = "{{ $app.limiter.messagesRate }}"
+        bytes_rate = "{{ $app.limiter.bytesRate }}"
+      }
+      {{ if $app.tls.enabled }}
+      listeners.wss.default {
+        enabled: {{ $app.tls.enabled }}
+        bind = "0.0.0.0:8084"
+        ssl_options {
+          cacertfile = "/mounted/cert/tls.crt"
+          certfile = "/mounted/cert/tls.crt"
+          keyfile = "/mounted/cert/tls.key"
+        }
+        max_conn_rate = "{{ $app.limiter.maxConnRate }}"
+        messages_rate = "{{ $app.limiter.messagesRate }}"
+        bytes_rate = "{{ $app.limiter.bytesRate }}"
+      }
+      {{ end }}
+      dashboard {
+        default_password = "{{ $app.dashboardPassword }}"
+      }
+      authentication = [
+          {
+              mechanism = "password_based"
+              method = "post"
+              url = "http://fogcloud:4000/mqtt/auth/emqx_v5"
+              enable = true
+              backend = "http"
+              body {
+                  clientid = "${clientid}"
+                  username = "${username}"
+                  password = "${password}"
+              }
+          }
+      ]
+
+      authorization {
+          no_match = "deny"
+          cache {
+              enable = true
+          }
+          sources = [
+              {
+                  type = "http"
+                  enable = true
+                  method = "post"
+                  url = "http://fogcloud:4000/mqtt/acl/emqx_v5"
+                  body {
+                      username = "${username}"
+                      topic = "${topic}"
+                      clientid = "${clientid}"
+                      action = "${action}"
+                      mountpoint = "${mountpoint}"
+                      peerhost = "${peerhost}"
+                      protocol = "${proto_name}"
+                      qos = "${qos}"
+                      retain = "${retain}"
+                  }
+                  headers {
+                      "Content-Type" = "application/json"
+                      "X-Request-Source" = "EMQX"
+                  }
+              }
+          ]
+      }
+
+      connectors.http.fogcloud {
+          connect_timeout = 15s
+          enable = true
+          enable_pipelining = 100
+          headers {content-type = "application/json"}
+          pool_size = 16
+          pool_type = random
+          resource_opts {
+              health_check_interval = 15s
+              start_after_created = true
+              start_timeout = 5s
+          }
+          tags = []
+          url = "http://mqttwebhook:8100/mqtt/webhook/emqx_v5"
+      }
+
+      actions {
+        http {
+          fog_webhook_event {
+            connector = fogcloud
+            description = ""
+            enable = true
+            parameters {
+              headers {
+                accept = "application/json"
+                cache-control = no-cache
+                connection = keep-alive
+                content-type = "application/json"
+                keep-alive = "timeout=5"
+              }
+              max_retries = 3
+              method = post
+            }
+            resource_opts {
+              health_check_interval = "15s"
+              inflight_window = 100
+              max_buffer_bytes = "256MB"
+              query_mode = "async"
+              request_ttl = "45s"
+              worker_pool_size = 16
+            }
+            tags = []
+          }
+          fog_webhook_publish {
+            connector = fogcloud
+            enable = true
+            parameters {
+              headers {content-type = "application/json"}
+              max_retries = 3
+              method = "post"
+            }
+            resource_opts {
+              health_check_interval = "15s"
+              inflight_window = 100
+              max_buffer_bytes = "256MB"
+              query_mode = async
+              request_ttl = "45s"
+              worker_pool_size = 32
+            }
+          }
+        }
+      }
+
+      rule_engine {
+        ignore_sys_message = true
+        jq_function_default_timeout = "10s"
+        rules {
+          fog_event {
+            actions = [
+              "http:fog_webhook_event"
+            ]
+            description = "only for fogcloud, do not edit"
+            sql = " SELECT * FROM \"$events/client_connected\", \"$events/client_disconnected\", \"$events/session_subscribed\", \"$events/session_unsubscribed\" "
+          }
+          fog_publish {
+            actions = [
+              "http:fog_webhook_publish"
+            ]
+            description = "only for fogcloud, do not edit"
+            sql = "SELECT *, base64_encode(payload) as payload FROM \"#\" "
+          }
+        }
+      }
+
+  coreTemplate:
+    spec:
+      {{ if $app.persistence.keep }}
+      volumeClaimTemplates:
+        storageClassName: {{ $app.persistence.storageClassName }}
+        resources:
+          requests:
+            storage: {{ $app.persistence.storage }}
+        accessModes:
+          - ReadWriteOnce
+      {{ end }}
+      replicas: {{ $app.coreNode.replicas }}
+      resources:
+{{ toYaml $app.coreNode.resources | indent 8 }}
+      {{ if $app.tls.enabled }}
+      extraVolumes:
+        - name: emqx-tls
+          secret:
+            secretName: {{ $app.tls.secretName }}
+      {{- if .Values.affinityEnabled }}
+      affinity:
+      {{ $app.coreAffinity | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if $app.coreTolerations }}
+      tolerations:
+      {{ toYaml $app.coreTolerations | nindent 8 }}
+      {{- end }}
+      extraVolumeMounts:
+        - name: emqx-tls
+          mountPath: /mounted/cert
+      {{ end }}
+  replicantTemplate:
+    spec:
+      replicas: {{ $app.replicantNode.replicas }}
+      resources:
+{{ toYaml $app.replicantNode.resources | indent 8 }}
+      {{ if $app.tls.enabled }}
+      extraVolumes:
+        - name: emqx-tls
+          secret:
+            secretName: {{ $app.tls.secretName }}
+      extraVolumeMounts:
+        - name: emqx-tls
+          mountPath: /mounted/cert
+      {{ end }}
+  dashboardServiceTemplate:
+    spec:
+      type: {{ $app.service.dashboardServiceType }}
+  listenersServiceTemplate:
+    spec:
+      type: {{ $svcType }}
+      {{- if or (eq $svcType "NodePort") (eq $svcType "LoadBalancer") }}
+      externalTrafficPolicy: {{ $app.service.listenersExternalTrafficPolicy }}
+      {{- end }}
+      ports: 
+      - name: mqtt-tcp
+        port: {{ $mqttPorts.mqttTcp.port }}
+        targetPort: 1883
+        {{- if or (eq $svcType "NodePort") (eq $svcType "LoadBalancer") }}
+        nodePort: {{ $mqttPorts.mqttTcp.nodePort }}
+        {{- end }}
+      - name: mqtt-tcp-tls
+        port: {{ $mqttPorts.mqttTcpTls.port }}
+        targetPort: 8883
+        {{- if or (eq $svcType "NodePort") (eq $svcType "LoadBalancer") }}
+        nodePort: {{ $mqttPorts.mqttTcpTls.nodePort }}
+        {{- end }}
+      - name: mqtt-ws
+        port: {{ $mqttPorts.mqttWs.port }}
+        targetPort: 8083
+        {{- if or (eq $svcType "NodePort") (eq $svcType "LoadBalancer") }}
+        nodePort: {{ $mqttPorts.mqttWs.nodePort }}
+        {{- end }}    
+      - name: mqtt-wss
+        port: {{ $mqttPorts.mqttWss.port }}
+        targetPort: 8084
+        {{- if or (eq $svcType "NodePort") (eq $svcType "LoadBalancer") }}
+        nodePort: {{ $mqttPorts.mqttWss.nodePort }}
+        {{- end }}
+{{ end }}

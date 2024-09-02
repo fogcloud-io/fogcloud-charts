@@ -19,9 +19,9 @@ spec:
       spec:
         type: {{ $svcType }}
         {{ if or (eq $svcType "NodePort") (eq $svcType "LoadBalancer") }}
-        externalTrafficPolicy: {{ .Values.mqttBroker.internal.service.externalTrafficPolicy }}
-          {{ if and (eq .Values.mqttBroker.internal.service.externalTrafficPolicy "Local") (eq $svcType "LoadBalancer") }}
-        healthCheckNodePort: {{ .Values.mqttBroker.internal.service.healthCheckNodePort }}
+        externalTrafficPolicy: {{ .Values.rabbitmq.internal.service.externalTrafficPolicy }}
+          {{ if and (eq .Values.rabbitmq.internal.service.externalTrafficPolicy "Local") (eq $svcType "LoadBalancer") }}
+        healthCheckNodePort: {{ .Values.rabbitmq.internal.service.healthCheckNodePort }}
           {{ end }}
         {{ end }}        
         ports:

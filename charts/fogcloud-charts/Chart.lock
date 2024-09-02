@@ -1,7 +1,7 @@
 dependencies:
 - name: nats
   repository: file://../nats
-  version: 1.1.4
+  version: 1.1.12
 - name: common
   repository: file://../common
   version: 2.13.3
@@ -17,5 +17,5 @@ dependencies:
 - name: tdengine
   repository: file://../tdengine
   version: 3.0.2
-digest: sha256:dc96afb209f6f6fa982714c812b54fde8fe080625f590c59c7cb297e074eea2e
-generated: "2024-02-04T19:53:57.911094+08:00"
+digest: sha256:064000904e9dcd9ddcbe8485ea6a528bae251601642e68e46c4d439b1d261d28
+generated: "2024-06-13T19:59:21.010621+08:00"

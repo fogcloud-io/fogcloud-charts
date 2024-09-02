@@ -68,6 +68,14 @@ spec:
       labels:
         app: fogcloud
     spec:
+      {{- if .Values.affinityEnabled }}
+      affinity:
+      {{ $app.affinity | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if $app.tolerations }}
+      tolerations:
+      {{ toYaml $app.tolerations | nindent 8 }}
+      {{- end }}
       containers:
         - args:
             - fogcloud
@@ -116,8 +124,6 @@ spec:
             - name: {{ $fields.name }}
               value: "{{ $fields.value }}"
             {{ end }}
-            - name: FOG_DISABLE_TDENGINE_HISTORY_SAVE
-              value: "{{ not .Values.tdengineEnabled }}"
           volumeMounts:
             - mountPath: /etc/fogcloud/fogcloud.yaml
               subPath: fogcloud.yaml
@@ -125,16 +131,23 @@ spec:
             - mountPath: /etc/fogcloud/topics.yaml
               subPath: topics.yaml
               name: topics-claim
-      restartPolicy: {{ $app.restartPolicy }}
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - podAffinityTerm:
-                labelSelector:
-                  matchLabels:
-                    app: fogcloud
-                topologyKey: "kubernetes.io/hostname"
-              weight: 100                 
+          startupProbe:
+            httpGet:
+              path: /api/v1/ping
+              port: 4000
+            initialDelaySeconds: 5
+            failureThreshold: 3
+            periodSeconds: 5
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: "/api/v1/ping"
+              port: 4000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            failureThreshold: 3
+            timeoutSeconds: 10
+      restartPolicy: {{ $app.restartPolicy }}             
       imagePullSecrets:
         {{ range $_, $secret := .Values.secret.imageCredentials }}
         - name: {{ $secret.name }}

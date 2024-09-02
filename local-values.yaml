@@ -3,7 +3,7 @@
 # Declare variables to be passed into your templates.
 
 # 配置文件环境：development,test,production
-environment: production
+environment: beta
 
 imagePullPolicy: Always
 
@@ -12,23 +12,21 @@ k8sApiServer: "https://localhost:6443"
 fissionEnabled: false
 # 是否启用云网关功能
 cloudGatewayEnabled: true
-# 是否启用tdengine历史数据存储
-tdengineEnabled: true
+tdengineEnabled: false
 # 是否启用遥测
 telemetryEnabled: true
-# 是否启用亲和性
-affinityEnabled: false
+affinityEnabled: true
 
 
 # 暴露web管理后台和api服务，有：Ingress, ClusterIP, NodePort, LoadBalancer这几种类型；
 # 若要公开服务，请使用LoadBalancer,Ingress,NodePort三种类型
 expose:
-  type: NodePort
+  type: ClusterIP
   insecureOSS: true
   # 各个服务的域名，若启用对应服务的tls，请保证域名是外网可以访问的；
   hosts:
-    api: localhost:8001
-    mqtt: localhost:8083
+    api: "api.demo.fogcloud.io"
+    mqtt: "mqtt.demo.fogcloud.io:8083"
   
   tls:
     enabled: false
@@ -44,7 +42,7 @@ expose:
       api:
         certSource: none
         secretName: api-cert
-        dnsName: 
+        dnsName:
 
   Ingress:
     className: traefik-lb
@@ -102,23 +100,10 @@ resourceRangeLimit:
 
 fogcloud:
   restartPolicy: Always
-  image: registry.cn-shanghai.aliyuncs.com/fogcloud/fogcloud
-  imageTag: latest
-  affinity: {}
-  tolerations: []
-  config:
-    MQTT_BROKER_TYPE: "emqx_v5"
-    MQTT_BROKER_TCP_PORT: 1880
-    MQTT_BROKER_HOST: "emqx-listeners"
-  replicas: 1
-  service:
-    externalTrafficPolicy: Local
-    type: ClusterIP
-    ports:
-      http:
-        nodePort: 4000
-      grpc:
-        nodePort: 4001
+  image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-fogcloud
+  imageTag: v5.8.0
+  config: {}
+  replicas: 3
   strategy: 
     type: RollingUpdate # enum: Recreate, RollingUpdate
     rollingUpdate:
@@ -131,19 +116,27 @@ fogcloud:
 
 fogcloudWeb:
   image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-fogcloud-web
-  imageTag: latest
-  replicas: 1
+  imageTag: v5.8.0
+  replicas: 3
   envVars:
     - name: "MAP_CONFIG"
       value: "china"
     - name: "DEPLOYMENT_CONFIG"
-      value: "public"
+      value: "private"
+    - name: "API_BASE_URL"
+      value: "https://api.demo.fogcloud.io"
     - name: "GATEWAY_CLOUD_STATUS"
       value: "true"
     - name: "GLOB_APPLIANCE_STATUS"
       value: "true"
-    - name: "GLOB_TOPIC_PREFIX"
-      value: "fogcloud"
+    - name: "GLOB_MQTT_TCP_HOST"
+      value: "mqtt://mqtt.demo.fogcloud.io:1883"
+    - name: "GLOB_MQTT_TLS_HOST"
+      value: "mqtts://mqtt.demo.fogcloud.io:8883"
+    - name: "GLOB_MQTT_WS_HOST"
+      value: "wss://mqtt.demo.fogcloud.io:8083/mqtt"
+    - name: "GLOB_MQTT_WSS_HOST"
+      value: "wss://mqtt.demo.fogcloud.io:8084/mqtt"
   strategy: 
     type: RollingUpdate # enum: Recreate, RollingUpdate
     rollingUpdate:
@@ -156,10 +149,10 @@ fogcloudWeb:
 
 faasbuilder:
   image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-faas-builder
-  imageTag: latest
+  imageTag: v4.0.3
   config: {}
   createKubeconfigWithFile: false
-  replicas: 1
+  replicas: 3
   resources:
     # limits:
     #   cpu: "0.1"
@@ -172,8 +165,8 @@ faasbuilder:
 
 fogcronScheduler:
   image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-fogcron-scheduler
-  imageTag: latest
-  replicas: 1
+  imageTag: v4.0.1
+  replicas: 3
   config: {}
   resources:
     # limits:
@@ -186,12 +179,25 @@ fogcronScheduler:
       maxUnavailable: 25%
 
 fognotifier:
-  image: registry.cn-shanghai.aliyuncs.com/fogcloud/fognotifier
-  imageTag: latest
-  replicas: 1
-  affinity: {}
-  tolerations: []
+  image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-fognotifier
+  imageTag: v5.3.0
+  replicas: 3
   config: {}
+  tolerations:
+  - key: "app"
+    operator: "Equal"
+    value: "emqx-core"
+    effect: "NoSchedule"
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        preference:
+          matchExpressions:
+          - key: app
+            operator: In
+            values:
+            - emqx-core
   resources:
     limits:
       cpu: "1"
@@ -206,11 +212,9 @@ fognotifier:
       maxUnavailable: 25%
 
 mqttwebhook:
-  image: registry.cn-shanghai.aliyuncs.com/fogcloud/mqttwebhook
-  imageTag: latest
-  replicas: 1
-  affinity: {}
-  tolerations: []
+  image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-mqttwebhook
+  imageTag: v5.3.2
+  replicas: 3
   config: {}
   resources:
     limits:
@@ -226,9 +230,9 @@ mqttwebhook:
       maxUnavailable: 25%
 
 fogthinghistory:
-  image: registry.cn-shanghai.aliyuncs.com/fogcloud/fogthinghistory
-  imageTag: latest
-  replicas: 1
+  image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-fogthinghistory
+  imageTag: v5.0.1
+  replicas: 0
   config: {}
   resources:
     limits:
@@ -244,15 +248,18 @@ fogthinghistory:
       maxUnavailable: 25%
 
 fogreviser:
-  enabled: true
-  image: registry.cn-shanghai.aliyuncs.com/fogcloud/fogreviser
-  imageTag: v2.2.0
+  enabled: false
+  image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-fogreviser
+  imageTag: v3.0.1
   replicas: 1
-  config: {}
+  config:
+    UPDATE_FREQUENCY: 5
+    MQTT_BROKER_ID: "fogcloud"
+    MQTT_BROKER_SECRET: "4Jy!YC7bdpsjU*6k"
   resources:
     limits:
       cpu: "0.5"
-      memory: "32Mi"
+      memory: "128Mi"
     requests:
       cpu: "0.01"
       memory: "16Mi"
@@ -266,13 +273,14 @@ nginx:
   image: nginx
   imageTag: 1.21
   replicas: 1
-  resources:
-    # limits:
-    #   cpu: "1"
-    #   memory: "128Mi"  
+  strategy: 
+    type: RollingUpdate # enum: Recreate, RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
 
 mqttBroker:
-  type: internal
+  type: external
   internal:
     type: emqx
     image: emqx/emqx
@@ -304,7 +312,7 @@ mqttBroker:
       certSource: none # file, auto, none
       secretName: mqtt-cert
     service:
-      type: NodePort
+      type: ClusterIP
       externalTrafficPolicy: Local
       healthCheckNodePort: 30000
       ports:
@@ -357,7 +365,7 @@ rabbitmq:
     service:
       externalTrafficPolicy: Cluster
       healthCheckNodePort: 30001
-      type: NodePort
+      type: ClusterIP
       ports:
         amqp:
           port: 5672
@@ -392,6 +400,7 @@ postgres:
 mongodb:
   type: internal
   internal:
+    enabled: true
     image: mongo  
     imageTag: 4.4-rc-focal
     persistence:
@@ -426,10 +435,7 @@ redis:
 etcd:
   type: external
   internal:
-    service:
-      type: ClusterIP
-      nodePorts:
-        api: "2379"
+    enabled: true
     image: bitnami/etcd
     imageTag: 3.5.1
     persistence:
@@ -454,11 +460,7 @@ etcd:
 minio:
   type: external
   internal: 
-    service:
-      type: ClusterIP
-      nodePorts:
-        api: "19000"
-        console: "19001"
+    enabled: true
     image: minio/minio
     imageTag: latest
     persistence:
@@ -486,10 +488,16 @@ minio:
 tdengine:
   enabled: false
   replicaCount: 3
+  taoscfg:
+    TAOS_REPLICA: "3"
+  storage:
+    className: "alibabacloud-cnfs-nas"
+    dataSize: "10Gi"
+    logSize: "5Gi"
   resources:
     limits:
-      cpu: "0.1"
-      memory: "128Mi"
+      cpu: "1"
+      memory: "1Gi"
     requests:
       cpu: "0.01"
       memory: "64Mi"
@@ -502,15 +510,6 @@ nats:
       replicas: 3
     jetstream:
       enabled: true
-      memoryStore:
-        enabled: true 
-        maxSize: 1Gi
-      fileStore:
-        enabled: true
-        pvc:
-          enabled: true
-          size: 10Gi
-          storageClassName: ""
     merge:
       system_account: SYS
       accounts:
@@ -519,15 +518,15 @@ nats:
             - user: admin
               password: public
         APP:
+          jetstream:
+              max_memory: 1G
+              max_filestore: 10G
+              max_streams: 100
+              max_consumers: 100
           jetstream: enabled
           users:
             - user: "fogcloud"
               password: "root"
-          mappings:
-            "mqtt_publish.*": "mqtt_publish.{{wildcard(1)}}.{{partition(5,1)}}"
-            "mqtt_subscribe.*": "mqtt_subscribe.{{wildcard(1)}}.{{partition(5,1)}}"
-            "mqtt_status.*": "mqtt_status.{{wildcard(1)}}.{{partition(5,1)}}"
-            "event.server.*.*": "event.server.{{wildcard(1)}}.{{wildcard(2)}}.{{partition(5,2)}}"
   service:
     ports:
       monitor:
@@ -536,18 +535,14 @@ nats:
     enabled: false
   reloader:
     enabled: true
-    image:
-      repository: "registry.cn-shanghai.aliyuncs.com/mximages/natsio-nats-server-config-reloader"
-      tag: "0.14.2"
   container:
     image:
-      repository: "registry.cn-shanghai.aliyuncs.com/mximages/nats"
       tag: "2.10.18"
     merge:
       resources:
         limits:
           cpu: 1000m
-          memory: 2Gi
+          memory: 256Mi
         requests:
           cpu: 10m
           memory: 16Mi
@@ -555,7 +550,6 @@ nats:
 minio-cluster:
   enabled: true
   mode: distributed
-  nameOverride: minio
   auth:
     rootUser: "minio"
     rootPassword: "fogcloud"
@@ -574,7 +568,6 @@ minio-cluster:
 
 redis-cluster:
   enabled: false
-  nameOverride: redis
   global:
     storageClass: local-path
   master:
@@ -597,7 +590,6 @@ redis-cluster:
 
 etcd-cluster:
   enabled: true
-  nameOverride: etcd
   replicaCount: 3
   auth:
     rbac:
@@ -613,28 +605,38 @@ etcd-cluster:
       cpu: "0.01"
       memory: "32Mi"
 
+emqx-operator:
+  enabled: true
+
 emqx:
   enabled: true
   image: emqx:5.6
   dashboardPassword: "%PWpPb*qhB*g82dY"
-  authJwtSecret: "not-a-secure-key"
-  appKey: "admin"
-  appSecret: "public"
-  coreAffinity: {}
-  coreTolerations: []
-  persistence:
-    keep: true
-    storageClassName: "local-path"
-    storage: 1Gi
+  authJwtSecret: "emqx-auth-secret"
+  coreAffinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        preference:
+          matchExpressions:
+          - key: app
+            operator: In
+            values:
+            - emqx-core
+  coreTolerations:
+  - key: "app"
+    operator: "Equal"
+    value: "emqx-core"
+    effect: "NoSchedule"
   coreNode:
-    replicas: 3
+    replicas: 1
     resources:
       limits:
-        cpu: "1"
-        memory: "512Mi"
+        cpu: "0.1"
+        memory: "256Mi"
       requests:
         cpu: "0.01"
-        memory: "128Mi"
+        memory: "32Mi"
   replicantNode:
     replicas: 0
     resources:
@@ -645,7 +647,7 @@ emqx:
         cpu: "0.01"
         memory: "32Mi"
   tls:
-    certSource: none
+    certSource: file
     enabled: true
     secretName: emqx-cert
   limiter:
@@ -655,18 +657,4 @@ emqx:
     bytesRate: "10MB/s"
   service:
     dashboardServiceType: ClusterIP
-    listenersServiceType: NodePort
-    listenersExternalTrafficPolicy: Local
-    ports:
-      mqttTcp:
-        port: 1883
-        nodePort: 1883
-      mqttTcpTls:
-        port: 8883
-        nodePort: 8883
-      mqttWs:
-        port: 8083
-        nodePort: 8083
-      mqttWss:
-        port: 8084
-        nodePort: 8084
+    listenersServiceType: ClusterIP

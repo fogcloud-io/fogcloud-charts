@@ -26,7 +26,7 @@ data:
 
     {{ if .Values.fissionEnabled }}
     upstream faas {
-      server router.fission.svc.cluster.local;
+      server router.fission.svc.cluster.local:80;
       keepalive 100;
     }
     {{ end }}

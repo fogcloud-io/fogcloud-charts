@@ -429,7 +429,7 @@ persistence:
 ## Analytics let us count how many people installed fission. Set to
 ## false to disable analytics.
 ##
-analytics: true
+analytics: false
 
 ## Internally used for generating an analytics job for non-helm installs
 ##
@@ -613,7 +613,7 @@ openTelemetry:
 ## Message Queue Trigger Kind, KEDA: enable and configuration
 ##
 mqt_keda:
-  enabled: true
+  enabled: false
   connector_images:
     kafka:
       image: fission/keda-kafka-http-connector

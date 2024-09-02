@@ -30,6 +30,41 @@ entries:
     version: v1.16.3
   fogcloud:
   - apiVersion: v2
+    appVersion: v5.8.0
+    created: "2024-09-02T07:03:56.516795444Z"
+    dependencies:
+    - condition: nats.enabled
+      name: nats
+      repository: file://../nats
+      version: 1.1.12
+    - name: common
+      repository: file://../common
+      version: 2.13.3
+    - condition: etcd-cluster.enabled
+      name: etcd-cluster
+      repository: file://../etcd-cluster
+      version: 9.10.5
+    - condition: redis-cluster.enabled
+      name: redis-cluster
+      repository: file://../redis-cluster
+      version: 18.3.2
+    - condition: minio-cluster.enabled
+      name: minio-cluster
+      repository: file://../minio-cluster
+      version: 12.9.3
+    - condition: tdengine.enabled
+      name: tdengine
+      repository: file://../tdengine
+      version: 3.0.2
+    description: A Helm chart for fogcloud
+    digest: a03ec5ac4f9c909d7fe4c3bb4eb75045ffab8cb15c451a4a8a7537556f4f901e
+    home: https://fogcloud.io
+    name: fogcloud
+    type: application
+    urls:
+    - https://github.com/fogcloud-io/fogcloud-charts/releases/download/fogcloud-2.2.3/fogcloud-2.2.3.tgz
+    version: 2.2.3
+  - apiVersion: v2
     appVersion: v4.25.0
     created: "2023-11-10T02:54:11.549301787Z"
     description: A Helm chart for fogcloud
@@ -528,4 +563,4 @@ entries:
     urls:
     - https://github.com/fogcloud-io/fogcloud-charts/releases/download/fogcloud-charts-1.0.0/fogcloud-charts-1.0.0.tgz
     version: 1.0.0
-generated: "2023-11-10T02:54:11.549456245Z"
+generated: "2024-09-02T07:03:56.516946766Z"

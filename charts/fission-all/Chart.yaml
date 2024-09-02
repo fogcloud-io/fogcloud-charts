@@ -16,7 +16,7 @@ maintainers:
 - email: sanket@infracloud.io
   name: Sanket Sudake
 name: fission-all
-# sources:
-# - https://github.com/fogcloud-io/fogcloud-charts
+sources:
+- https://github.com/fogcloud-io/fogcloud-charts
 type: application
 version: v1.16.3

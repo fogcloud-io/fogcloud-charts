@@ -25,8 +25,8 @@ appVersion: "v5.8.0"
 
 home: https://fogcloud.io
 
-# sources:
-#   - https://github.com/fogcloud-io/fogcloud-charts
+sources:
+  - https://github.com/fogcloud-io/fogcloud-charts
 
 dependencies:
   - name: nats

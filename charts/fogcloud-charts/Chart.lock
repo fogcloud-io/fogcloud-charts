@@ -17,5 +17,5 @@ dependencies:
 - name: tdengine
   repository: file://../tdengine
   version: 3.0.2
-digest: sha256:064000904e9dcd9ddcbe8485ea6a528bae251601642e68e46c4d439b1d261d28
-generated: "2024-09-02T14:45:13.662541+08:00"
+digest: sha256:8a1bbe8299d9082c7eb71386538a222f6b96177a270712f68b26447cd3eda10f
+generated: "2024-10-30T11:29:06.264125+08:00"

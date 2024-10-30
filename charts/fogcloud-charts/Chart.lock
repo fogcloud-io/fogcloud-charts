@@ -7,13 +7,13 @@ dependencies:
   version: 2.13.3
 - name: etcd-cluster
   repository: file://../etcd-cluster
-  version: 9.10.5
+  version: 9.10.6
 - name: redis-cluster
   repository: file://../redis-cluster
   version: 18.3.2
 - name: minio-cluster
   repository: file://../minio-cluster
-  version: 12.9.3
+  version: 12.9.4
 - name: tdengine
   repository: file://../tdengine
   version: 3.0.2

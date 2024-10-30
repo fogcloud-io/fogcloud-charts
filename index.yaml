@@ -1,5 +1,19 @@
 apiVersion: v1
 entries:
+  emqx-operator:
+  - apiVersion: v2
+    appVersion: 2.2.22
+    created: "2024-10-30T07:25:13.789345856Z"
+    description: A Helm chart for EMQX Operator Controller
+    digest: d5afb107a75f9cd5dd99bd745f3796d45b447f86ac2a89ca793daf6b85ce7b59
+    name: emqx-operator
+    sources:
+    - https://github.com/emqx/emqx-operator/tree/main/deploy/charts/emqx-operator
+    - https://github.com/emqx/emqx
+    type: application
+    urls:
+    - https://github.com/fogcloud-io/fogcloud-charts/releases/download/emqx-operator-2.2.22/emqx-operator-2.2.22.tgz
+    version: 2.2.22
   fission-all:
   - apiVersion: v2
     appVersion: v1.16.3
@@ -55,6 +69,43 @@ entries:
     - https://github.com/fogcloud-io/fogcloud-charts/releases/download/fission-all-v1.16.3/fission-all-v1.16.3.tgz
     version: v1.16.3
   fogcloud:
+  - apiVersion: v2
+    appVersion: v5.8.0
+    created: "2024-10-30T07:25:13.939483789Z"
+    dependencies:
+    - condition: nats.enabled
+      name: nats
+      repository: file://../nats
+      version: 1.1.12
+    - name: common
+      repository: file://../common
+      version: 2.13.3
+    - condition: etcd-cluster.enabled
+      name: etcd-cluster
+      repository: file://../etcd-cluster
+      version: 9.10.6
+    - condition: redis-cluster.enabled
+      name: redis-cluster
+      repository: file://../redis-cluster
+      version: 18.3.2
+    - condition: minio-cluster.enabled
+      name: minio-cluster
+      repository: file://../minio-cluster
+      version: 12.9.4
+    - condition: tdengine.enabled
+      name: tdengine
+      repository: file://../tdengine
+      version: 3.0.2
+    description: A Helm chart for fogcloud
+    digest: 3b74229ded4ed49cd214bc5f26d796a154adbe91b5cc0c895dc7313f87c81be2
+    home: https://fogcloud.io
+    name: fogcloud
+    sources:
+    - https://github.com/fogcloud-io/fogcloud-charts
+    type: application
+    urls:
+    - https://github.com/fogcloud-io/fogcloud-charts/releases/download/fogcloud-2.2.6/fogcloud-2.2.6.tgz
+    version: 2.2.6
   - apiVersion: v2
     appVersion: v5.8.0
     created: "2024-10-30T03:38:50.630220362Z"
@@ -626,4 +677,4 @@ entries:
     urls:
     - https://github.com/fogcloud-io/fogcloud-charts/releases/download/fogcloud-charts-1.0.0/fogcloud-charts-1.0.0.tgz
     version: 1.0.0
-generated: "2024-10-30T03:38:50.630420928Z"
+generated: "2024-10-30T07:25:13.939652818Z"

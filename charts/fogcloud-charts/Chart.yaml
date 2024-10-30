@@ -37,7 +37,7 @@ dependencies:
     version: "2.13.3"
     repository: "file://../common"
   - name: etcd-cluster
-    version: "9.10.5"
+    version: "9.10.6"
     repository: "file://../etcd-cluster"
     condition: etcd-cluster.enabled
   - name: redis-cluster
@@ -45,7 +45,7 @@ dependencies:
     repository: "file://../redis-cluster"
     condition: redis-cluster.enabled
   - name: minio-cluster
-    version: "12.9.3"
+    version: "12.9.4"
     repository: "file://../minio-cluster"
     condition: minio-cluster.enabled
   - name: tdengine

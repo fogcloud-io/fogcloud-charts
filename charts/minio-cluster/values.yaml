@@ -56,8 +56,8 @@ extraDeploy: []
 ## @param image.debug Specify if debug logs should be enabled
 ##
 image:
-  registry: docker.io
-  repository: bitnami/minio
+  registry: registry.cn-shanghai.aliyuncs.com
+  repository: mximages/bitnami-minio
   tag: 2023.11.6-debian-11-r1
   digest: ""
   ## Specify a imagePullPolicy
@@ -84,8 +84,8 @@ image:
 ## @param clientImage.digest MinIO&reg; Client image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
 ##
 clientImage:
-  registry: docker.io
-  repository: bitnami/minio-client
+  registry: registry.cn-shanghai.aliyuncs.com
+  repository: mximages/bitnami-minio-client
   tag: 2023.11.6-debian-11-r1
   digest: ""
 ## @param mode MinIO&reg; server mode (`standalone` or `distributed`)

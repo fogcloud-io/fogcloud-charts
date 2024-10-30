@@ -13,9 +13,9 @@ fissionEnabled: false
 # 是否启用云网关功能
 cloudGatewayEnabled: true
 # 是否启用tdengine历史数据存储
-tdengineEnabled: true
+tdengineEnabled: false
 # 是否启用遥测
-telemetryEnabled: true
+telemetryEnabled: false
 # 是否启用亲和性
 affinityEnabled: false
 
@@ -76,11 +76,11 @@ expose:
 secret:
   # 配置私有镜像仓库    
   imageCredentials:
-    - registry: "registry.cn-shanghai.aliyuncs.com"
-      name: "regcred"
-      username: "wuzh@mxchip"
-      password: "git1009021045"
-      email: ""
+    # - registry: ""
+    #   name: ""
+    #   username: ""
+    #   password: ""
+    #   email: ""
 
 storageClassName: "local-path"
 
@@ -102,7 +102,7 @@ resourceRangeLimit:
 
 fogcloud:
   restartPolicy: Always
-  image: registry.cn-shanghai.aliyuncs.com/fogcloud/fogcloud
+  image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-fogcloud
   imageTag: latest
   affinity: {}
   tolerations: []
@@ -186,7 +186,7 @@ fogcronScheduler:
       maxUnavailable: 25%
 
 fognotifier:
-  image: registry.cn-shanghai.aliyuncs.com/fogcloud/fognotifier
+  image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-fognotifier
   imageTag: latest
   replicas: 1
   affinity: {}
@@ -206,7 +206,7 @@ fognotifier:
       maxUnavailable: 25%
 
 mqttwebhook:
-  image: registry.cn-shanghai.aliyuncs.com/fogcloud/mqttwebhook
+  image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-mqttwebhook
   imageTag: latest
   replicas: 1
   affinity: {}
@@ -226,7 +226,7 @@ mqttwebhook:
       maxUnavailable: 25%
 
 fogthinghistory:
-  image: registry.cn-shanghai.aliyuncs.com/fogcloud/fogthinghistory
+  image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-fogthinghistory
   imageTag: latest
   replicas: 1
   config: {}
@@ -245,8 +245,8 @@ fogthinghistory:
 
 fogreviser:
   enabled: true
-  image: registry.cn-shanghai.aliyuncs.com/fogcloud/fogreviser
-  imageTag: v2.2.0
+  image: registry.cn-shanghai.aliyuncs.com/fogcloud/public-fogreviser
+  imageTag: latest
   replicas: 1
   config: {}
   resources:
@@ -266,13 +266,18 @@ nginx:
   image: nginx
   imageTag: 1.21
   replicas: 1
+  strategy:
+    type: RollingUpdate # enum: Recreate, RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
   resources:
     # limits:
     #   cpu: "1"
     #   memory: "128Mi"  
 
 mqttBroker:
-  type: internal
+  type: external
   internal:
     type: emqx
     image: emqx/emqx
@@ -330,7 +335,7 @@ mqttBroker:
 rabbitmq:
   type: internal
   internal:
-    image: rabbitmq
+    image: registry.cn-shanghai.aliyuncs.com/mximages/rabbitmq
     imageTag: 3.10.24-management
     replicas: 1
     defaultUsername: rabbitmq
@@ -369,7 +374,7 @@ rabbitmq:
 postgres:
   type: internal
   internal: 
-    image: postgres
+    image: registry.cn-shanghai.aliyuncs.com/mximages/postgres
     imageTag: 13
     persistence:
       pvcExisted: true
@@ -392,7 +397,7 @@ postgres:
 mongodb:
   type: internal
   internal:
-    image: mongo  
+    image: registry.cn-shanghai.aliyuncs.com/mximages/mongo
     imageTag: 4.4-rc-focal
     persistence:
       keep: true
@@ -409,8 +414,8 @@ mongodb:
 redis:
   type: internal
   internal:
-    image: redis
-    imageTag: 6.2
+    image: registry.cn-shanghai.aliyuncs.com/mximages/redis
+    imageTag: 7.2
     persistence:
       keep: true
       pvcExisted: false
@@ -645,7 +650,7 @@ emqx:
         cpu: "0.01"
         memory: "32Mi"
   tls:
-    certSource: none
+    certSource: file
     enabled: true
     secretName: emqx-cert
   limiter:

@@ -19,12 +19,23 @@ defaults: &defaults
   MQTT_BROKER_SECRET: public
   MQTT_BROKER_API_PORT: 8081
 
+
+development: &development
+  <<: *defaults
+  REDIS_HOST: redis
+  POSTGRES_HOST: postgres
+  MQTT_BROKER_HOST: emqx-listeners
+  MQTT_BROKER_API_URL: "http://emqx-dashboard:18083"
+
+
 beta:
   <<: *defaults
   REDIS_HOST: redis
   POSTGRES_HOST: postgres
-  MQTT_BROKER_HOST: mqtt-broker
+  MQTT_BROKER_HOST: emqx-listeners
+  MQTT_BROKER_API_URL: "http://emqx-dashboard:18083"
 
 production:
   <<: *defaults
-  MQTT_BROKER_HOST: mqtt-broker
+  MQTT_BROKER_HOST: emqx-listeners
+  MQTT_BROKER_API_URL: "http://emqx-dashboard:18083"

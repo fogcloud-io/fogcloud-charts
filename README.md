@@ -18,7 +18,6 @@ helm repo add fogcloud-charts https://fogcloud-io.github.io/fogcloud-charts
 helm repo update
 helm pull fogcloud-charts/fogcloud --untar
 helm pull fogcloud-charts/fission-all --untar
-helm pull fogcloud-charts/emqx-operator --untar
 ```
 运行后在当前目录会生成fogcloud-charts文件夹
 
@@ -31,7 +30,7 @@ helm install fission ./fission-all -n fission
 ```
 4. 安装emqx-operator
 ```console
-helm upgrade --install emqx-operator ./emqx-operator -n emqx-operator --create-namespace
+helm upgrade --install emqx-operator ./operator/emqx-operator -n emqx-operator --create-namespace
 ```
 5. 安装fogcloud-charts
 ```console

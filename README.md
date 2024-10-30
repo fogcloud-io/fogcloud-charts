@@ -51,6 +51,7 @@ helm upgrade -f myvalues.yaml ${RELEASE_NAME} -n ${NAMESPACE_NAME} ./fogcloud
 helm uninstall ${RELEASE_NAME} -n ${NAMESPACE_NAME}
 helm uninstall fission -n fission
 kubectl delete -f ./fogcloud/operator/rabbitmq-cluster-operator.yaml
+helm uninstall emqx-operator -n emqx-operator
 ```
 注意：默认启用了helm的资源保留，卸载时不会释放persistent volume资源；
 

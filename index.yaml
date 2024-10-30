@@ -3,6 +3,32 @@ entries:
   fission-all:
   - apiVersion: v2
     appVersion: v1.16.3
+    created: "2024-10-30T03:34:17.178195889Z"
+    description: Fission is a fast serverless framework for Kubernetes.
+    digest: ac1535d93fae6c28de21d07fca3c196d92d1f1f83f1131fe7008617efea6550f
+    home: https://fission.io/
+    icon: https://fission.io/images/fission-logo-white.svg
+    keywords:
+    - fission
+    - serverless
+    - platform
+    - faas
+    - functions
+    - Integration & Delivery
+    maintainers:
+    - email: vishal@infracloud.io
+      name: Vishal Biyani
+    - email: sanket@infracloud.io
+      name: Sanket Sudake
+    name: fission-all
+    sources:
+    - https://github.com/fogcloud-io/fogcloud-charts
+    type: application
+    urls:
+    - https://github.com/fogcloud-io/fogcloud-charts/releases/download/fission-all-v1.16.4/fission-all-v1.16.4.tgz
+    version: v1.16.4
+  - apiVersion: v2
+    appVersion: v1.16.3
     created: "2022-11-28T07:47:26.894180598Z"
     description: Fission is a fast serverless framework for Kubernetes.
     digest: 7fbf5c4c071cd4334fbae06f48febde0b5e311966af02324d1324a98765f83bc
@@ -563,4 +589,4 @@ entries:
     urls:
     - https://github.com/fogcloud-io/fogcloud-charts/releases/download/fogcloud-charts-1.0.0/fogcloud-charts-1.0.0.tgz
     version: 1.0.0
-generated: "2024-09-02T07:03:56.516946766Z"
+generated: "2024-10-30T03:34:17.178267383Z"
